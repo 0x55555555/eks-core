@@ -1,0 +1,55 @@
+#ifndef XMATRIX4X4_H
+#define XMATRIX4X4_H
+
+#include "XGlobal"
+#include "Eigen/Core"
+#include "XVector2D"
+#include "QDebug"
+
+typedef Eigen::Matrix<xReal, 4, 4> XMatrix4x4;
+typedef Eigen::Matrix<xReal, 3, 3> XMatrix3x3;
+
+#define XMatrix Eigen::Matrix
+
+template <typename Derived> QDebug operator <<(QDebug str, const Eigen::DenseBase <Derived> &data)
+  {
+  xsize cols = data.cols();
+  xsize rows = data.rows();
+
+  if(cols == 1)
+    {
+    str << "[ ";
+    for (xsize r = 0; r < rows; ++r)
+      {
+      str << data(r, 0);
+      if((r < rows-1)) // while not last element
+        {
+        str << ", "; // separate each element with space
+        }
+      }
+    str << " ]";
+    }
+  else
+    {
+    for (xsize r = 0; r < rows; ++r)
+      {
+      str << "[ ";
+      for(xsize c = 0; c < cols; ++c)
+        {
+        str << data(r, c);
+        if((c < cols-1)) // while not last element
+          {
+          str << ", "; // separate each element with space
+          }
+        }
+      str << " ]";
+      if(r < (rows-1))
+        {
+        str << "\n";
+        }
+      }
+    }
+  return str;
+  }
+
+#endif

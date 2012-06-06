@@ -1,0 +1,26 @@
+#ifndef XCODELOCATION_H
+#define XCODELOCATION_H
+
+#include "XGlobal"
+#include "XProperty"
+#include "XMacroHelpers"
+
+class EKSCORE_EXPORT XCodeLocation
+  {
+XProperties:
+  XROProperty(const char *, file);
+  XROProperty(xsize, line);
+  XROProperty(const char *, function);
+
+  XCodeLocation(const char *file, xsize line, const char *function);
+
+  QString toString() const;
+
+  bool operator==(const XCodeLocation &a) const;
+  };
+
+uint qHash(const XCodeLocation &a);
+
+#define X_CURRENT_CODE_LOCATION XCodeLocation(__FILE__, __LINE__, xCurrentFunction)
+
+#endif // XCODELOCATION_H

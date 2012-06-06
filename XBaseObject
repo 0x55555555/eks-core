@@ -1,0 +1,98 @@
+#ifndef XBASEOBJECT_H
+#define XBASEOBJECT_H
+
+#include "XGlobal"
+#include "XList"
+#include "XSet"
+
+// Casting macros
+#define X_CASTABLE( myName, superName, myID, rootName ) \
+    public: \
+    virtual const rootName *castToType( xuint32 id ) const { if( id == myID ){return this;}else{return superName::castToType( id );} } \
+    private:
+
+// Casting macro for XObject to use (neater to have it here)
+#define X_CASTABLE_ROOT( myName, myID, getTID ) \
+    public: \
+    myName *castToType( xuint32 id ) { return (myName*)((const myName*)this)->castToType(id); } \
+    virtual const myName *castToType( xuint32 id ) const { if( id == myID ){return this;}else{return 0;} } \
+    template <typename T>inline T *uncheckedCastTo() \
+      { \
+      xAssert( castTo<T>() ); \
+      return static_cast<T*>( this ); \
+      } \
+    template <typename T>inline const T *uncheckedCastTo() const \
+      { \
+      xAssert( castTo<T>() ); \
+      return static_cast<const T*>( this ); \
+      } \
+    template <typename T>inline T *castTo() \
+      { \
+      return static_cast<T*>( castToType( getTID ) ); \
+      } \
+    template <typename T>inline const T *castTo() const \
+      { \
+      return static_cast<const T *>( castToType( getTID ) ); \
+      } \
+    private:
+
+// XObject may eventually do more
+#define X_OBJECT(myName,superName,myID) public: enum {Type = myID}; X_CASTABLE(myName,superName,myID,XObject)
+
+// predefs
+class XObject;
+class XBaseObject;
+class XChildEvent;
+typedef XList <XObject *> XObjectList;
+template <typename T1, typename T2, typename T3, typename T4,
+          typename T5, typename T6, typename T7, typename T8, typename T9> class XSignalTriggerInstance;
+
+// The XBaseObject class (abstract base to XObject)
+class EKSCORE_EXPORT XBaseObject
+    {
+public:
+    virtual ~XBaseObject();
+
+    // Parent Child
+    XObjectList children() const;
+    XObject *parent() const;
+    void addChild( XObject * );
+    void removeChild( XObject * );
+
+protected:
+    virtual void childEvent( XChildEvent * );
+
+    XObject *sender() const;
+    template <typename T1, typename T2, typename T3, typename T4,
+              typename T5, typename T6, typename T7, typename T8, typename T9>
+    void trigger( XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9> );
+
+private:
+    void addChild( XBaseObject * );
+    void removeChild( XBaseObject * );
+    XBaseObject( );
+    XObjectList _children;
+    XObject *_parent;
+    XBaseObject *_sender;
+
+    XList <XBaseObject*> _baseChildren;
+    template <typename T1, typename T2, typename T3,
+              typename T4, typename T5, typename T6,
+              typename T7, typename T8, typename T9>
+        friend class XSignal;
+    template <typename T1, typename T2, typename T3,
+              typename T4, typename T5, typename T6,
+              typename T7, typename T8, typename T9>
+        friend class XSlot;
+    friend class XObject;
+    };
+
+template <typename T1, typename T2, typename T3, typename T4,
+          typename T5, typename T6, typename T7, typename T8, typename T9>
+void XBaseObject::trigger( XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9> signalInstance )
+    {
+    signalInstance._signal->setSender( static_cast<XObject*>(this) );
+    signalInstance._signal->execute( &signalInstance._args );
+    }
+
+#endif // XBASEOBJECT_H

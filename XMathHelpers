@@ -1,0 +1,64 @@
+#ifndef XMATHHELPERS_H
+#define XMATHHELPERS_H
+
+#include "QtGlobal"
+
+typedef float xReal;
+#define EKS_XREAL_IS_DOUBLE 0
+
+template <typename T>T xMix( xReal t, const T &a, const T &b )
+  {
+  return ( (1-t) * a  ) + ( t * b );
+  }
+
+inline int xRand()
+  {
+  return qrand();
+  }
+
+inline int xRand( int min, int max )
+  {
+  return min + ( xRand() % (max-min+1) );
+  }
+
+inline xReal xRandF( )
+  {
+  return xRand() / (double)RAND_MAX;
+  }
+
+inline xReal xRandF( xReal min, xReal max )
+  {
+  return min + ( xRandF() * (max-min) );
+  }
+
+inline xReal xClamp( xReal in, xReal min, xReal max )
+  {
+  if( in < min )
+    {
+    return min;
+    }
+  else if( in > max )
+    {
+    return max;
+    }
+  return in;
+  }
+
+inline unsigned int xFactorial( unsigned int in )
+  {
+  // multiply 1 * 2 * 3 * ... * in
+  unsigned int ret = 1;
+  for( unsigned int x=2; x<=in; x++ )
+    {
+    ret *= x;
+    }
+  return ret;
+  }
+
+inline unsigned int xBinomialCoefficient( unsigned int n, unsigned int k )
+  {
+  // Find the coefficient of n and k...
+  return xFactorial( n ) / ( ( xFactorial( n - k ) * xFactorial( k ) ) );
+  }
+
+#endif // XMATHHELPERS_H

@@ -1,0 +1,127 @@
+#ifndef XEVENTLOGGER_H
+#define XEVENTLOGGER_H
+
+#include "XGlobal"
+#include "XAssert"
+#include "XTime"
+#include "QMetaType"
+
+template <typename T> struct EKSCORE_EXPORT XEventLoggerPair
+  {
+  XTime time;
+  T value;
+  };
+
+class EKSCORE_EXPORT XEventLoggerInternal
+  {
+public:
+  XEventLoggerInternal(const char *name, int type, xsize size, xsize count, const char *units);
+
+  QString name;
+  QString units;
+  int type;
+  xsize size;
+  xsize count;
+  XEventLoggerInternal *next;
+
+  xuint8 *firstData;
+  xuint8 *nextData;
+  xuint8 data[1];
+
+  xsize used() const;
+  const void *at(xsize index) const;
+  const void *dataAt(xsize index) const;
+  const void *last() const;
+  void *last();
+  void add();
+
+  template <typename T> static XEventLoggerInternal *init(const char *name, xsize size, const char *units)
+    {
+    typedef XEventLoggerPair<T> Pair;
+    XEventLoggerInternal *ev = (XEventLoggerInternal *)malloc(sizeof(XEventLoggerInternal)+(sizeof(Pair)*size));
+    new(ev) XEventLoggerInternal(name, qMetaTypeId<T>(), sizeof(Pair), size, units);
+    return ev;
+    }
+  };
+
+#define X_IMPLEMENT_LOGGER(name, type, size, units) XEventLoggerInternal *name = XEventLoggerInternal::init<type>(#name, size, units)
+#define X_DECLARE_LOGGER(exp, name) exp extern XEventLoggerInternal *name
+
+#define X_IMPLEMENT_MEMORY_LOGGER(name) X_IMPLEMENT_LOGGER(name, xsize, XEventLogger<xsize>::Large, "bytes")
+#define X_DECLARE_MEMORY_LOGGER X_DECLARE_LOGGER
+#define X_MEMORY_LOGGER_ALLOC(name, s) { XEventLogger<xsize> l(name); if(l.size()) { l.logNow(s + l.last().value); } else { l.logNow(s); } }
+#define X_MEMORY_LOGGER_FREE(name, s) { XEventLogger<xsize> l(name); xAssert(l.size()); l.logNow(l.last().value - s); }
+
+template <typename T> class XEventLogger
+  {
+public:
+  enum
+    {
+    Small = 128,
+    Large = 1024
+    };
+
+  typedef XEventLoggerPair<T> Pair;
+
+  XEventLogger(XEventLoggerInternal *l) : _logger(l)
+    {
+    xAssert(l->type == qMetaTypeId<T>());
+    }
+
+  xsize size() const
+    {
+    return _logger->used();
+    }
+
+  const Pair &at(xsize index) const
+    {
+    void *p = _logger->at(index);
+    return *(Pair*)p;
+    }
+
+  Pair &last()
+    {
+    void *p = _logger->last();
+    Pair *pair = (Pair*)p;
+    return *pair;
+    }
+
+  const Pair &last() const
+    {
+    const void *p = _logger->last();
+    const Pair *pair = (Pair*)p;
+    return *pair;
+    }
+
+  Pair &addNext()
+    {
+    _logger->add();
+    return last();
+    }
+
+  void log(const T &t, const XTime& time)
+    {
+    Pair &p(addNext());
+    p.time = time;
+    p.value = t;
+    }
+
+  void logNow(const T &t)
+    {
+    log(t, XTime::now());
+    }
+
+private:
+  XEventLoggerInternal *_logger;
+  };
+
+class EKSCORE_EXPORT XEventManager
+  {
+public:
+  static void totalAvailableTime(XTime &min, XTime &max);
+
+  static XEventLoggerInternal *firstEvent();
+  static void addEvent(XEventLoggerInternal *);
+  };
+
+#endif // XEVENTLOGGER_H

@@ -1,0 +1,338 @@
+#ifndef XSIGNAL_H
+#define XSIGNAL_H
+
+#include "QtGlobal"
+#include "XBaseObject"
+
+#define X_SIGNAL( name, ... ) XSignal <__VA_ARGS__> name
+#define X_SLOT( cla, fn ) &cla::fn
+#define X_CONNECT( signaller, sig, slotter, slo ) { \
+    typedef __typeof__(*slotter) tempSlotterType; \
+    signaller->sig.connect( slotter, X_SLOT( tempSlotterType, slo ) ); \
+    }
+
+class XBaseObject;
+template <typename T1, typename T2, typename T3, typename T4,
+          typename T5, typename T6, typename T7, typename T8, typename T9> class XSignal;
+template <typename T1, typename T2, typename T3, typename T4,
+          typename T5, typename T6, typename T7, typename T8, typename T9> class XSignalTriggerInstance;
+
+// A Default Argument
+struct XNoArg { };
+
+template <typename T1, typename T2, typename T3, typename T4,
+          typename T5, typename T6, typename T7, typename T8, typename T9>
+struct XArgumentList
+    {
+    XArgumentList( T1 &t1, T2 &t2, T3 &t3,
+                   T4 &t4, T5 &t5, T6 &t6,
+                   T7 &t7, T8 &t8, T9 &t9 )
+            : arg1( t1 ), arg2( t2 ), arg3( t3 ),
+              arg4( t4 ), arg5( t5 ), arg6( t6 ),
+              arg7( t7 ), arg8( t8 ), arg9( t9 )
+        {
+        }
+
+    T1 &arg1;
+    T2 &arg2;
+    T3 &arg3;
+    T4 &arg4;
+    T5 &arg5;
+    T6 &arg6;
+    T7 &arg7;
+    T8 &arg8;
+    T9 &arg9;
+    };
+
+template <typename T1, typename T2, typename T3, typename T4,
+          typename T5, typename T6, typename T7, typename T8, typename T9>
+class XSlot : public XBaseObject
+    {
+public:
+    typedef XSignal<T1,T2,T3,T4,T5,T6,T7,T8,T9> XSignalArgs;
+    typedef void (XBaseObject::*fn)();
+    typedef void (XBaseObject::*fn1)(T1);
+    typedef void (XBaseObject::*fn2)(T1, T2);
+    typedef void (XBaseObject::*fn3)(T1, T2, T3);
+    typedef void (XBaseObject::*fn4)(T1, T2, T3, T4);
+    typedef void (XBaseObject::*fn5)(T1, T2, T3, T4, T5);
+    typedef void (XBaseObject::*fn6)(T1, T2, T3, T4, T5, T6);
+    typedef void (XBaseObject::*fn7)(T1, T2, T3, T4, T5, T6, T7);
+    typedef void (XBaseObject::*fn8)(T1, T2, T3, T4, T5, T6, T7, T8);
+    typedef void (XBaseObject::*fn9)(T1, T2, T3, T4, T5, T6, T7, T8, T9);
+
+    enum Type
+        {
+        NoArgs,
+        OneArg,
+        TwoArgs,
+        ThreeArgs,
+        FourArgs,
+        FiveArgs,
+        SixArgs,
+        SevenArgs,
+        EightArgs,
+        NineArgs
+        };
+
+    XSlot( XSignalArgs *sig, fn f ) : _signal( sig )
+        {
+        _method.mfn = f;
+        _type = NoArgs;
+        }
+    XSlot( XSignalArgs *sig, fn1 f ) : _signal( sig )
+        {
+        _method.mfn1 = f;
+        _type = OneArg;
+        }
+    XSlot( XSignalArgs *sig, fn2 f ) : _signal( sig )
+        {
+        _method.mfn2 = f;
+        _type = TwoArgs;
+        }
+    XSlot( XSignalArgs *sig, fn3 f ) : _signal( sig )
+        {
+        _method.mfn3 = f;
+        _type = ThreeArgs;
+        }
+    XSlot( XSignalArgs *sig, fn4 f ) : _signal( sig )
+        {
+        _method.mfn4 = f;
+        _type = FourArgs;
+        }
+    XSlot( XSignalArgs *sig, fn5 f ) : _signal( sig )
+        {
+        _method.mfn5 = f;
+        _type = FiveArgs;
+        }
+    XSlot( XSignalArgs *sig, fn6 f ) : _signal( sig )
+        {
+        _method.mfn6 = f;
+        _type = SixArgs;
+        }
+    XSlot( XSignalArgs *sig, fn7 f ) : _signal( sig )
+        {
+        _method.mfn7 = f;
+        _type = SevenArgs;
+        }
+    XSlot( XSignalArgs *sig, fn8 f ) : _signal( sig )
+        {
+        _method.mfn8 = f;
+        _type = EightArgs;
+        }
+    XSlot( XSignalArgs *sig, fn9 f ) : _signal( sig )
+        {
+        _method.mfn9 = f;
+        _type = NineArgs;
+        }
+
+    ~XSlot( );
+
+private:
+    Q_DISABLE_COPY( XSlot );
+    XSignalArgs *_signal;
+    union
+        {
+        fn mfn;
+        fn1 mfn1;
+        fn2 mfn2;
+        fn3 mfn3;
+        fn4 mfn4;
+        fn5 mfn5;
+        fn6 mfn6;
+        fn7 mfn7;
+        fn8 mfn8;
+        fn9 mfn9;
+        } _method;
+    Type _type;
+    friend class XSignal<T1,T2,T3,T4,T5,T6,T7,T8,T9>;
+    };
+
+template <typename T1 = XNoArg, typename T2 = XNoArg, typename T3 = XNoArg,
+          typename T4 = XNoArg, typename T5 = XNoArg, typename T6 = XNoArg,
+          typename T7 = XNoArg, typename T8 = XNoArg, typename T9 = XNoArg>
+class XSignalTriggerInstance
+    {
+public:
+    XSignalTriggerInstance( XSignal<T1,T2,T3,T4,T5,T6,T7,T8,T9> *signal, const XArgumentList<T1,T2,T3,T4,T5,T6,T7,T8,T9> & );
+    XSignalTriggerInstance( const XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9> & );
+
+private:
+    XSignal<T1,T2,T3,T4,T5,T6,T7,T8,T9> *_signal;
+    XArgumentList<T1,T2,T3,T4,T5,T6,T7,T8,T9> _args;
+    friend class XBaseObject;
+    };
+
+template <typename T1 = XNoArg, typename T2 = XNoArg, typename T3 = XNoArg,
+          typename T4 = XNoArg, typename T5 = XNoArg, typename T6 = XNoArg,
+          typename T7 = XNoArg, typename T8 = XNoArg, typename T9 = XNoArg>
+class XSignal
+    {
+public:
+    typedef XSlot<T1,T2,T3,T4,T5,T6,T7,T8,T9> XSlotArgs;
+
+    XSignal()
+        {
+        }
+    ~XSignal()
+        {
+        foreach( XSlotArgs *slot, _slots )
+            {
+            delete slot;
+            }
+        }
+
+    void setSender( XObject *sender )
+        {
+        _sender = sender;
+        }
+
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)() )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)(T1) )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn1>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)(T1,T2) )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn2>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)(T1,T2,T3) )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn3>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)(T1,T2,T3,T4) )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn4>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)(T1,T2,T3,T4,T5) )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn5>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)(T1,T2,T3,T4,T5,T6) )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn6>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)(T1,T2,T3,T4,T5,T6,T7) )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn7>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)(T1,T2,T3,T4,T5,T6,T7,T8) )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn8>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+    template <typename conObj>
+    void connect( XBaseObject *obj, void (conObj::*f)(T1,T2,T3,T4,T5,T6,T7,T8,T9) )
+        {
+        XSlotArgs *slot = new XSlotArgs( this, static_cast<typename XSlotArgs::fn9>(f) );
+        obj->addChild( slot );
+        _slots << slot;
+        }
+
+    XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9> operator()( T1 t1=XNoArg(), T2 t2=XNoArg(), T3 t3=XNoArg(),
+                  T4 t4=XNoArg(), T5 t5=XNoArg(), T6 t6=XNoArg(),
+                  T7 t7=XNoArg(), T8 t8=XNoArg(), T9 t9=XNoArg())
+        {
+        return XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9>( this, XArgumentList<T1,T2,T3,T4,T5,T6,T7,T8,T9>( t1, t2, t3, t4, t5, t6, t7, t8, t9 ) );
+        }
+    XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9> trigger( T1 t1=XNoArg(), T2 t2=XNoArg(), T3 t3=XNoArg(),
+                  T4 t4=XNoArg(), T5 t5=XNoArg(), T6 t6=XNoArg(),
+                  T7 t7=XNoArg(), T8 t8=XNoArg(), T9 t9=XNoArg())
+        {
+        return XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9>( this, XArgumentList<T1,T2,T3,T4,T5,T6,T7,T8,T9>( t1, t2, t3, t4, t5, t6, t7, t8, t9 ) );
+        }
+
+private:
+    void execute( XArgumentList<T1,T2,T3,T4,T5,T6,T7,T8,T9> *args )
+        {
+        foreach( XSlotArgs *slot, _slots )
+            {
+            XBaseObject *parent( slot->parent() );
+            parent->_sender = _sender;
+
+            switch( slot->_type )
+                {
+                case XSlotArgs::NoArgs:    (parent->*((typename XSlotArgs::fn)(slot->_method.mfn)))( ); break;
+                case XSlotArgs::OneArg:    (parent->*((typename XSlotArgs::fn1)(slot->_method.mfn1)))( args->arg1 ); break;
+                case XSlotArgs::TwoArgs:   (parent->*((typename XSlotArgs::fn2)(slot->_method.mfn2)))( args->arg1, args->arg2 ); break;
+                case XSlotArgs::ThreeArgs: (parent->*((typename XSlotArgs::fn3)(slot->_method.mfn3)))( args->arg1, args->arg2, args->arg3 ); break;
+                case XSlotArgs::FourArgs:  (parent->*((typename XSlotArgs::fn4)(slot->_method.mfn4)))( args->arg1, args->arg2, args->arg3, args->arg4 ); break;
+                case XSlotArgs::FiveArgs:  (parent->*((typename XSlotArgs::fn5)(slot->_method.mfn5)))( args->arg1, args->arg2, args->arg3, args->arg4, args->arg5 ); break;
+                case XSlotArgs::SixArgs:   (parent->*((typename XSlotArgs::fn6)(slot->_method.mfn6)))( args->arg1, args->arg2, args->arg3, args->arg4, args->arg5, args->arg6 ); break;
+                case XSlotArgs::SevenArgs: (parent->*((typename XSlotArgs::fn7)(slot->_method.mfn7)))( args->arg1, args->arg2, args->arg3, args->arg4, args->arg5, args->arg6, args->arg7 ); break;
+                case XSlotArgs::EightArgs: (parent->*((typename XSlotArgs::fn8)(slot->_method.mfn8)))( args->arg1, args->arg2, args->arg3, args->arg4, args->arg5, args->arg6, args->arg7, args->arg8 ); break;
+                case XSlotArgs::NineArgs:  (parent->*((typename XSlotArgs::fn9)(slot->_method.mfn9)))( args->arg1, args->arg2, args->arg3, args->arg4, args->arg5, args->arg6, args->arg7, args->arg8, args->arg9 ); break;
+                };
+
+            slot->parent()->_sender = 0;
+            }
+        }
+    Q_DISABLE_COPY( XSignal );
+    XList <XSlotArgs*> _slots;
+    XObject *_sender;
+    friend class XSlot<T1,T2,T3,T4,T5,T6,T7,T8,T9>;
+    friend class XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9>;
+    friend class XBaseObject;
+    };
+
+
+template <typename T1, typename T2, typename T3,
+          typename T4, typename T5, typename T6,
+          typename T7, typename T8, typename T9>
+XSlot<T1,T2,T3,T4,T5,T6,T7,T8,T9>::~XSlot( )
+    {
+    _signal->_slots.removeAll( this );
+
+    if( parent() )
+        {
+        parent()->removeChild( this );
+        }
+    }
+
+template <typename T1, typename T2, typename T3,
+          typename T4, typename T5, typename T6,
+          typename T7, typename T8, typename T9>
+XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9>::XSignalTriggerInstance( XSignal<T1,T2,T3,T4,T5,T6,T7,T8,T9> *signal,
+                                                                            const XArgumentList<T1,T2,T3,T4,T5,T6,T7,T8,T9> &args )
+        : _signal( signal ), _args( args )
+    {
+    }
+
+template <typename T1, typename T2, typename T3,
+          typename T4, typename T5, typename T6,
+          typename T7, typename T8, typename T9>
+XSignalTriggerInstance<T1,T2,T3,T4,T5,T6,T7,T8,T9>::XSignalTriggerInstance( const XSignalTriggerInstance &ref )
+        : _signal( ref._signal ), _args( ref._args )
+    {
+    }
+
+#endif // XSIGNAL_H

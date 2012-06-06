@@ -1,0 +1,54 @@
+#ifndef XTIMER_H
+#define XTIMER_H
+
+#include "XProperty"
+#include "XGlobal"
+
+class EKSCORE_EXPORT XTime
+  {
+public:
+  XTime();
+  XTime(const XTime &t);
+  static XTime now();
+
+  double seconds() const { return (double)_secs + ((double)_nanosecs / 1000000000.0); }
+  double milliseconds() const { return ((double)_secs * 1000.0) + ((double)_nanosecs / 1000000.0); }
+  double microseconds() const { return ((double)_secs * 1000000.0) + ((double)_nanosecs / 1000.0); }
+  double nanoseconds() const { return ((double)_secs * 1000000000.0) + (double)_nanosecs; }
+
+  XTime &operator+=(const XTime &t);
+  XTime operator+(const XTime &t);
+
+  XTime operator-(const XTime &t) const;
+  XTime operator/(double d) const;
+  XTime operator*(double d) const;
+
+  bool operator<(const XTime &t) const;
+  bool operator>(const XTime &t) const;
+
+  static XTime fromMilliseconds(double ms);
+
+private:
+  XTime(xint64, xint32);
+  xint64 _secs;
+  xint32 _nanosecs;
+  };
+
+class EKSCORE_EXPORT XTimeStatistics
+  {
+XProperties:
+  XRORefProperty(XTime, minimum);
+  XRORefProperty(XTime, maximum);
+  XRORefProperty(XTime, total);
+  XRORefProperty(xsize, count);
+public:
+  XTimeStatistics();
+
+  XTime average() const { if(count() == 0) { return XTime(); } return total() / (double)count(); }
+
+  void append(XTime);
+  void append(const XTimeStatistics &);
+  void clear();
+  };
+
+#endif // XTIMER_H

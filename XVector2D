@@ -1,0 +1,168 @@
+#ifndef XVECTORXD_H
+#define XVECTORXD_H
+
+#include "XGlobal"
+#include "XMathHelpers"
+#include "Eigen/Core"
+#include "QMetaType"
+#include "XMetaType"
+#include "QVector2D"
+#include "QVector3D"
+#include "QVector4D"
+
+typedef Eigen::Matrix<xReal, 2, 1> XVector2D;
+typedef Eigen::Matrix<xReal, 3, 1> XVector3D;
+typedef Eigen::Matrix<xReal, 4, 1> XVector4D;
+
+typedef Eigen::Matrix<xint32, 2, 1> XVectorI2D;
+typedef Eigen::Matrix<xint32, 3, 1> XVectorI3D;
+typedef Eigen::Matrix<xint32, 4, 1> XVectorI4D;
+
+typedef XList<XVector2D> XVector2DList;
+typedef XList<XVector3D> XVector3DList;
+typedef XList<XVector4D> XVector4DList;
+
+class QTextStream;
+class QDataStream;
+
+// static size
+
+template <typename Derived> QTextStream &operator>>(QTextStream &str, Eigen::PlainObjectBase<Derived> &vec)
+  {
+  xint32 rows = Derived::RowsAtCompileTime;
+  xint32 cols = Derived::ColsAtCompileTime;
+
+  if(rows == Eigen::Dynamic)
+    {
+    str >> rows;
+    }
+
+  if(cols == Eigen::Dynamic)
+    {
+    str >> cols;
+    }
+
+  for(xint32 i=0; i<rows; ++i)
+    {
+    for(xint32 j=0; j<cols; ++j)
+      {
+      str >> vec(i,j);
+      }
+    }
+
+  return str;
+  }
+
+template <typename Derived> QTextStream &operator<<(QTextStream &str, const Eigen::PlainObjectBase<Derived> &vec)
+  {
+  xint32 rows = Derived::RowsAtCompileTime;
+  xint32 cols = Derived::ColsAtCompileTime;
+
+  if(rows == Eigen::Dynamic)
+    {
+    rows = vec.rows();
+    str << rows << " ";
+    }
+
+  if(cols == Eigen::Dynamic)
+    {
+    cols = vec.cols();
+    str << cols << " ";
+    }
+
+  for(xint32 i=0; i<rows; ++i)
+    {
+    for(xint32 j=0; j<cols; ++j)
+      {
+      str << vec(i,j);
+
+      bool iC = i < (rows-1);
+      bool jC = j < (cols-1);
+      if((iC || jC) && !(iC && jC))
+        {
+        str << " ";
+        }
+      }
+    }
+
+  return str;
+  }
+
+template <typename Derived> QDataStream &operator>>(QDataStream &str, Eigen::PlainObjectBase<Derived> &vec)
+  {
+  xint32 rows = Derived::RowsAtCompileTime;
+  xint32 cols = Derived::ColsAtCompileTime;
+
+  if(rows == Eigen::Dynamic)
+    {
+    str >> rows;
+    }
+
+  if(cols == Eigen::Dynamic)
+    {
+    str >> cols;
+    }
+
+  for(xint32 i=0; i<rows; ++i)
+    {
+    for(xint32 j=0; j<cols; ++j)
+      {
+      str >> vec(i,j);
+      }
+    }
+
+  return str;
+  }
+
+template <typename Derived> QDataStream &operator<<(QDataStream &str, const Eigen::PlainObjectBase<Derived> &vec)
+  {
+  xint32 rows = Derived::RowsAtCompileTime;
+  xint32 cols = Derived::ColsAtCompileTime;
+
+  if(rows == Eigen::Dynamic)
+    {
+    rows = vec.rows();
+    str << rows << " ";
+    }
+
+  if(cols == Eigen::Dynamic)
+    {
+    cols = vec.cols();
+    str << cols << " ";
+    }
+
+  for(xint32 i=0; i<rows; ++i)
+    {
+    for(xint32 j=0; j<cols; ++j)
+      {
+      str << vec(i,j);
+      }
+    }
+
+  return str;
+  }
+
+inline QVector2D toQt(const XVector2D &vec)
+  {
+  return QVector2D(vec(0), vec(1));
+  }
+
+inline QVector3D toQt(const XVector3D &vec)
+  {
+  return QVector3D(vec(0), vec(1), vec(2));
+  }
+
+inline QVector4D toQt(const XVector4D &vec)
+  {
+  return QVector4D(vec(0), vec(1), vec(2), vec(3));
+  }
+
+X_DECLARE_SERIALISABLE_METATYPE(XVector2D);
+X_DECLARE_SERIALISABLE_METATYPE(XVector3D);
+X_DECLARE_SERIALISABLE_METATYPE(XVector4D);
+
+Q_DECLARE_METATYPE(XVector2D);
+Q_DECLARE_METATYPE(XVector3D);
+Q_DECLARE_METATYPE(XVector4D);
+
+#endif // XVECTORXD_H

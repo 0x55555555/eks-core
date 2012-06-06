@@ -1,0 +1,40 @@
+#ifndef XMESSAGEHANDLER_H
+#define XMESSAGEHANDLER_H
+
+#include "XGlobal"
+#include "QObject"
+#include "QIODevice"
+#include "QString"
+#include "XProperty"
+#include "XList"
+
+
+class EKSCORE_EXPORT XMessageHandler : public QIODevice
+{
+    Q_OBJECT
+    XROProperty( QString, triggerFile )
+    XROProperty( QString, triggerFunction )
+    XROProperty( unsigned int, triggerLine )
+    XROProperty( int, triggerType )
+public:
+    XMessageHandler();
+    ~XMessageHandler();
+
+    virtual bool canHandle( int level ) const;
+
+signals:
+    void handle( QString message );
+
+protected:
+    virtual qint64 readData(char *data, qint64 maxlen);
+    virtual qint64 writeData( const char *data, qint64 size );
+
+private:
+    XList <XList <XMessageHandler *> *> _listeners;
+    friend class XMessageRouter;
+};
+
+EKSCORE_EXPORT void xRegisterMessageHandler( XMessageHandler & );
+EKSCORE_EXPORT void xRegisterMessageHandler( XMessageHandler * );
+
+#endif // XMESSAGEHANDLER_H

@@ -1,0 +1,102 @@
+#ifndef XASSERT_H
+#define XASSERT_H
+
+#include "XGlobal"
+#include "XProperty"
+#include "XCodeLocation"
+#include "QVariant"
+#include "QVector"
+
+class EKSCORE_EXPORT XAssert
+  {
+public:
+  class Argument
+    {
+  public:
+    const char *name;
+    QVariant value;
+    };
+
+XProperties:
+  XRORefProperty(XCodeLocation, location);
+  XROProperty(const char *, condition);
+  XROProperty(const char *, message);
+
+  XRefProperty(QVector<Argument>, arguments);
+
+public:
+  XAssert(const XCodeLocation &location, const char *condition, const char *message);
+
+  template <typename T> XAssert &arg(const char *name, const T &val)
+    {
+    arguments() << Argument();
+    Argument &arg = arguments().back();
+
+    arg.name = name;
+    arg.value = val;
+
+    return *this;
+    }
+
+  typedef bool FireFunction(const XAssert &assert);
+  static FireFunction *currentFireFunction();
+  static void setCurrentFireFunction(FireFunction *f);
+
+#ifdef Q_CC_MSVC
+  typedef void __stdcall BreakFunction();
+#else
+  typedef void BreakFunction();
+#endif
+  static BreakFunction *currentBreakFunction();
+  static void setCurrentBreakFunction(BreakFunction *f);
+  };
+
+#define X_ASSERT_VARIABLE(variable, aa, n) .arg(#variable, variable)
+
+#ifdef Q_CC_MSVC
+# define X_CONSTRUCT_ASSERT(condition, message, ...) XAssert ass(X_CURRENT_CODE_LOCATION, #condition, message); ass X_EXPAND_ARGS(X_ASSERT_VARIABLE, 0, __VA_ARGS__)
+#else
+# define X_CONSTRUCT_ASSERT(condition, message, ...) XAssert ass(X_CURRENT_CODE_LOCATION, #condition, message)
+#endif
+
+#if X_ASSERTS_ENABLED
+# define xAssertMessage(condition, message, ...) if(!(condition) && XAssert::currentFireFunction()) { X_CONSTRUCT_ASSERT(condition, message, __VA_ARGS__); if( XAssert::currentFireFunction()(ass) && XAssert::currentBreakFunction() ) { XAssert::currentBreakFunction()(); } }
+# define xVerify xAssert
+
+#ifndef X_CPPOX_SUPPORT
+template <bool Condition>
+struct xCompileTimeAssertDef
+{
+    enum { Value = 1 };
+};
+/** Unimplemented - causes a compile-time error if used. */
+template <> struct xCompileTimeAssertDef<false>;
+#define xCompileTimeAssert(x) typedef xCompileTimeAssertDef<x> CTA_##__LINE__
+#else
+#define xCompileTimeAssert(x) static_assert(x, "Static Assert: " #x)
+#endif
+
+#else
+# define xAssertMessage(condition, message, ...)
+# define xVerify(x, ...) x
+
+template <bool Condition>
+struct xCompileTimeAssertDef
+{
+    enum { Value = 1 };
+};
+#endif
+
+#define xAssert(condition, ...) xAssertMessage(condition, "", __VA_ARGS__)
+#define xAssertFail(...) xAssert(0, __VA_ARGS__);
+#define xAssertFailMessage(msg, ...) xAssertMessage(0, msg, __VA_ARGS__);
+
+
+
+// xAssert Usage
+// xAssert(i > 10, i)
+// xAssertMessage(i > 10, "Oh noes i is too small", i)
+// xAssertMessage(i > 10, "Oh noes (%1, %2, %3) is too small", i, j, k)
+
+
+#endif // XASSERT_H

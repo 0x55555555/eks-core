@@ -1,0 +1,117 @@
+#ifndef XSHARED_H
+#define XSHARED_H
+
+#include "QAtomicInt"
+#include "QSharedPointer"
+
+class XSharedData
+  {
+  mutable QAtomicInt _ref;
+  template <typename T> friend class XSharedPointer;
+  template <typename T> friend class XConstSharedPointer;
+  };
+
+template <typename T> class XSharedPointer
+  {
+public:
+  XSharedPointer() : _ptr(0) { }
+  explicit XSharedPointer( XSharedData *ptr ) : _ptr(ptr) { xAssert(_ptr); _ptr->_ref.ref(); }
+  XSharedPointer( const XSharedPointer<T> &cpy ) : _ptr(cpy._ptr) { if(_ptr) { _ptr->_ref.ref(); } }
+  ~XSharedPointer()
+    {
+    if(_ptr && !_ptr->_ref.deref())
+      {
+      delete _ptr;
+      _ptr = 0;
+      }
+    }
+
+  XSharedPointer<T> &operator=( const XSharedPointer<T> &cpy )
+    {
+    if(_ptr && !_ptr->_ref.deref())
+      {
+      delete _ptr;
+      }
+
+    _ptr = cpy._ptr;
+    if(_ptr)
+      {
+      _ptr->_ref.ref();
+      }
+    return *this;
+    }
+
+  T &operator *() { detach(); return *ptr(); }
+  const T &operator *() const { return *ptr(); }
+
+  T *operator->() { detach(); return ptr(); }
+  const T *operator->() const { return ptr(); }
+
+  T *ptr() { detach(); return static_cast<T*>(_ptr); }
+  const T *ptr() const { return static_cast<T*>(_ptr); }
+  const T *constPtr() const { return static_cast<T*>(_ptr); }
+
+private:
+  void detach()
+    {
+    if(_ptr && _ptr->_ref > 1)
+      {
+      _ptr = new T(*constPtr());
+      }
+    }
+
+  XSharedData *_ptr;
+  };
+
+template <typename T> class XConstSharedPointer
+  {
+public:
+  XConstSharedPointer() : _ptr(0) { }
+  explicit XConstSharedPointer( const XSharedData *ptr ) : _ptr(ptr) { xAssert(_ptr); _ptr->_ref.ref(); }
+  XConstSharedPointer( const XConstSharedPointer<T> &cpy ) : _ptr(cpy._ptr) { if(_ptr) { _ptr->_ref.ref(); } }
+  ~XConstSharedPointer()
+    {
+    if(_ptr && !_ptr->_ref.deref())
+      {
+      delete _ptr;
+      _ptr = 0;
+      }
+    }
+
+  XConstSharedPointer<T> &operator=( const XConstSharedPointer<T> &cpy )
+    {
+    if(_ptr && !_ptr->_ref.deref())
+      {
+      delete _ptr;
+      }
+
+    _ptr = cpy._ptr;
+    if(_ptr)
+      {
+      _ptr->_ref.ref();
+      }
+    return *this;
+    }
+
+  T &operator *() { detach(); return *ptr(); }
+  const T &operator *() const { return *ptr(); }
+
+  T *operator->() { detach(); return ptr(); }
+  const T *operator->() const { return ptr(); }
+
+  const T *ptr() const { return static_cast<const T*>(_ptr); }
+  const T *constPtr() const { return static_cast<const T*>(_ptr); }
+
+private:
+  void detach()
+    {
+    if(_ptr && _ptr->_ref > 1)
+      {
+      _ptr = new T(*constPtr());
+      }
+    }
+
+  const XSharedData *_ptr;
+  };
+
+#endif // XSHARED_H

@@ -1,0 +1,32 @@
+{
+  "__T":"Project",
+  "name":"Project",
+  "dynamic":"1",
+  "__C":"4",
+  "__H":[
+    {
+      "__T":"SPropertyArray",
+      "name":"children",
+      "__C":"0",
+      "__H":[
+      ]
+    },
+    {
+      "__T":"StringProperty",
+      "name":"rootDirectory",
+      "__V":"EksCore"
+    },
+    {
+      "__T":"PointerArray",
+      "name":"projectDependancies",
+      "__C":"0",
+      "__H":[
+      ]
+    },
+    {
+      "__T":"Pointer",
+      "name":"config",
+      "input":"..\/..\/Conf"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+#ifndef XPROFILER_H
+#define XPROFILER_H
+
+#include "XProfiler"
+#include "XTime"
+#include "QString"
+#include "XHash"
+#include "XVector"
+#include "XBucketAllocator"
+#include "QMutex"
+
+class EKSCORE_EXPORT XProfiler
+  {
+public:
+  class EKSCORE_EXPORT ProfilingContext
+    {
+  XProperties:
+    XROProperty(ProfilingContext *, parent);
+    XRORefProperty(xuint32, context);
+    XROProperty(ProfilingContext *, firstChild);
+    XROProperty(ProfilingContext *, nextSibling);
+    XRefProperty(XTimeStatistics, timeStats);
+
+    const char *message() const { return _message; }
+
+    ProfilingContext *findChildContext(xuint32 context, const char *);
+    const ProfilingContext *findChildContext(xuint32 context, const char *) const;
+
+    ProfilingContext(ProfilingContext* parent, xuint32 context, const char *message);
+
+  private:
+    const char *_message;
+    };
+
+  class EKSCORE_EXPORT ProfileHandle
+    {
+  private:
+    ProfileHandle(ProfilingContext *key);
+    ProfilingContext *_context;
+    XTime _start;
+    friend class XProfiler;
+    };
+
+  class EKSCORE_EXPORT ProfileScopedBlock
+    {
+  public:
+    ProfileScopedBlock(xuint32 component, const char *message);
+    ~ProfileScopedBlock();
+  private:
+    ProfileHandle _handle;
+    };
+
+  static ProfileHandle start(xuint32 component, const char *mess);
+  static void end(const ProfileHandle &);
+
+  // for the current thread
+  static ProfilingContext *rootContext();
+  // clears all threads results.
+  static void clearResults();
+
+  static QString stringForContext(xuint32 t);
+  static void setStringForContext(xuint32 t, const QString &str);
+
+private:
+  XProfiler();
+
+  ProfilingContext *_rootContext;
+  XHash<QThread *, ProfilingContext *> _currentContexts;
+  XFixedSizeBucketAllocator _contextAllocator;
+  QHash<xuint32, QString> _contextStrings;
+  QMutex _lock;
+  };
+
+#ifdef X_PROFILING_ENABLED
+  #define XProfileFunctionBase(component) XProfiler::ProfileScopedBlock functionBlock(component, xCurrentFunction);
+  #define XProfileScopedBlockBase(component, mess) XProfiler::ProfileScopedBlock scopeBlock##__LINE__(component, mess);
+#else
+  #define XProfileFunctionBase(component)
+  #define XProfileScopedBlockBase(component, mess)
+#endif
+
+
+#endif // XPROFILER_H

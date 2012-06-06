@@ -1,0 +1,29 @@
+#ifndef XOBJECT_H
+#define XOBJECT_H
+
+#include "XBaseObject"
+#include "XSignal"
+
+// XObject - XBaseObject, with signals and casting
+class EKSCORE_EXPORT XObject : public XBaseObject
+  {
+  X_CASTABLE_ROOT( XObject, 1, static_cast<T*>(0)->Type )
+public:
+  enum {Type = 1};
+
+  XObject( );
+  ~XObject( );
+
+  X_SIGNAL( destroyed );
+  };
+
+template <typename T>inline T xobject_cast( XObject *obj )
+  {
+  if( obj )
+    {
+    return static_cast<T>( obj->castToType( static_cast<T>(0)->Type ) ); \
+    }
+  return 0;
+  }
+
+#endif

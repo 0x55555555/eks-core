@@ -1,0 +1,45 @@
+#ifndef XQUATERNION_H
+#define XQUATERNION_H
+
+#include "Eigen/Geometry"
+#include "XMetaType"
+#include "QTextStream"
+#include "QDataStream"
+
+typedef Eigen::Quaternion<xReal> XQuaternion;
+
+inline bool operator==(const XQuaternion &a, const XQuaternion& b)
+  {
+  return a.coeffs() == b.coeffs();
+  }
+
+inline bool operator!=(const XQuaternion &a, const XQuaternion& b)
+  {
+  return a.coeffs() != b.coeffs();
+  }
+
+inline QTextStream &operator<<(QTextStream &str, const XQuaternion &quat)
+  {
+  return str << quat.x() << " " << quat.y() << " " << quat.z() << " " << quat.w();
+  }
+
+inline QTextStream &operator>>(QTextStream &str, XQuaternion &quat)
+  {
+  return str >> quat.x() >> quat.y() >> quat.z() >> quat.w();
+  }
+
+inline QDataStream &operator<<(QDataStream &str, const XQuaternion &quat)
+  {
+  return str << quat.x() << quat.y() << quat.z() << quat.w();
+  }
+
+inline QDataStream &operator>>(QDataStream &str, XQuaternion &quat)
+  {
+  return str >> quat.x() >> quat.y() >> quat.z() >> quat.w();
+  }
+
+X_DECLARE_SERIALISABLE_METATYPE(XQuaternion);
+
+Q_DECLARE_METATYPE(XQuaternion);
+
+#endif // XQUATERNION_H

@@ -1,0 +1,8 @@
+#ifndef XVECTOR_H
+#define XVECTOR_H
+
+#include "QVector"
+
+#define XVector QVector
+
+#endif

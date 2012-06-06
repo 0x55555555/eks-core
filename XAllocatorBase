@@ -1,0 +1,29 @@
+#ifndef XALLOCATORBASE_H
+#define XALLOCATORBASE_H
+
+#include "XGlobal"
+#include "XEventLogger"
+
+class XAllocatorBase
+  {
+public:
+  virtual ~XAllocatorBase() {}
+  virtual void *alloc(xsize size, xsize alignment=X_ALIGN_BYTE_COUNT) = 0;
+  virtual void free(void *mem) = 0;
+  };
+
+class EKSCORE_EXPORT XGlobalAllocator : public XAllocatorBase
+  {
+public:
+  virtual void *alloc(xsize size, xsize alignment=0);
+  virtual void free(void *mem);
+
+  static XGlobalAllocator *instance();
+  };
+
+#define xAllocateAndConstruct(a, t, ...) new(a->alloc(sizeof(t))) t(__VA_ARGS__)
+#define xDestroyAndFree(a, t, m) m-> ~t(); a->free(m)
+
+X_DECLARE_MEMORY_LOGGER(EKSCORE_EXPORT, xTotalGlobalAllocatorSize);
+
+#endif // XALLOCATORBASE_H

@@ -1,0 +1,8 @@
+#ifndef XHASH_H
+#define XHASH_H
+
+#include "QHash"
+
+#define XHash QHash
+
+#endif

@@ -1,0 +1,41 @@
+#ifndef XMESSAGEROUTER_H
+#define XMESSAGEROUTER_H
+
+#include "XGlobal"
+#include "XList"
+#include "QObject"
+#include "QDebug"
+
+class XMessageHandler;
+class QDebug;
+
+class EKSCORE_EXPORT XMessageRouter : public QObject
+    {
+    Q_OBJECT
+public:
+    static void registerMessageHandler( XMessageHandler & );
+    static void registerMessageHandler( XMessageHandler * );
+    static void unregisterMessageHandler( XMessageHandler & );
+    static void unregisterMessageHandler( XMessageHandler * );
+
+    static QDebug stream( int type, const char *file, const char *function, unsigned int line );
+
+private slots:
+    void removeHandler( QObject * );
+
+private:
+    static XList <XMessageHandler *> _handlers;
+    };
+
+QDebug operator <<( QDebug, std::string );
+
+void EKSCORE_EXPORT xRegisterMessageHandler( XMessageHandler & );
+void EKSCORE_EXPORT xRegisterMessageHandler( XMessageHandler * );
+void EKSCORE_EXPORT xUnregisterMessageHandler( XMessageHandler & );
+void EKSCORE_EXPORT xUnregisterMessageHandler( XMessageHandler * );
+
+#define xStream( type ) XMessageRouter::stream( type, __FILE__, xCurrentFunction, __LINE__ )
+
+#define xDisablingStream( type, str ) XMessageRouter::stream( type, __FILE__, xCurrentFunction, __LINE__ ) << str;
+
+#endif // XMESSAGEROUTER_H
