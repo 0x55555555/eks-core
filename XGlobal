@@ -70,7 +70,7 @@ typedef unsigned long long xuint64; /* 64 bit unsigned */
 
 #define X_SIZEOF_ARRAY(x) (sizeof(x)/sizeof(x[0]))
 
-#ifdef X_CPPOX_SUPPORT
+#ifdef X_CPPOX_OVERRIDE_SUPPORT
 # define X_OVERRIDE override
 # define X_FINAL final
 #else
