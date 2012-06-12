@@ -31,7 +31,8 @@ inline xReal xRandF( xReal min, xReal max )
   return min + ( xRandF() * (max-min) );
   }
 
-inline xReal xClamp( xReal in, xReal min, xReal max )
+template <typename T>
+inline T xClamp( T in, T min, T max )
   {
   if( in < min )
     {
@@ -42,6 +43,12 @@ inline xReal xClamp( xReal in, xReal min, xReal max )
     return max;
     }
   return in;
+  }
+
+template <typename T>
+inline T xLerp(T a, T b, xReal factor)
+  {
+  return a + (factor * (b-a));
   }
 
 inline unsigned int xFactorial( unsigned int in )
