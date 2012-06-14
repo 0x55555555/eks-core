@@ -158,4 +158,12 @@
 
 #define X_EXPAND_ARGS(op, a1, ...)		X_JOIN_2(X_EXPAND_ARGS_, X_NUM_ARGS(__VA_ARGS__)) X_PASS_ARGS(op, a1, __VA_ARGS__)
 
+#if defined(Q_CC_MSVC)
+# define xForeach(VAR, RANGE) for each(VAR in RANGE)
+#elif defined(X_CPPOX_SUPPORT)
+# define xForeach(VAR, RANGE) foreach(VAR : RANGE)
+#else
+# error no foreach loop for this platform
+#endif
+
 #endif // XMACROHELPERS_H
