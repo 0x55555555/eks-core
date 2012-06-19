@@ -20,7 +20,7 @@ public:
 
     static QDebug stream( int type, const char *file, const char *function, unsigned int line );
 
-private slots:
+private Q_SLOTS:
     void removeHandler( QObject * );
 
 private:

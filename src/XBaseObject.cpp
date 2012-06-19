@@ -9,12 +9,12 @@ XBaseObject::XBaseObject( ) : _parent( 0 ), _sender( 0 )
 
 XBaseObject::~XBaseObject( )
     {
-    foreach( XBaseObject *child, _baseChildren )
+    Q_FOREACH( XBaseObject *child, _baseChildren )
         {
         delete child;
         }
 
-    foreach( XBaseObject *child, _children )
+    Q_FOREACH( XBaseObject *child, _children )
         {
         delete child;
         }

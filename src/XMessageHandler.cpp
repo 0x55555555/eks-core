@@ -8,7 +8,7 @@ XMessageHandler::XMessageHandler()
 
 XMessageHandler::~XMessageHandler()
     {
-    foreach( XList <XMessageHandler *> *listener, _listeners )
+    Q_FOREACH( XList <XMessageHandler *> *listener, _listeners )
         {
         listener->removeAll( this );
         }
@@ -21,7 +21,7 @@ bool XMessageHandler::canHandle( int ) const
 
 qint64 XMessageHandler::writeData( const char *data, qint64 size )
 {
-    emit handle( QString( QByteArray( data, size ) ) );
+    Q_EMIT handle( QString( QByteArray( data, size ) ) );
     return size;
 }
 

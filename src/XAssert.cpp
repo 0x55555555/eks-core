@@ -56,7 +56,7 @@ bool defaultFire(const XAssert &a)
   if(a.arguments().size())
     {
     text += "Arguments:\n";
-    foreach(const XAssert::Argument &arg, a.arguments())
+    Q_FOREACH(const XAssert::Argument &arg, a.arguments())
       {
       text + "  ";
       text += arg.name;

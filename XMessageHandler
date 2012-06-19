@@ -22,7 +22,7 @@ public:
 
     virtual bool canHandle( int level ) const;
 
-signals:
+Q_SIGNALS:
     void handle( QString message );
 
 protected:

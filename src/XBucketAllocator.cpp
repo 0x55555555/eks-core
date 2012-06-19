@@ -5,7 +5,7 @@ X_IMPLEMENT_MEMORY_LOGGER(xTotalBucketAllocatorSize);
 
 void XBucketAllocator::debugDump() const
   {
-  foreach(xsize s, _internal.keys())
+  Q_FOREACH(xsize s, _internal.keys())
     {
     XFixedSizeBucketAllocator *alloc = _internal.value(s);
     alloc->debugDump();

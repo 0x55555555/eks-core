@@ -30,7 +30,7 @@ void XMessageRouter::unregisterMessageHandler( XMessageHandler *in )
 
 QDebug XMessageRouter::stream( int type, const char *file, const char *function, unsigned int line )
 {
-    foreach( XMessageHandler *handler, _handlers )
+    Q_FOREACH( XMessageHandler *handler, _handlers )
     {
         if( handler->canHandle( type ) )
         {
