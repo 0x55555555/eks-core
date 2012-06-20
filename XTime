@@ -28,6 +28,8 @@ public:
 
   static XTime fromMilliseconds(double ms);
 
+  static void beginAccurateTiming();
+
 private:
   XTime(xint64, xint32);
   xint64 _secs;

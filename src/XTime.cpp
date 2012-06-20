@@ -24,6 +24,14 @@ XTime XTime::fromMilliseconds(double ms)
   return XTime(seconds, (xint32)nanoseconds);
   }
 
+void XTime::beginAccurateTiming()
+  {
+#ifdef Q_OS_WIN
+  HANDLE h = GetCurrentProcess();
+  SetProcessAffinityMask(h, 1);
+#endif
+  }
+
 #ifdef Q_OS_WIN
 inline LARGE_INTEGER getFrequency() { LARGE_INTEGER freq; xAssert(QueryPerformanceFrequency(&freq)); return freq; }
 LARGE_INTEGER frequency(getFrequency());
