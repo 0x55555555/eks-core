@@ -46,7 +46,6 @@
 # define X_PROFILING_ENABLED
 # define X_ASSERTS_ENABLED 1
 #endif
-# define X_ASSERTS_ENABLED 1
 
 typedef signed char xint8;         /* 8 bit signed */
 typedef unsigned char xuint8;      /* 8 bit unsigned */
