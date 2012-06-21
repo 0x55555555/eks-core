@@ -63,6 +63,17 @@ public:
 # define xAssertMessage(condition, message, ...) if(!(condition) && XAssert::currentFireFunction()) { X_CONSTRUCT_ASSERT(condition, message, __VA_ARGS__); if( XAssert::currentFireFunction()(ass) && XAssert::currentBreakFunction() ) { XAssert::currentBreakFunction()(); } }
 # define xVerify xAssert
 
+#else
+# define xAssertMessage(condition, message, ...)
+# define xVerify(x, ...) x
+
+template <bool Condition>
+struct xCompileTimeAssertDef
+{
+    enum { Value = 1 };
+};
+#endif
+
 #ifndef X_CPPOX_SUPPORT
 template <bool Condition>
 struct xCompileTimeAssertDef
@@ -74,17 +85,6 @@ template <> struct xCompileTimeAssertDef<false>;
 #define xCompileTimeAssert(x) typedef xCompileTimeAssertDef<x> CTA_##__LINE__
 #else
 #define xCompileTimeAssert(x) static_assert(x, "Static Assert: " #x)
-#endif
-
-#else
-# define xAssertMessage(condition, message, ...)
-# define xVerify(x, ...) x
-
-template <bool Condition>
-struct xCompileTimeAssertDef
-{
-    enum { Value = 1 };
-};
 #endif
 
 #define xAssert(condition, ...) xAssertMessage(condition, "", __VA_ARGS__)
