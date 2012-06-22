@@ -11,7 +11,7 @@
 
 #define SECOND_IN_NANO_SECONDS 1000000000
 
-XTime::XTime(xint64 secs, xint32 nanosecs) : _secs(secs), _nanosecs(nanosecs)
+XTime::XTime(xint64 secs, xint64 nanosecs) : _secs(secs), _nanosecs(nanosecs)
   {
   }
 
@@ -21,7 +21,7 @@ XTime XTime::fromMilliseconds(double ms)
   xint64 nanoseconds = ms * 1000000.0;
   nanoseconds -= seconds * SECOND_IN_NANO_SECONDS;
   xAssert(nanoseconds > 0);
-  return XTime(seconds, (xint32)nanoseconds);
+  return XTime(seconds, nanoseconds);
   }
 
 void XTime::beginAccurateTiming()
@@ -33,7 +33,7 @@ void XTime::beginAccurateTiming()
   }
 
 #ifdef Q_OS_WIN
-inline LARGE_INTEGER getFrequency() { LARGE_INTEGER freq; xAssert(QueryPerformanceFrequency(&freq)); return freq; }
+inline LARGE_INTEGER getFrequency() { LARGE_INTEGER freq; xVerify(QueryPerformanceFrequency(&freq)); return freq; }
 LARGE_INTEGER frequency(getFrequency());
 #endif
 
@@ -92,7 +92,15 @@ XTime XTime::operator+(const XTime &t)
 
 XTime XTime::operator-(const XTime &t) const
   {
-  return XTime(_secs - t._secs, _nanosecs - t._nanosecs);
+  xint64 secs = _secs - t._secs;
+  xint64 nano = _nanosecs - t._nanosecs;
+  if(nano < 0)
+    {
+    secs -= 1;
+    nano += SECOND_IN_NANO_SECONDS;
+    xAssert(nano > 0);
+    }
+  return XTime(secs, nano);
   }
 
 XTime XTime::operator/(double d) const
@@ -102,13 +110,13 @@ XTime XTime::operator/(double d) const
 
 XTime XTime::operator*(double d) const
   {
-  xint64 secs = (double)_secs * d;
-  xint32 nanosecs = (double)_nanosecs * d;
+  double secs = (double)_secs * d;
+  double nanosecs = (double)_nanosecs * d;
 
-  nanosecs += (double)(secs * SECOND_IN_NANO_SECONDS) * d;
-  nanosecs = nanosecs % SECOND_IN_NANO_SECONDS;
+  xint64 nanosecsInt = (xint64)(nanosecs + (secs * SECOND_IN_NANO_SECONDS));
+  nanosecsInt = nanosecsInt % SECOND_IN_NANO_SECONDS;
 
-  return XTime(secs, nanosecs);
+  return XTime(secs, nanosecsInt);
   }
 
 bool XTime::operator<(const XTime &t) const

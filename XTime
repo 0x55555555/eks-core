@@ -31,9 +31,9 @@ public:
   static void beginAccurateTiming();
 
 private:
-  XTime(xint64, xint32);
+  XTime(xint64, xint64);
   xint64 _secs;
-  xint32 _nanosecs;
+  xint64 _nanosecs;
   };
 
 class EKSCORE_EXPORT XTimeStatistics
