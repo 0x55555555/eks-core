@@ -5,7 +5,8 @@ win32-g++ {
   QMAKE_CXXFLAGS += -Wall
 }
 
-release {
+CONFIG(debug) {
+} else {
   DEFINES += QT_NO_DEBUG
 }
 
