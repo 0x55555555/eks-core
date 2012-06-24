@@ -539,8 +539,8 @@ template <typename T>
       const ImageData<float> *imData = (const ImageData<float> *)h->_imageData;
       XVectorI2D sampleAt = pt - imData->_offset;
 
-      sampleAt.x() = xMin(imData->_data.rows(), xMax(sampleAt.x(), 0));
-      sampleAt.y() = xMin(imData->_data.cols(), xMax(sampleAt.y(), 0));
+      sampleAt.x() = xMin(imData->_data.rows(), xMax(sampleAt.x(), 0.0f));
+      sampleAt.y() = xMin(imData->_data.cols(), xMax(sampleAt.y(), 0.0f));
 
       ImageData<float>::Vec v = imData->_data(sampleAt.x(), sampleAt.y());
       arr = v.cast<T>();
@@ -550,8 +550,8 @@ template <typename T>
       const ImageData<xuint8> *imData = (const ImageData<xuint8> *)h->_imageData;
       XVectorI2D sampleAt = pt - imData->_offset;
 
-      sampleAt.x() = xMin(imData->_data.rows(), xMax(sampleAt.x(), 0));
-      sampleAt.y() = xMin(imData->_data.cols(), xMax(sampleAt.y(), 0));
+      sampleAt.x() = xMin(imData->_data.rows(), xMax(sampleAt.x(), 0.0f));
+      sampleAt.y() = xMin(imData->_data.cols(), xMax(sampleAt.y(), 0.0f));
 
       ImageData<xuint8>::Vec v = imData->_data(sampleAt.x(), sampleAt.y());
       arr = v.cast<T>();
