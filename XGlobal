@@ -42,8 +42,10 @@
 # define X_DEBUG
 #endif
 
-#ifdef X_DEBUG
+
 # define X_PROFILING_ENABLED
+
+#ifdef X_DEBUG
 # define X_ASSERTS_ENABLED 1
 #endif
 
