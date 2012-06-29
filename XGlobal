@@ -43,10 +43,10 @@
 #endif
 
 
-# define X_PROFILING_ENABLED
 
 #ifdef X_DEBUG
 # define X_ASSERTS_ENABLED 1
+# define X_PROFILING_ENABLED
 #endif
 
 typedef signed char xint8;         /* 8 bit signed */
