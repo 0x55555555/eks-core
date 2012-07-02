@@ -18,7 +18,7 @@ class EKSCORE_EXPORT XProfilerWidget : public QWidget
 public:
   XProfilerWidget(QWidget *parent = 0);
 
-private slots:
+private Q_SLOTS:
   void clear();
   void update();
   void chooseFilter();

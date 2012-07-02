@@ -95,7 +95,7 @@ void XProfilerWidget::chooseFilter()
 
   QMenu menu;
 
-  foreach(xuint32 t, types)
+  xForeach(xuint32 t, types)
     {
     if(t != X_UINT32_SENTINEL)
       {
@@ -179,7 +179,7 @@ void XProfilerWidget::populateListFromContext(const XProfiler::ProfilingContext*
   populateHashFromContext(ctx, items);
 
   _list->clear();
-  foreach(const char *fn, items.keys())
+  xForeach(const char *fn, items.keys())
     {
     const XTimeStatistics& stats = items.value(fn);
 
