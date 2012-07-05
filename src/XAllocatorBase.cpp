@@ -13,7 +13,14 @@ XGlobalAllocator *XGlobalAllocator::instance()
 struct MemoryHandle
   {
   xsize allocSize;
+#if sizeof(xsize) == 4
   xuint32 padding[3];
+#elif sizeof(xsize) == 8
+  xuint32 padding[2];
+#else
+# error what size is xsize???
+#endif
+
   };
 
 void *XGlobalAllocator::alloc(xsize size, xsize alignment)
