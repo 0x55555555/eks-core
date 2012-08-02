@@ -9,6 +9,8 @@
 typedef Eigen::Matrix<xReal, 4, 4> XMatrix4x4;
 typedef Eigen::Matrix<xReal, 3, 3> XMatrix3x3;
 
+Q_DECLARE_METATYPE(XMatrix3x3)
+
 #define XMatrix Eigen::Matrix
 
 template <typename Derived> QDebug operator <<(QDebug str, const Eigen::DenseBase <Derived> &data)
