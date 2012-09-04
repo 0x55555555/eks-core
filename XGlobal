@@ -88,6 +88,8 @@ typedef unsigned long long xuint64; /* 64 bit unsigned */
 # define X_FINAL
 #endif
 
+#define X_CONST_EXPR Q_DECL_CONSTEXPR
+
 inline void xNoop() { }
 
 #define X_SIZE_SENTINEL (xsize)-1
