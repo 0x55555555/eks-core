@@ -1,0 +1,33 @@
+#ifndef XOPTIONALPOINTER_H
+#define XOPTIONALPOINTER_H
+
+template <typename T> class XOptionalPointer
+  {
+public:
+  XOptionalPointer(T **location) : _val(location ? location : &_myCopy)
+    {
+    }
+
+  operator T*()
+    {
+    return *_val;
+    }
+
+
+  T *operator->()
+    {
+    return *_val;
+    }
+
+  XOptionalPointer<T> &operator=(T *val)
+    {
+    *_val = val;
+    return *this;
+    }
+
+private:
+  T *_myCopy;
+  T **_val;
+  };
+
+#endif // XOPTIONALPOINTER_H

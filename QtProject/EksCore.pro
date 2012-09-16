@@ -146,7 +146,8 @@ HEADERS += ../XObject \
     ../XArrayMath \
     ../XTemplateHelpers \
     ../XMemoryTracker \
-    ../XProfileWidget
+    ../XProfileWidget \
+    ../XOptionalPointer
 
 
 
