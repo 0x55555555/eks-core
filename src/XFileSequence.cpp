@@ -59,8 +59,6 @@ void XFileSequence::setSequence( QString in, stringMode mode )
         QRegExp rx( "\\$([0-9]+)F" );
 
         int pos( 0 );
-        int start( -1 );
-        uint length( 0 );
         QString capturedPadding;
 
         while( pos >= 0 )
