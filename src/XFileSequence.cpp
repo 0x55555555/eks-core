@@ -60,7 +60,6 @@ void XFileSequence::setSequence( QString in, stringMode mode )
 
         int pos( 0 );
         int start( -1 );
-        uint length( 0 );
         QString capturedPadding;
 
         while( pos >= 0 )
@@ -70,7 +69,6 @@ void XFileSequence::setSequence( QString in, stringMode mode )
                 {
                 capturedPadding = rx.cap(1);
                 start = pos;
-                length = rx.matchedLength();
                 pos += rx.matchedLength();
                 }
             }
