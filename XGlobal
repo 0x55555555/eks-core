@@ -20,15 +20,23 @@
 #include "QtGlobal"
 #include "cstdlib"
 #include "cmath"
+
+#undef min
+#undef max
 #include "Eigen/Core"
 
 #define X_DECL_EXPORT Q_DECL_EXPORT
 #define X_DECL_IMPORT Q_DECL_IMPORT
 
-#ifdef EKSCORE_BUILD
-# define EKSCORE_EXPORT X_DECL_EXPORT
+#ifndef EKSCORE_STATIC_BUILD
+# ifdef EKSCORE_BUILD
+#  define EKSCORE_EXPORT X_DECL_EXPORT
+# else
+#  define EKSCORE_EXPORT X_DECL_IMPORT
+# endif
 #else
-# define EKSCORE_EXPORT X_DECL_IMPORT
+#define EKSCORE_EXPORT
+#define EKSCORE_IMPORT
 #endif
 
 #define X_ALIGNED_OPERATOR_NEW EIGEN_MAKE_ALIGNED_OPERATOR_NEW
