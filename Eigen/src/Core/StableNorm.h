@@ -3,27 +3,14 @@
 //
 // Copyright (C) 2009 Gael Guennebaud <gael.guennebaud@inria.fr>
 //
-// Eigen is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 3 of the License, or (at your option) any later version.
-//
-// Alternatively, you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as
-// published by the Free Software Foundation; either version 2 of
-// the License, or (at your option) any later version.
-//
-// Eigen is distributed in the hope that it will be useful, but WITHOUT ANY
-// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-// FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License or the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License and a copy of the GNU General Public License along with
-// Eigen. If not, see <http://www.gnu.org/licenses/>.
+// This Source Code Form is subject to the terms of the Mozilla
+// Public License v. 2.0. If a copy of the MPL was not distributed
+// with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef EIGEN_STABLENORM_H
 #define EIGEN_STABLENORM_H
+
+namespace Eigen { 
 
 namespace internal {
 template<typename ExpressionType, typename Scalar>
@@ -58,9 +45,9 @@ MatrixBase<Derived>::stableNorm() const
 {
   using std::min;
   const Index blockSize = 4096;
-  RealScalar scale = 0;
-  RealScalar invScale = 1;
-  RealScalar ssq = 0; // sum of square
+  RealScalar scale(0);
+  RealScalar invScale(1);
+  RealScalar ssq(0); // sum of square
   enum {
     Alignment = (int(Flags)&DirectAccessBit) || (int(Flags)&AlignedBit) ? 1 : 0
   };
@@ -69,7 +56,7 @@ MatrixBase<Derived>::stableNorm() const
   if (bi>0)
     internal::stable_norm_kernel(this->head(bi), ssq, scale, invScale);
   for (; bi<n; bi+=blockSize)
-    internal::stable_norm_kernel(this->segment(bi,min(blockSize, n - bi)).template forceAlignedAccessIf<Alignment>(), ssq, scale, invScale);
+    internal::stable_norm_kernel(this->segment(bi,(min)(blockSize, n - bi)).template forceAlignedAccessIf<Alignment>(), ssq, scale, invScale);
   return scale * internal::sqrt(ssq);
 }
 
@@ -103,12 +90,12 @@ MatrixBase<Derived>::blueNorm() const
     // For portability, the PORT subprograms "ilmaeh" and "rlmach"
     // are used. For any specific computer, each of the assignment
     // statements can be replaced
-    nbig  = std::numeric_limits<Index>::max();            // largest integer
+    nbig  = (std::numeric_limits<Index>::max)();            // largest integer
     ibeta = std::numeric_limits<RealScalar>::radix;         // base for floating-point numbers
     it    = std::numeric_limits<RealScalar>::digits;        // number of base-beta digits in mantissa
     iemin = std::numeric_limits<RealScalar>::min_exponent;  // minimum exponent
     iemax = std::numeric_limits<RealScalar>::max_exponent;  // maximum exponent
-    rbig  = std::numeric_limits<RealScalar>::max();         // largest floating-point number
+    rbig  = (std::numeric_limits<RealScalar>::max)();         // largest floating-point number
 
     iexp  = -((1-iemin)/2);
     b1    = RealScalar(pow(RealScalar(ibeta),RealScalar(iexp)));  // lower boundary of midrange
@@ -144,7 +131,6 @@ MatrixBase<Derived>::blueNorm() const
     abig = internal::sqrt(abig);
     if(abig > overfl)
     {
-      eigen_assert(false && "overflow");
       return rbig;
     }
     if(amed > RealScalar(0))
@@ -167,8 +153,8 @@ MatrixBase<Derived>::blueNorm() const
   }
   else
     return internal::sqrt(amed);
-  asml = min(abig, amed);
-  abig = max(abig, amed);
+  asml = (min)(abig, amed);
+  abig = (max)(abig, amed);
   if(asml <= abig*relerr)
     return abig;
   else
@@ -186,5 +172,7 @@ MatrixBase<Derived>::hypotNorm() const
 {
   return this->cwiseAbs().redux(internal::scalar_hypot_op<RealScalar>());
 }
+
+} // end namespace Eigen
 
 #endif // EIGEN_STABLENORM_H
