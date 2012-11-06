@@ -78,7 +78,7 @@ template <typename Derived> QTextStream &operator<<(QTextStream &str, const Eige
 
       bool iC = i < (rows-1);
       bool jC = j < (cols-1);
-      if((iC || jC) && !(iC && jC))
+      if(iC || jC)
         {
         str << " ";
         }
