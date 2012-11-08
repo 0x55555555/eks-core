@@ -1,4 +1,7 @@
 #include "XArrayMath"
+
+#if X_COMPILE_ARRAY_MATH
+
 #include "XAssert"
 #include "Eigen/Core"
 #include "Eigen/Geometry"
@@ -666,3 +669,5 @@ void XReferenceMathsEngine::onCleanUp(const XMathsOperation *, void **userData)
   delete res;
   res = 0;
   }
+
+#endif

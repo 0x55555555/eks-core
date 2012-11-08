@@ -9,7 +9,9 @@
 typedef Eigen::Matrix<xReal, 4, 4> XMatrix4x4;
 typedef Eigen::Matrix<xReal, 3, 3> XMatrix3x3;
 
+#if X_DECLARE_METATYPES
 Q_DECLARE_METATYPE(XMatrix3x3)
+#endif
 
 #define XMatrix Eigen::Matrix
 

@@ -16,7 +16,6 @@ SOURCES += ../src/XObject.cpp \
     ../src/XChildEvent.cpp \
     ../src/XBaseObject.cpp \
     ../src/XSize.cpp \
-    ../src/XCurve.cpp \
     ../src/XMetaType.cpp \
     ../src/XTime.cpp \
     ../src/XProfiler.cpp \
@@ -147,7 +146,20 @@ HEADERS += ../XObject \
     ../XTemplateHelpers \
     ../XMemoryTracker \
     ../XProfileWidget \
-    ../XOptional
+    ../XOptional \
+    ../XSimpleString \
+    ../Eigen/src/Core/util/XprHelper.h \
+    ../Eigen/src/Core/util/StaticAssert.h \
+    ../Eigen/src/Core/util/ReenableStupidWarnings.h \
+    ../Eigen/src/Core/util/NonMPL2.h \
+    ../Eigen/src/Core/util/MKL_support.h \
+    ../Eigen/src/Core/util/Meta.h \
+    ../Eigen/src/Core/util/Memory.h \
+    ../Eigen/src/Core/util/Macros.h \
+    ../Eigen/src/Core/util/ForwardDeclarations.h \
+    ../Eigen/src/Core/util/DisableStupidWarnings.h \
+    ../Eigen/src/Core/util/Constants.h \
+    ../Eigen/src/Core/util/BlasUtil.h
 
 
 

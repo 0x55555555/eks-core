@@ -6,6 +6,7 @@ win32-g++ {
 }
 
 CONFIG(debug) {
+  DEFINES += NDEBUG _DEBUG
 } else {
   DEFINES += QT_NO_DEBUG
 }
@@ -30,6 +31,25 @@ win32-msvc2010 {
     QMAKE_CXXFLAGS += /Zi
     QMAKE_LFLAGS += /DEBUG
   }
+}
+
+win32-arm-msvc2012 {
+  CONFIG += staticlib
+
+  INCLUDEPATH += "C:\\QtSDK\\Desktop\\Qt\\4.8.1\\msvc2010\\include" \
+                "C:\\QtSDK\\Desktop\\Qt\\4.8.1\\msvc2010\\include\\QtCore" \
+                "C:\\QtSDK\\Desktop\\Qt\\4.8.1\\msvc2010\\include\\QtGui" \
+                "C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\include" \
+                "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\um" \
+                "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\shared" \
+                "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\winrt"
+
+  #QMAKE_CXXFLAGS += /AI\"C:/Program Files (x86)/Microsoft Visual Studio 11.0/VC/vcpackages\" \
+  #          /AI\"C:/Program Files (x86)/Windows Kits/8.0/References/CommonConfiguration/Neutral\"
+}
+
+CONFIG(staticlib) {
+  DEFINES += $$upper($$TARGET)_STATIC_BUILD
 }
 
 ROOT = $$PWD"/../../"

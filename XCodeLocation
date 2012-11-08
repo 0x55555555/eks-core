@@ -4,6 +4,7 @@
 #include "XGlobal"
 #include "XProperty"
 #include "XMacroHelpers"
+#include "XSimpleString"
 
 class EKSCORE_EXPORT XCodeLocation
   {
@@ -12,9 +13,10 @@ XProperties:
   XROProperty(xsize, line);
   XROProperty(const char *, function);
 
+public:
   XCodeLocation(const char *file, xsize line, const char *function);
 
-  QString toString() const;
+  XString toString() const;
 
   bool operator==(const XCodeLocation &a) const;
   };

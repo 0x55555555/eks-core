@@ -22,7 +22,19 @@ void *XGlobalAllocator::alloc(xsize size, xsize alignment)
   xAssert(((alignment-1) & sizeof(MemoryHandle)) == 0);
 
   X_MEMORY_LOGGER_ALLOC(xTotalGlobalAllocatorSize, size);
+
+#ifndef Q_CC_MSVC
   void *m = qMallocAligned(sizeof(MemoryHandle) + size, alignment);
+
+#else
+  // msvc malloc should always be 16 byte aligned
+  xAssert(alignment == 16);
+  void *m = malloc(sizeof(MemoryHandle) + size);
+
+#endif
+
+
+  xAssertIsAligned(m);
 
   MemoryHandle *handle = (MemoryHandle*)m;
 
@@ -39,6 +51,11 @@ void XGlobalAllocator::free(void *mem)
     h = h-1;
 
     X_MEMORY_LOGGER_FREE(xTotalGlobalAllocatorSize, h->allocSize);
+
+#ifndef Q_CC_MSVC
     qFreeAligned(h);
+#else
+    free(h);
+#endif
     }
   }

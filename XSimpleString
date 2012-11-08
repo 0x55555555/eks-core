@@ -1,0 +1,38 @@
+#ifndef XSTRING_H
+#define XSTRING_H
+
+#include "XGlobal"
+
+#if X_STRING_IS_QSTRING
+# include "QString"
+typedef QString String;
+
+#else
+# include <string>
+typedef std::string String;
+
+#endif
+
+class EKSCORE_EXPORT XString : public String
+  {
+
+public:
+  XString() { }
+  XString(const char *n) : String(n)
+    {
+    }
+  XString(const String &n) : String(n)
+    {
+    }
+
+
+#if !X_STRING_IS_QSTRING
+  template <typename T> static XString number(T n)
+    {
+    return std::to_string(n);
+    }
+
+#endif
+  };
+
+#endif // XSTRING_H

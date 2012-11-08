@@ -2,10 +2,13 @@
 #define XASSERT_H
 
 #include "XGlobal"
+
 #include "XProperty"
 #include "XCodeLocation"
-#include "QVariant"
-#include "QVector"
+
+#if X_ASSERT_VALUE_HANDLING
+# include "QVariant"
+#endif
 
 class EKSCORE_EXPORT XAssert
   {
@@ -14,7 +17,9 @@ public:
     {
   public:
     const char *name;
+#if X_ASSERT_VALUE_HANDLING
     QVariant value;
+#endif
     };
 
 XProperties:
@@ -22,18 +27,19 @@ XProperties:
   XROProperty(const char *, condition);
   XROProperty(const char *, message);
 
-  XRefProperty(QVector<Argument>, arguments);
-
 public:
   XAssert(const XCodeLocation &location, const char *condition, const char *message);
 
   template <typename T> XAssert &arg(const char *name, const T &val)
     {
-    arguments() << Argument();
-    Argument &arg = arguments().back();
+    Argument &arg = _arguments[_argCount++];
 
     arg.name = name;
+#if X_ASSERT_VALUE_HANDLING
     arg.value = val;
+#else
+    (void)val;
+#endif
 
     return *this;
     }
@@ -49,6 +55,16 @@ public:
 #endif
   static BreakFunction *currentBreakFunction();
   static void setCurrentBreakFunction(BreakFunction *f);
+
+private:
+  static bool defaultFire(const XAssert &a);
+
+  enum
+    {
+    MaxArgs = 16
+    };
+  Argument _arguments[MaxArgs];
+  xsize _argCount;
   };
 
 #define X_ASSERT_VARIABLE(variable, aa, n) .arg(#variable, variable)

@@ -114,7 +114,7 @@ void *XUnorderedMapData::allocateNode()
 void *XUnorderedMapData::allocateNode(int nodeAlign)
 {
     void *ptr = strictAlignment ? allocator->alloc(nodeSize, nodeAlign) : allocator->alloc(nodeSize);
-    Q_CHECK_PTR(ptr);
+    xAssert(ptr);
     return ptr;
 }
 
@@ -226,7 +226,7 @@ XUnorderedMapData::Node *XUnorderedMapData::nextNode(Node *node)
         XUnorderedMapData *d;
     };
     next = node->next;
-    Q_ASSERT_X(next, "XUnorderedMap", "Iterating beyond end()");
+    xAssert(next, "XUnorderedMap", "Iterating beyond end()");
     if (next->next)
         return next;
 
@@ -272,7 +272,7 @@ XUnorderedMapData::Node *XUnorderedMapData::previousNode(Node *node)
         --bucket;
         --start;
     }
-    Q_ASSERT_X(start >= 0, "XUnorderedMap", "Iterating backward beyond begin()");
+    xAssert(start >= 0, "XUnorderedMap", "Iterating backward beyond begin()");
     return e;
 }
 

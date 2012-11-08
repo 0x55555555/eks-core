@@ -1,4 +1,5 @@
 #include "XAssert"
+#include "XUnorderedMap"
 #include "QMessageBox"
 #include "QPushButton"
 #include "QApplication"
@@ -12,12 +13,12 @@
 #endif
 
 XAssert::XAssert(const XCodeLocation &location, const char *condition, const char* message)
-    : _location(location), _condition(condition), _message(message)
+    : _location(location), _condition(condition), _message(message), _argCount(0)
   {
   }
 
-QHash<XCodeLocation, bool> g_disabledAsserts;
-bool defaultFire(const XAssert &a)
+XUnorderedMap<XCodeLocation, bool> g_disabledAsserts;
+bool XAssert::defaultFire(const XAssert &a)
   {
   if(g_disabledAsserts.contains(a.location()))
     {
@@ -25,7 +26,12 @@ bool defaultFire(const XAssert &a)
     }
 
   static bool recursion = false;
-  if(recursion || !QCoreApplication::instance() || !dynamic_cast<QApplication*>(QCoreApplication::instance()))
+  if(recursion
+#if X_ADVANCED_ASSERT
+     || !QCoreApplication::instance()
+     || !dynamic_cast<QApplication*>(QCoreApplication::instance())
+#endif
+     )
     {
     // crap. just break
     return true;
@@ -33,6 +39,7 @@ bool defaultFire(const XAssert &a)
 
   recursion = true;
 
+#if X_ADVANCED_ASSERT
   QMessageBox msgBox;
   msgBox.setWindowModality(Qt::ApplicationModal);
   QPushButton *breakButton = msgBox.addButton("Break Now", QMessageBox::YesRole);
@@ -53,14 +60,18 @@ bool defaultFire(const XAssert &a)
     text = QString(a.message()) + ":\n\n" + text;
     }
 
-  if(a.arguments().size())
+  if(a._argCount)
     {
     text += "Arguments:\n";
-    Q_FOREACH(const XAssert::Argument &arg, a.arguments())
+    for(xsize i = 0; i < a._argCount; ++i)
       {
+      const XAssert::Argument &arg = a._arguments[a._argCount];
+
       text + "  ";
       text += arg.name;
+# if X_ASSERT_VALUE_HANDLING
       text += ": " + arg.value.toString() + "\n";
+# endif
       }
     }
 
@@ -78,6 +89,13 @@ bool defaultFire(const XAssert &a)
     {
     g_disabledAsserts.insert(a.location(), true);
     }
+#else
+# ifdef Q_OS_WIN
+  _ASSERT(0);
+# else
+#  error No simple assert defined
+# endif
+#endif
 
   return false;
   }
@@ -100,6 +118,14 @@ void interuptBreak()
   }
 #endif
 
+#ifdef X_ARCH_ARM
+void __stdcall interuptBreak()
+	{
+  int *i = 0;
+  *i = 1;
+	}
+#endif
+
 XAssert::BreakFunction *g_currentBreakFunction = 0;
 XAssert::BreakFunction *XAssert::currentBreakFunction()
   {
@@ -107,12 +133,10 @@ XAssert::BreakFunction *XAssert::currentBreakFunction()
 
   if(!f)
     {
-#if defined(Q_CC_MSVC)
+#if defined(Q_CC_MSVC) && !defined(X_ARCH_ARM)
     f = DebugBreak;
-#elif defined(Q_CC_GNU)
-    f = interuptBreak;
 #else
-# error define a break type macro for this platform
+    f = interuptBreak;
 #endif
     }
 

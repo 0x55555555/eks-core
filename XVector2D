@@ -6,9 +6,6 @@
 #include "Eigen/Core"
 #include "QMetaType"
 #include "XMetaType"
-#include "QVector2D"
-#include "QVector3D"
-#include "QVector4D"
 
 typedef Eigen::Matrix<xReal, 2, 1> XVector2D;
 typedef Eigen::Matrix<xReal, 3, 1> XVector3D;
@@ -142,6 +139,12 @@ template <typename Derived> QDataStream &operator<<(QDataStream &str, const Eige
   return str;
   }
 
+#if X_QT_MATH_INTEROP
+
+#include "QVector2D"
+#include "QVector3D"
+#include "QVector4D"
+
 inline QVector2D toQt(const XVector2D &vec)
   {
   return QVector2D(vec(0), vec(1));
@@ -157,12 +160,16 @@ inline QVector4D toQt(const XVector4D &vec)
   return QVector4D(vec(0), vec(1), vec(2), vec(3));
   }
 
-X_DECLARE_SERIALISABLE_METATYPE(XVector2D);
-X_DECLARE_SERIALISABLE_METATYPE(XVector3D);
-X_DECLARE_SERIALISABLE_METATYPE(XVector4D);
-
 Q_DECLARE_METATYPE(XVector2D);
 Q_DECLARE_METATYPE(XVector3D);
 Q_DECLARE_METATYPE(XVector4D);
+
+#endif
+
+#if X_DECLARE_METATYPES
+X_DECLARE_SERIALISABLE_METATYPE(XVector2D);
+X_DECLARE_SERIALISABLE_METATYPE(XVector3D);
+X_DECLARE_SERIALISABLE_METATYPE(XVector4D);
+#endif
 
 #endif // XVECTORXD_H

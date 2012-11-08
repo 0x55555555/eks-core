@@ -6,13 +6,13 @@ XCodeLocation::XCodeLocation(const char *file, xsize line, const char *function)
   {
   }
 
-QString XCodeLocation::toString() const
+XString XCodeLocation::toString() const
   {
-  QString out;
+  XString out;
 
   out += file();
   out += " ";
-  out += QString::number(line());
+  out += XString::number(line());
   out += " ";
   out += function();
 
@@ -22,8 +22,8 @@ QString XCodeLocation::toString() const
 bool XCodeLocation::operator==(const XCodeLocation &a) const
   {
   return line() == a.line() &&
-    qstrcmp(file(), a.file()) == 0 &&
-    qstrcmp(function(), a.function()) == 0;
+    strcmp(file(), a.file()) == 0 &&
+    strcmp(function(), a.function()) == 0;
   }
 
 uint qHash(const XCodeLocation &a)

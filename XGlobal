@@ -35,8 +35,7 @@
 #  define EKSCORE_EXPORT X_DECL_IMPORT
 # endif
 #else
-#define EKSCORE_EXPORT
-#define EKSCORE_IMPORT
+# define EKSCORE_EXPORT
 #endif
 
 #define X_ALIGNED_OPERATOR_NEW EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -50,15 +49,40 @@
 # define X_DEBUG
 #endif
 
-#ifdef Q_CC_MSVC
+#ifdef X_DEBUG
+# define X_ASSERTS_ENABLED 1
+
+# ifndef X_ARCH_ARM
+#  define X_PROFILING_ENABLED
+#  define X_ENABLE_EVENT_LOGGING
+#  define X_ENABLE_HEAP_CHECK
+# endif
+
+#endif
+
+
+#ifdef X_ENABLE_HEAP_CHECK
 #define X_HEAP_CHECK { xAssert(_heapchk() == _HEAPOK); xAssert(_CrtCheckMemory()); }
 #else
 #define X_HEAP_CHECK
 #endif
 
-#ifdef X_DEBUG
-# define X_ASSERTS_ENABLED 1
-# define X_PROFILING_ENABLED
+#ifdef X_ARCH_ARM
+# define X_ASSERT_VALUE_HANDLING 0
+# define X_ADVANCED_ASSERT 0
+# define X_UNORDERED_MAP_THREAD_SAFE 0
+# define X_STRING_IS_QSTRING 0
+# define X_QT_MATH_INTEROP 0
+# define X_DECLARE_METATYPES 0
+# define X_COMPILE_ARRAY_MATH 0
+#else
+# define X_ASSERT_VALUE_HANDLING 1
+# define X_ADVANCED_ASSERT 1
+# define X_UNORDERED_MAP_THREAD_SAFE 1
+# define X_STRING_IS_QSTRING 1
+# define X_QT_MATH_INTEROP 1
+# define X_DECLARE_METATYPES 1
+# define X_COMPILE_ARRAY_MATH 1
 #endif
 
 typedef signed char xint8;         /* 8 bit signed */

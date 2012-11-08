@@ -1,6 +1,8 @@
 #ifndef XARRAYMATH_H
 #define XARRAYMATH_H
 
+#if X_COMPILE_ARRAY_MATH
+
 #include "XMatrix3x3"
 #include "XVector4D"
 #include "QRectF"
@@ -165,5 +167,7 @@ private:
   XMathsResult(const XMathsResult &);
   XMathsResult& operator=(const XMathsResult &);
   };
+
+#endif
 
 #endif // XARRAYMATH_H

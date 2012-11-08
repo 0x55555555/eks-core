@@ -45,7 +45,10 @@
 #define XUNORDEREDMAP_H
 
 #include "XGlobal"
-#include <QtCore/qatomic.h>
+#include "XAssert"
+#if X_UNORDERED_MAP_THREAD_SAFE
+# include <QtCore/qatomic.h>
+#endif
 #include <QtCore/qchar.h>
 #include <QtCore/qiterator.h>
 #include <QtCore/qlist.h>
@@ -67,7 +70,11 @@ struct EKSCORE_EXPORT XUnorderedMapData
 
     Node *fakeNext;
     Node **buckets;
+#if X_UNORDERED_MAP_THREAD_SAFE
     QBasicAtomicInt ref;
+#else
+    int ref;
+#endif
     int size;
     int nodeSize;
     short userNumBits;
@@ -230,9 +237,26 @@ class XUnorderedMap
 #endif
 
 public:
-    inline XUnorderedMap(XAllocatorBase *a=XGlobalAllocator::instance()) : d(&XUnorderedMapData::shared_null), allocator(a) { d->ref.ref(); }
+    inline XUnorderedMap(XAllocatorBase *a=XGlobalAllocator::instance()) : d(&XUnorderedMapData::shared_null), allocator(a)
+      {
+#if X_UNORDERED_MAP_THREAD_SAFE
+      d->ref.ref();
+#else
+      ++d->ref;
+#endif
+      }
     inline XUnorderedMap(const XUnorderedMap<Key, T> &other) : d(other.d), allocator(other.allocator) { d->ref.ref(); if (!d->sharable) detach(); }
-    inline ~XUnorderedMap() { if (!d->ref.deref()) freeData(d); }
+    inline ~XUnorderedMap()
+      {
+#if X_UNORDERED_MAP_THREAD_SAFE
+      if (!d->ref.deref())
+#else
+      if (!(--d->ref))
+#endif
+        {
+        freeData(d);
+        }
+      }
 
     XUnorderedMap<Key, T> &operator=(const XUnorderedMap<Key, T> &other);
 
@@ -531,8 +555,14 @@ Q_OUTOFLINE_TEMPLATE void XUnorderedMap<Key, T>::detach_helper()
     XUnorderedMapData *x = d->detach_helper2(duplicateNode, deleteNode2,
         QTypeInfo<T>::isDummy ? sizeof(DummyNode) : sizeof(Node),
         QTypeInfo<T>::isDummy ? alignOfDummyNode() : alignOfNode(), allocator);
+#if X_UNORDERED_MAP_THREAD_SAFE
     if (!d->ref.deref())
-        freeData(d);
+#else
+    if (!(--d->ref))
+#endif
+      {
+      freeData(d);
+      }
     d = x;
 }
 
@@ -832,7 +862,7 @@ Q_OUTOFLINE_TEMPLATE typename XUnorderedMap<Key, T>::Node **XUnorderedMap<Key, T
 
     if (d->numBuckets) {
         node = reinterpret_cast<Node **>(&d->buckets[h % d->numBuckets]);
-        Q_ASSERT(*node == e || (*node)->next);
+        xAssert(*node == e || (*node)->next);
         while (*node != e && !(*node)->same_key(h, akey))
             node = &(*node)->next;
     } else {

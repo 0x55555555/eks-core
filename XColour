@@ -54,13 +54,28 @@ public:
     {
     }
 
+  template <typename Derived>
+      XColour(const Eigen::EigenBase<Derived> &oth) : XVector4D(oth)
+    {
+    }
+
   XLDRColour toLDRColour( ) const
     {
     return XLDRColour::fromRgbF( coeff(0), coeff(1), coeff(2), coeff(3) );
     }
+
+  template <typename Derived>
+  XColour &operator=(const Eigen::EigenBase<Derived> &oth)
+    {
+    XVector4D& ths(*this);
+    ths = oth;
+    return *this;
+    }
   };
 
+#if X_DECLARE_METATYPES
 X_DECLARE_SERIALISABLE_METATYPE(XColour);
 Q_DECLARE_METATYPE(XColour);
+#endif
 
 #endif // XCOLOUR_H

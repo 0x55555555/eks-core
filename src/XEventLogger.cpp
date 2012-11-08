@@ -1,5 +1,6 @@
 #include "XEventLogger"
-#include "QDebug"
+
+#ifdef X_ENABLE_EVENT_LOGGING
 
 void XEventManager::totalAvailableTime(XTime &min, XTime &max)
   {
@@ -151,3 +152,5 @@ void XEventLoggerInternal::add()
     firstData = nextData;
     }
   }
+
+#endif

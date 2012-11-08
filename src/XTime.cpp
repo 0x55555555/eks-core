@@ -1,9 +1,10 @@
 #define builtIn
 #include "XTime"
 #include "QDebug"
+#include "XGlobal"
 #include "XAssert"
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN)
 # include <windows.h>
 #else
 # include <sys/time.h>
@@ -26,20 +27,20 @@ XTime XTime::fromMilliseconds(double ms)
 
 void XTime::beginAccurateTiming()
   {
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) && !defined(X_ARCH_ARM)
   HANDLE h = GetCurrentProcess();
   SetProcessAffinityMask(h, 1);
 #endif
   }
 
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) && !defined(X_ARCH_ARM)
 inline LARGE_INTEGER getFrequency() { LARGE_INTEGER freq; xVerify(QueryPerformanceFrequency(&freq)); return freq; }
 LARGE_INTEGER frequency(getFrequency());
 #endif
 
 XTime XTime::now()
   {
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) && !defined(X_ARCH_ARM)
   LARGE_INTEGER time;
   QueryPerformanceCounter(&time);
 
@@ -50,6 +51,9 @@ XTime XTime::now()
   xAssert(elapsedNanoseconds < SECOND_IN_NANO_SECONDS);
 
   return XTime(secs, elapsedNanoseconds);
+#elif defined(X_ARCH_ARM)
+  xAssertFail();
+  return XTime();
 #else
   // find the current time from the system in floating point seconds
   struct timeval newTime;
