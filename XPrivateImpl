@@ -1,0 +1,57 @@
+#ifndef XPRIVATEIMPL_H
+#define XPRIVATEIMPL_H
+
+#include "XGlobal"
+#include "XAssert"
+
+template <xsize size> class XPrivateImpl
+  {
+public:
+  template <typename T> T *data()
+    {
+    xCompileTimeAssert(size <= sizeof(T));
+
+    return reinterpret_cast<T*>(_data);
+    }
+
+  template <typename T> const T *data() const
+    {
+    xCompileTimeAssert(size <= sizeof(T));
+
+    return reinterpret_cast<const T*>(_data);
+    }
+
+  template <typename T> void destoy()
+    {
+    xCompileTimeAssert(size <= sizeof(T));
+
+    if(_valid)
+      {
+      T *d = data();
+      (void)d;
+      d->~T();
+      }
+    }
+
+  bool isValid() const
+    {
+    return _valid;
+    }
+
+protected:
+  XPrivateImpl()
+    {
+    _valid = false;
+    }
+
+  ~XPrivateImpl()
+    {
+    xAssert(!_valid);
+    }
+
+private:
+  bool _valid;
+  xuint8 _data[size];
+  };
+
+#endif // XPRIVATEIMPL_H
