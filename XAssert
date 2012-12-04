@@ -98,7 +98,7 @@ struct xCompileTimeAssertDef
 };
 /** Unimplemented - causes a compile-time error if used. */
 template <> struct xCompileTimeAssertDef<false>;
-#define xCompileTimeAssert(x) typedef xCompileTimeAssertDef<x> CTA_##__LINE__
+#define xCompileTimeAssert(x) typedef xCompileTimeAssertDef<x> CTA_ ## __LINE__
 #else
 #define xCompileTimeAssert(x) static_assert(x, "Static Assert: " #x)
 #endif
