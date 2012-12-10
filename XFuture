@@ -1,0 +1,65 @@
+#ifndef XFUTURE_H
+#define XFUTURE_H
+
+#include "XGlobal"
+
+namespace Eks
+{
+
+template <typename Result> class Future;
+
+namespace detail
+{
+template <typename Fn, typename Arg> class ContinuationFuture
+  {
+  typedef typename Future<int> FutureType;
+  };
+
+template <typename Derived> class FutureBase
+  {
+public:
+  template <typename OthResult>
+  Future<void> whenBoth(const Future<OthResult> &oth)
+    {
+    (void)oth;
+    return Future<void>();
+    }
+
+  template <typename OthResult>
+  Future<void> operator&&(const Future<OthResult> &oth)
+    {
+    return whenBoth(oth);
+    }
+  };
+}
+
+template <typename Result> class Future : public detail::FutureBase<Future<void>>
+  {
+public:
+  Future(const Result& re) : _result(re)
+    {
+    }
+
+  template <typename Fn>
+      typename detail::ContinuationFuture<Fn, Result>::FutureType then(const Fn &fn) const
+    {
+    fn(_result);
+    }
+
+private:
+  Result _result;
+  };
+
+template <> class Future<void> : public detail::FutureBase<Future<void>>
+  {
+public:
+  template <typename Fn>
+      typename detail::ContinuationFuture<Fn, void>::FutureType then(const Fn &fn) const
+    {
+    fn();
+    }
+  };
+
+}
+
+#endif // XFUTURE_H

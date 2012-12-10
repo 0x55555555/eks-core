@@ -25,6 +25,11 @@
 #undef max
 #include "Eigen/Core"
 
+namespace Eks
+{
+using Eigen::internal::result_of;
+}
+
 #define X_DECL_EXPORT Q_DECL_EXPORT
 #define X_DECL_IMPORT Q_DECL_IMPORT
 
