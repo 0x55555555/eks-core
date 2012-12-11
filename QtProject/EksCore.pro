@@ -161,7 +161,7 @@ HEADERS += ../XObject \
     ../Eigen/src/Core/util/Constants.h \
     ../Eigen/src/Core/util/BlasUtil.h \
     ../XPrivateImpl \
-    ../XFuture
+    ../XTaskFuture
 
 
 

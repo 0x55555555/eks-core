@@ -2,6 +2,7 @@
 #define XVECTORXD_H
 
 #include "XGlobal"
+#include "XAssert"
 #include "XMathHelpers"
 #include "Eigen/Core"
 #include "QMetaType"
@@ -18,6 +19,10 @@ typedef Eigen::Matrix<xint32, 4, 1> XVectorI4D;
 typedef XList<XVector2D> XVector2DList;
 typedef XList<XVector3D> XVector3DList;
 typedef XList<XVector4D> XVector4DList;
+
+// types for integration with d3d gl, tightly packed for uniform blocks etc.
+typedef Eigen::Matrix<float, 3, 1, Eigen::DontAlign> XVector3DTight;
+xCompileTimeAssert(sizeof(XVector3DTight) == sizeof(float) * 3);
 
 class QTextStream;
 class QDataStream;

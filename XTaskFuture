@@ -1,0 +1,127 @@
+#ifndef XFUTURE_H
+#define XFUTURE_H
+
+#include "XGlobal"
+
+namespace Eks
+{
+
+template <typename Result> class Future;
+
+namespace detail
+{
+
+template <typename Fn, typename Arg, typename Result> class ContinuationFutureImpl
+  {
+  static Future<Result> create(const Future<Arg> &arg, const Fn &fn);
+  };
+
+template <typename Fn,
+          typename Arg> class ContinuationFuture
+  {
+public:
+  typedef typename std::result_of<Fn(Arg)>::type Result;
+  typedef typename Future<Result> FutureType;
+
+  static FutureType create(const Future<Arg> &arg, const Fn &fn);
+  };
+
+template <typename Derived> class FutureBase
+  {
+public:
+  template <typename OthResult>
+  Future<void> whenBoth(const Future<OthResult> &oth)
+    {
+    (void)oth;
+    return Future<void>();
+    }
+
+  template <typename OthResult>
+  Future<void> operator&&(const Future<OthResult> &oth)
+    {
+    return whenBoth(oth);
+    }
+  };
+}
+
+template <typename Result> class Future : public detail::FutureBase<Future<void>>
+  {
+public:
+  Future(const Result& re) : _result(re)
+    {
+    }
+
+  template <typename Fn>
+      typename detail::ContinuationFuture<Fn, Result>::FutureType then(const Fn &fn) const
+    {
+    return detail::ContinuationFuture<Fn, Result>::create(*this, fn);
+    }
+
+  const Result &result() const { return _result; }
+
+private:
+  Result _result;
+  };
+
+template <> class Future<void> : public detail::FutureBase<Future<void>>
+  {
+public:
+  template <typename Fn>
+      typename detail::ContinuationFuture<Fn, void>::FutureType then(const Fn &fn) const
+    {
+    return detail::ContinuationFuture<Fn, void>::create(*this, fn);
+    }
+  };
+
+namespace detail
+{
+template <typename Fn> class ContinuationFutureImpl<Fn, void, void>
+  {
+  static Future<void>
+      create(const Future<void> &arg, const Fn &fn)
+    {
+    fn();
+    return FutureType<void>();
+    }
+  };
+
+template <typename Fn, typename Arg> class ContinuationFutureImpl<Fn, Arg, void>
+  {
+  static Future<void>
+      create(const Future<Arg> &arg, const Fn &fn)
+    {
+    fn(arg.result());
+    return FutureType<void>();
+    }
+  };
+
+template <typename Fn, typename Result> class ContinuationFutureImpl<Fn, void, Result>
+  {
+  static Future<Result>
+      create(const Future<void> &arg, const Fn &fn)
+    {
+    Result res = fn();
+    return FutureType<Result>(res);
+    }
+  };
+
+template <typename Fn, typename Arg, typename Result>
+    Future<Result>
+    ContinuationFutureImpl<Fn, Arg, Result>::create(const Future<Arg> &arg, const Fn &fn)
+  {
+  Result res = fn(arg.result());
+  return FutureType<Result>(res);
+  }
+
+template <typename Fn, typename Arg>
+    typename ContinuationFuture<Fn, Arg>::FutureType
+    create(const Future<Arg> &arg, const Fn &fn)
+  {
+  ContinuationFutureImpl::create<Fn, Arg, Result>(arg, fn);
+  }
+
+}
+
+}
+
+#endif // XFUTURE_H
