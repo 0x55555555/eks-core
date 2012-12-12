@@ -6,55 +6,55 @@
 namespace Eks
 {
 
-template <typename Result> class Future;
+template <typename Result> class Task;
 
 namespace detail
 {
 
-template <typename Fn, typename Arg, typename Result> class ContinuationFutureImpl
+template <typename Fn, typename Arg, typename Result> class ContinuationTaskImpl
   {
-  static Future<Result> create(const Future<Arg> &arg, const Fn &fn);
+  static Task<Result> create(const Task<Arg> &arg, const Fn &fn);
   };
 
 template <typename Fn,
-          typename Arg> class ContinuationFuture
+          typename Arg> class ContinuationTask
   {
 public:
   typedef typename std::result_of<Fn(Arg)>::type Result;
-  typedef typename Future<Result> FutureType;
+  typedef typename Task<Result> TaskType;
 
-  static FutureType create(const Future<Arg> &arg, const Fn &fn);
+  static TaskType create(const Task<Arg> &arg, const Fn &fn);
   };
 
-template <typename Derived> class FutureBase
+template <typename Derived> class TaskBase
   {
 public:
   template <typename OthResult>
-  Future<void> whenBoth(const Future<OthResult> &oth)
+  Task<void> whenBoth(const Task<OthResult> &oth)
     {
     (void)oth;
-    return Future<void>();
+    return Task<void>();
     }
 
   template <typename OthResult>
-  Future<void> operator&&(const Future<OthResult> &oth)
+  Task<void> operator&&(const Task<OthResult> &oth)
     {
     return whenBoth(oth);
     }
   };
 }
 
-template <typename Result> class Future : public detail::FutureBase<Future<void>>
+template <typename Result> class Task : public detail::TaskBase<Task<void>>
   {
 public:
-  Future(const Result& re) : _result(re)
+  Task(const Result& re) : _result(re)
     {
     }
 
   template <typename Fn>
-      typename detail::ContinuationFuture<Fn, Result>::FutureType then(const Fn &fn) const
+      typename detail::ContinuationTask<Fn, Result>::TaskType then(const Fn &fn) const
     {
-    return detail::ContinuationFuture<Fn, Result>::create(*this, fn);
+    return detail::ContinuationTask<Fn, Result>::create(*this, fn);
     }
 
   const Result &result() const { return _result; }
@@ -63,61 +63,61 @@ private:
   Result _result;
   };
 
-template <> class Future<void> : public detail::FutureBase<Future<void>>
+template <> class Task<void> : public detail::TaskBase<Task<void>>
   {
 public:
   template <typename Fn>
-      typename detail::ContinuationFuture<Fn, void>::FutureType then(const Fn &fn) const
+      typename detail::ContinuationTask<Fn, void>::TaskType then(const Fn &fn) const
     {
-    return detail::ContinuationFuture<Fn, void>::create(*this, fn);
+    return detail::ContinuationTask<Fn, void>::create(*this, fn);
     }
   };
 
 namespace detail
 {
-template <typename Fn> class ContinuationFutureImpl<Fn, void, void>
+template <typename Fn> class ContinuationTaskImpl<Fn, void, void>
   {
-  static Future<void>
-      create(const Future<void> &arg, const Fn &fn)
+  static Task<void>
+      create(const Task<void> &arg, const Fn &fn)
     {
     fn();
-    return FutureType<void>();
+    return TaskType<void>();
     }
   };
 
-template <typename Fn, typename Arg> class ContinuationFutureImpl<Fn, Arg, void>
+template <typename Fn, typename Arg> class ContinuationTaskImpl<Fn, Arg, void>
   {
-  static Future<void>
-      create(const Future<Arg> &arg, const Fn &fn)
+  static Task<void>
+      create(const Task<Arg> &arg, const Fn &fn)
     {
     fn(arg.result());
-    return FutureType<void>();
+    return TaskType<void>();
     }
   };
 
-template <typename Fn, typename Result> class ContinuationFutureImpl<Fn, void, Result>
+template <typename Fn, typename Result> class ContinuationTaskImpl<Fn, void, Result>
   {
-  static Future<Result>
-      create(const Future<void> &arg, const Fn &fn)
+  static Task<Result>
+      create(const Task<void> &arg, const Fn &fn)
     {
     Result res = fn();
-    return FutureType<Result>(res);
+    return TaskType<Result>(res);
     }
   };
 
 template <typename Fn, typename Arg, typename Result>
-    Future<Result>
-    ContinuationFutureImpl<Fn, Arg, Result>::create(const Future<Arg> &arg, const Fn &fn)
+    Task<Result>
+    ContinuationTaskImpl<Fn, Arg, Result>::create(const Task<Arg> &arg, const Fn &fn)
   {
   Result res = fn(arg.result());
-  return FutureType<Result>(res);
+  return TaskType<Result>(res);
   }
 
 template <typename Fn, typename Arg>
-    typename ContinuationFuture<Fn, Arg>::FutureType
-    create(const Future<Arg> &arg, const Fn &fn)
+    typename ContinuationTask<Fn, Arg>::TaskType
+    create(const Task<Arg> &arg, const Fn &fn)
   {
-  ContinuationFutureImpl::create<Fn, Arg, Result>(arg, fn);
+  ContinuationTaskImpl::create<Fn, Arg, Result>(arg, fn);
   }
 
 }
