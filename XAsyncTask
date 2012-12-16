@@ -1,0 +1,58 @@
+#ifndef XFUTURE_H
+#define XFUTURE_H
+
+#include "XGlobal"
+#include "XProperty"
+#include <atomic>
+
+namespace Eks
+{
+
+namespace detail
+{
+template <typename Fn, typename Arg> class ContinuationTask;
+class TaskImpl;
+}
+
+// Represents a function which returns [ResultType]
+template <typename ResultType> class Task
+  {
+public:
+  typedef ResultType Result;
+  typedef detail::TaskImpl Impl;
+  typedef Impl *Token;
+
+XProperties:
+  // the Task token that represents the completion of the task
+  XRORefProperty(Token, token);
+
+public:
+  // create a new task
+  Task();
+
+  // complete the task now, with the given value as an argument
+  template <typename T> static void completeTaskSync(Token token, const T *val);
+
+  // creates a new task that completes when both [this] and [oth] are complete.
+  template <typename OthResult> Task<void> whenBoth(const Task<OthResult> &oth);
+
+  // creates a new task that completes when both [this] and [oth] are complete.
+  template <typename OthResult> Task<void> operator&&(const Task<OthResult> &oth)
+    {
+    return whenBoth(oth);
+    }
+
+  // create a new task which executes [fn] and add the task as a dependent
+  // (ie to be completed when [this] completes)
+  template <typename Fn>
+      typename detail::ContinuationTask<Fn, Result>::TaskType then(const Fn &fn) const
+    {
+    return detail::ContinuationTask<Fn, Result>::create(*this, fn);
+    }
+  };
+
+}
+
+#include "XAsyncTaskImpl"
+
+#endif // XFUTURE_H

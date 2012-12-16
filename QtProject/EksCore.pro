@@ -27,7 +27,8 @@ SOURCES += ../src/XObject.cpp \
     ../src/XCodeLocation.cpp \
     ../src/XArrayMath.cpp \
     ../src/XMemoryTracker.cpp \
-    ../src/XProfileWidget.cpp
+    ../src/XProfileWidget.cpp \
+    ../src/XAsyncTask.cpp
 
 HEADERS += ../XObject \
     ../XGlobal \
@@ -161,7 +162,8 @@ HEADERS += ../XObject \
     ../Eigen/src/Core/util/Constants.h \
     ../Eigen/src/Core/util/BlasUtil.h \
     ../XPrivateImpl \
-    ../XTaskFuture
+    ../XAsyncTask \
+    ../XAsyncTaskImpl
 
 
 
