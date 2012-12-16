@@ -10,7 +10,7 @@ namespace Eks
 
 namespace detail
 {
-template <typename Fn, typename Arg> class ContinuationTask;
+template <typename Fn, typename Arg, typename Result> class ContinuationTask;
 class TaskImpl;
 }
 
@@ -45,9 +45,11 @@ public:
   // create a new task which executes [fn] and add the task as a dependent
   // (ie to be completed when [this] completes)
   template <typename Fn>
-      typename detail::ContinuationTask<Fn, Result>::TaskType then(const Fn &fn) const
+      typename Task<typename std::result_of<Fn(Result)>::type> then(const Fn &fn) const
     {
-    return detail::ContinuationTask<Fn, Result>::create(*this, fn);
+    typedef typename std::result_of<Fn(Result)>::type DerivedResult;
+
+    return detail::ContinuationTask<Fn, Result, DerivedResult>::create(*this, fn);
     }
   };
 

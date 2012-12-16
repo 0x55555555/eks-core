@@ -49,126 +49,96 @@ public:
   xsize _dependentCount;
   };
 
-template <typename Fn, typename Arg, typename Result> class ContinuationTaskImpl
+template <typename Fn, typename Arg, typename Result> class ContinuationTask
   {
 public:
-  static Task<Result> create(const Task<Arg> &arg, const Fn &fn);
+  typedef Task<Result> TaskT;
+
+  static TaskT create(const Task<Arg> &arg, const Fn &fn)
+    {
+    // create a new task
+    TaskT res;
+
+    // get the task token, so we can set up dependencies
+    TaskT::Token token = res.token();
+
+    // token needs to depend on the arg
+    arg.token()->addDependent(token);
+
+    // set the userdata of the token so we can get it in complete
+    token->setUserData<Fn>(fn);
+
+    // setup the complete callback for the token
+    token->_onDependencyComplete = complete;
+
+    return res;
+    }
+
+  static void complete(TaskImpl *ths, TaskImpl *, const void *arg)
+    {
+    // get the arg as the right type
+    const Arg *argData = reinterpret_cast<const Arg*>(arg);
+    // get the function from userdata
+    const Fn &data = ths->userData<Fn>();
+
+    typedef ContinuationTaskImpl<Fn, Arg, Result> Impl;
+
+    // get a result object (might be an empty struct)
+    Impl::Result res;
+    // call the task function
+    Impl::call(data, &res, argData);
+
+    // complete the task and any dependents syncronously
+    TaskT::completeTaskSync(ths, &res);
+
+    // delete the userdata object (important if its a functor)
+    ths->clearUserData<Fn>();
+    }
   };
 
-template <typename Fn,
-          typename Arg> class ContinuationTask
+template <typename Fn, typename Arg, typename ResultType> class ContinuationTaskImpl
   {
 public:
-  typedef typename std::result_of<Fn(Arg)>::type Result;
-  typedef typename Task<Result> TaskType;
+  typedef ResultType Result;
 
-  static TaskType create(const Task<Arg> &arg, const Fn &fn)
+  static void call(const Fn& fn, Result *res, const Arg *arg)
     {
-    return ContinuationTaskImpl<Fn, Arg, Result>::create(arg, fn);
+    *res = fn(*arg);
     }
   };
 
 template <typename Fn> class ContinuationTaskImpl<Fn, void, void>
   {
 public:
-  static Task<void>
-      create(const Task<void> &arg, const Fn &fn)
+  struct Result { };
+
+  static void call(const Fn &fn, Result *, const void *)
     {
-    typedef Task<void> TaskT;
-    TaskT res;
-    TaskT::Token token = res.token();
-    arg.token()->addDependent(token);
-    token->setUserData<Fn>(fn);
-    token->_onDependencyComplete = [](TaskImpl *ths, TaskImpl *, const void *arg)
-      {
-      xAssert(!arg);
-      (void)arg;
-
-      const Fn &data = ths->userData<Fn>();
-      data();
-
-      TaskT::completeTaskSync(ths, (TaskT::Result*)0);
-      ths->clearUserData<Fn>();
-      };
-
-    return res;
+    fn();
     }
   };
 
 template <typename Fn, typename Arg> class ContinuationTaskImpl<Fn, Arg, void>
   {
 public:
-  static Task<void>
-      create(const Task<Arg> &arg, const Fn &fn)
+  struct Result { };
+
+  static void call(const Fn &fn, Result *, const Arg *arg)
     {
-    typedef Task<void> TaskT;
-    TaskT res;
-    TaskT::Token token = res.token();
-
-    arg.token()->addDependent(token);
-    token->setUserData<Fn>(fn);
-    token->_onDependencyComplete = [](TaskImpl *ths, TaskImpl *, const void *arg)
-      {
-      const Arg *argData = reinterpret_cast<const Arg*>(arg);
-      const Fn &data = ths->userData<Fn>();
-      data(*argData);
-
-      TaskT::completeTaskSync(ths, (TaskT::Result *)0);
-      ths->clearUserData<Fn>();
-      };
-
-    return res;
+    fn(*arg);
     }
   };
 
-template <typename Fn, typename Result> class ContinuationTaskImpl<Fn, void, Result>
+template <typename Fn, typename ResultType> class ContinuationTaskImpl<Fn, void, ResultType>
   {
 public:
-  static Task<Result>
-      create(const Task<void> &arg, const Fn &fn)
+  typedef ResultType Result;
+
+  static void call(const Fn &fn, Result *res, const void *)
     {
-    typedef Task<Result> TaskT;
-    TaskT res;
-    TaskT::Token token = res.token();
-    arg.token()->addDependent(token);
-    token->setUserData<Fn>(fn);
-    token->_onDependencyComplete = [](TaskImpl *ths, TaskImpl *dep, const void *arg)
-      {
-      xAssert(!arg);
-      (void)arg;
-
-      const Fn &data = ths->userData<Fn>();
-      Result res = data();
-
-      TaskT::completeTaskSync(ths, &res);
-      ths->clearUserData<Fn>();
-      };
-
-    return res;
+    *res = fn();
     }
   };
-
-template <typename Fn, typename Arg, typename Result>
-    Task<Result>
-    ContinuationTaskImpl<Fn, Arg, Result>::create(const Task<Arg> &arg, const Fn &fn)
-  {
-  typedef Task<Result> TaskT;
-  TaskT res;
-  TaskT::Token token = res.token();
-  arg.token()->addDependent(token);
-  token->setUserData<Fn>(fn);
-  token->_onDependencyComplete = [](TaskImpl *ths, TaskImpl *dep, const void *arg)
-    {
-    const Arg *argData = reinterpret_cast<const Arg*>(arg);
-    const Fn &data = ths->userData<Fn>();
-    Result res = data(*argData);
-
-    TaskT::completeTaskSync(ths, &res);
-    ths->clearUserData<Fn>();
-    };
-
-  return res;
-  }
 
 }
 
@@ -191,11 +161,8 @@ template <typename ResultType>
 
   resToken->setUserData<std::atomic<int>>(2);
 
-  resToken->_onDependencyComplete = [](Impl *ths, Impl *, const void *arg)
+  resToken->_onDependencyComplete = [](Impl *ths, Impl *, const void *)
     {
-    xAssert(!arg);
-    (void)arg;
-
     std::atomic_int &data = ths->userData<std::atomic<int>>();
 
     // find the result before decremented.
