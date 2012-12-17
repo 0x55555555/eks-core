@@ -2,6 +2,7 @@
 #define XCOLOUR_H
 
 #include "XGlobal"
+#include "XAssert"
 #include "XVector4D"
 #include "QColor"
 
@@ -72,6 +73,11 @@ public:
     return *this;
     }
   };
+
+typedef XColour XColourTight;
+typedef XVector3DTight XColourRGBTight;
+xCompileTimeAssert(sizeof(xReal) == sizeof(float));
+xCompileTimeAssert(sizeof(XColour) == sizeof(float) * 4);
 
 #if X_DECLARE_METATYPES
 X_DECLARE_SERIALISABLE_METATYPE(XColour);
