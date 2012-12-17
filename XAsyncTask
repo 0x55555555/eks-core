@@ -3,6 +3,7 @@
 
 #include "XGlobal"
 #include "XProperty"
+#include "XAssert"
 #include <atomic>
 
 namespace Eks
@@ -12,6 +13,16 @@ namespace detail
 {
 template <typename Fn, typename Arg, typename Result> class ContinuationTask;
 class TaskImpl;
+
+template <typename Fn, typename Arg> class ContinuationTaskResult
+  {
+  typedef typename std::result_of<Fn(Arg)>::type Type;
+  };
+
+template <typename Fn> class ContinuationTaskResult<Fn, void>
+  {
+  typedef typename std::result_of<Fn()>::type Type;
+  };
 }
 
 // Represents a function which returns [ResultType]
@@ -45,7 +56,7 @@ public:
   // create a new task which executes [fn] and add the task as a dependent
   // (ie to be completed when [this] completes)
   template <typename Fn>
-      typename Task<typename std::result_of<Fn(Result)>::type> then(const Fn &fn) const
+      Task<typename detail::ContinuationTaskResult<Fn, Result>::Type> then(const Fn &fn) const
     {
     typedef typename std::result_of<Fn(Result)>::type DerivedResult;
 

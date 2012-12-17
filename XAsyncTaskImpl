@@ -19,6 +19,7 @@ public:
 
   template <typename T, typename X> void setUserData(const X &t)
     {
+    xCompileTimeAssert(sizeof(T) <= UserDataSize);
     new(_userData) T(t);
     }
 
@@ -47,53 +48,6 @@ public:
   void (*_onDependencyComplete)(TaskImpl *impl, TaskImpl *dep, const void *data);
   TaskImpl *_dependents[MaxDependents];
   xsize _dependentCount;
-  };
-
-template <typename Fn, typename Arg, typename Result> class ContinuationTask
-  {
-public:
-  typedef Task<Result> TaskT;
-
-  static TaskT create(const Task<Arg> &arg, const Fn &fn)
-    {
-    // create a new task
-    TaskT res;
-
-    // get the task token, so we can set up dependencies
-    TaskT::Token token = res.token();
-
-    // token needs to depend on the arg
-    arg.token()->addDependent(token);
-
-    // set the userdata of the token so we can get it in complete
-    token->setUserData<Fn>(fn);
-
-    // setup the complete callback for the token
-    token->_onDependencyComplete = complete;
-
-    return res;
-    }
-
-  static void complete(TaskImpl *ths, TaskImpl *, const void *arg)
-    {
-    // get the arg as the right type
-    const Arg *argData = reinterpret_cast<const Arg*>(arg);
-    // get the function from userdata
-    const Fn &data = ths->userData<Fn>();
-
-    typedef ContinuationTaskImpl<Fn, Arg, Result> Impl;
-
-    // get a result object (might be an empty struct)
-    Impl::Result res;
-    // call the task function
-    Impl::call(data, &res, argData);
-
-    // complete the task and any dependents syncronously
-    TaskT::completeTaskSync(ths, &res);
-
-    // delete the userdata object (important if its a functor)
-    ths->clearUserData<Fn>();
-    }
   };
 
 template <typename Fn, typename Arg, typename ResultType> class ContinuationTaskImpl
@@ -137,6 +91,53 @@ public:
   static void call(const Fn &fn, Result *res, const void *)
     {
     *res = fn();
+    }
+  };
+
+template <typename Fn, typename Arg, typename Result> class ContinuationTask
+  {
+public:
+  typedef Task<Result> TaskT;
+
+  static TaskT create(const Task<Arg> &arg, const Fn &fn)
+    {
+    // create a new task
+    TaskT res;
+
+    // get the task token, so we can set up dependencies
+    typename TaskT::Token token = res.token();
+
+    // token needs to depend on the arg
+    arg.token()->addDependent(token);
+
+    // set the userdata of the token so we can get it in complete
+    token->setUserData(fn);
+
+    // setup the complete callback for the token
+    token->_onDependencyComplete = complete;
+
+    return res;
+    }
+
+  static void complete(TaskImpl *ths, TaskImpl *, const void *arg)
+    {
+    // get the arg as the right type
+    const Arg *argData = reinterpret_cast<const Arg*>(arg);
+    // get the function from userdata
+    const Fn &data = ths->userData<Fn>();
+
+    typedef ContinuationTaskImpl<Fn, Arg, Result> Impl;
+
+    // get a result object (might be an empty struct)
+    typename Impl::Result res;
+    // call the task function
+    Impl::call(data, &res, argData);
+
+    // complete the task and any dependents syncronously
+    TaskT::completeTaskSync(ths, &res);
+
+    // delete the userdata object (important if its a functor)
+    ths->clearUserData<Fn>();
     }
   };
 

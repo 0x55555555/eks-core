@@ -53,7 +53,9 @@ bool XAssert::defaultFire(const XAssert &a)
 
   msgBox.setWindowTitle(text);
 
-  text += " in " + a.location().toString() + "\n\n";
+  QString location = a.location().toString();
+
+  text += " in " + location + "\n\n";
 
   if(!qstrcmp(a.message(), "") == 0)
     {
@@ -120,10 +122,10 @@ void interuptBreak()
 
 #ifdef X_ARCH_ARM
 void __stdcall interuptBreak()
-	{
+  {
   int *i = 0;
   *i = 1;
-	}
+  }
 #endif
 
 XAssert::BreakFunction *g_currentBreakFunction = 0;
