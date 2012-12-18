@@ -33,7 +33,7 @@ using Eigen::internal::result_of;
 #define X_DECL_EXPORT Q_DECL_EXPORT
 #define X_DECL_IMPORT Q_DECL_IMPORT
 
-#ifndef EKSCORE_STATIC_BUILD
+#ifndef EKSCORE_STATIC
 # ifdef EKSCORE_BUILD
 #  define EKSCORE_EXPORT X_DECL_EXPORT
 # else

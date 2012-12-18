@@ -49,7 +49,7 @@ win32-arm-msvc2012 {
 }
 
 CONFIG(staticlib) {
-  DEFINES += $$upper($$TARGET)_STATIC_BUILD
+  DEFINES += $$upper($$TARGET)_STATIC
 }
 
 ROOT = $$PWD"/../../"

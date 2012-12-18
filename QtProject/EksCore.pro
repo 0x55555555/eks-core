@@ -163,7 +163,8 @@ HEADERS += ../XObject \
     ../Eigen/src/Core/util/BlasUtil.h \
     ../XPrivateImpl \
     ../XAsyncTask \
-    ../XAsyncTaskImpl
+    ../XAsyncTaskImpl \
+    ../XUniquePointer
 
 
 
