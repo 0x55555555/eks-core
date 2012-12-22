@@ -1,8 +1,437 @@
 #ifndef XVECTOR_H
 #define XVECTOR_H
 
-#include "QVector"
+#include "XGlobal"
+#include "XAssert"
+#include "XAllocatorBase"
+#include <algorithm>
 
-#define XVector QVector
+template <typename T, typename Alloc = XTypedAllocator<T> >
+    class XVector
+  {
+public:
+  typedef xsize size_type;
+  typedef T* iterator;
+  typedef const T* const_iterator;
+
+  XVector(const Alloc &alloc=Alloc())
+      : _alloc(alloc),
+      _first(0),
+      _last(0),
+      _end(0)
+    {
+    }
+
+  template <typename X, typename AllocX>
+    XVector(const XVector<X, AllocX> &v, const Alloc &alloc=Alloc())
+      : _alloc(alloc),
+      _first(0),
+      _last(0),
+      _end(0)
+    {
+    resizeAndCopy(v.size(), v.begin());
+    }
+
+  template <typename X, typename AllocX>
+    XVector(XVector<X, AllocX> &&v, const Alloc &alloc=Alloc())
+      : _alloc(alloc),
+      _first(0),
+      _last(0),
+      _end(0)
+    {
+    swap(*this, v);
+    }
+
+  explicit XVector(size_type size, const T& t, const Alloc &alloc=Alloc())
+      : _alloc(alloc),
+      _first(0),
+      _last(0),
+      _end(0)
+    {
+    resize(size, t);
+    }
+
+  ~XVector()
+    {
+    clear();
+    squeeze();
+    xAssert(_first == 0);
+    }
+
+  size_type size() const
+    {
+    return _end - _first;
+    }
+
+  size_type capacity() const
+    {
+    return _last - _first;
+    }
+
+  T &front()
+    {
+    xAssert(_first);
+    return *_first;
+    }
+
+  const T &front() const
+    {
+    xAssert(_first);
+    return *_first;
+    }
+
+  T &back()
+    {
+    xAssert(_end-1);
+    return *(_end-1);
+    }
+
+  const T &back() const
+    {
+    xAssert(_end-1);
+    return *(_end-1);
+    }
+
+  T *data()
+    {
+    return _first;
+    }
+
+  const T *data() const
+    {
+    return _first;
+    }
+
+  XVector<T, Alloc>& operator<<(const T &&t)
+    {
+    pushBack(t);
+    return *this;
+    }
+
+  XVector<T, Alloc>& operator<<(const T &t)
+    {
+    pushBack(t);
+    return *this;
+    }
+
+  template <typename VecX>
+  XVector<T, Alloc>& operator<<(const VecX &t)
+    {
+    append(t);
+    return *this;
+    }
+
+  template <typename VecX>
+  XVector<T, Alloc>& operator+=(const VecX &t)
+    {
+    append(t);
+    return *this;
+    }
+
+  iterator begin()
+    {
+    return _first;
+    }
+
+  iterator end()
+    {
+    return _end;
+    }
+
+  const_iterator begin() const
+    {
+    return _first;
+    }
+
+  const_iterator end() const
+    {
+    return _end;
+    }
+
+  const_iterator cbegin() const
+    {
+    return _first;
+    }
+
+  const_iterator cend() const
+    {
+    return _end;
+    }
+
+  void reserve(size_type newCapacity)
+    {
+    if(newCapacity <= capacity())
+      {
+      return;
+      }
+
+    const size_type s = size();
+    const size_type newBestCapacity = bestCapacity(newCapacity);
+
+    T *newData = _alloc.allocate(newBestCapacity);
+
+    copy(newData, newData+s, _first);
+
+    _first = newData;
+    _end = _first + s;
+    _last = _first + newCapacity;
+    }
+
+  void squeeze()
+    {
+    if(_last == _end)
+      {
+      return;
+      }
+
+    const size_type s = size();
+    const size_type newCapacity = s;
+
+    T *oldData = _first;
+    xsize oldCapacity = capacity();
+
+    if(s)
+      {
+      T *newData = _alloc.allocate(newCapacity);
+
+      // copy the new elements
+      copy(newData, newData+s, _first);
+
+      // destroy the old data
+      for(size_type i = 0; i < s; ++i)
+        {
+        _alloc.destroy(oldData+i);
+        }
+
+      _first = newData;
+      _last = _end = _first + s;
+      }
+    else
+      {
+      // no old size, just reset pointers
+      _last = _end = _first = 0;
+      }
+
+    // always destroy the old data if it existed
+    if(oldData)
+      {
+      _alloc.deallocate(oldData, oldCapacity);
+      }
+    }
+
+  void resize(size_type newSize, const T &val = T())
+    {
+    size_type s = size();
+
+    // destroy extra members
+    for(size_type i = newSize; i < s; ++i)
+      {
+      _alloc.destroy(&at(i));
+      }
+
+    // adjust the end
+    _end = _first + xMin(s, newSize);
+
+    // now expand, copying the needed members
+    reserve(newSize);
+
+    // adjust the new end
+    _end = _first + newSize;
+
+    // construct the extra members
+    for(size_type i = s; i < newSize; ++i)
+      {
+      _alloc.construct(&at(i), val);
+      }
+    }
+
+  template <typename It>
+      void resizeAndCopy(size_type newSize, It val)
+    {
+    size_type s = size();
+
+    // destroy extra members
+    for(size_type i = newSize; i < s; ++i)
+      {
+      _alloc.destroy(&at(i));
+      }
+
+    // adjust the end
+    _end = _first + xMin(s, newSize);
+
+    // now expand, copying the needed members
+    reserve(newSize);
+
+    // adjust the new end
+    _end = _first + newSize;
+
+    // construct the extra members
+    for(size_type i = s; i < newSize; ++i, ++val)
+      {
+      _alloc.construct(&at(i), *val);
+      }
+    }
+
+  void clear()
+    {
+    resize(0);
+    }
+
+  bool compare(const T *other, size_type count, size_type start=0) const
+    {
+    if(start + count >= length())
+      {
+      return false;
+      }
+
+    const T *ths = data() + start;
+
+    return memcmp(ths, other, sizeof(T) * count) == 0;
+    }
+
+  size_type length() const { return size(); }
+
+  size_type indexOf(const T &t, size_type from) const
+    {
+    const_iterator it = begin() + from;
+    const_iterator found = std::find(it, cend(), t);
+
+    if(found == end())
+      {
+      return X_SIZE_SENTINEL;
+      }
+    return found - begin();
+    }
+
+  size_type indexOf(const T *t, size_type count, size_type from) const
+    {
+    xAssert(count >= 0);
+    size_type index = indexOf(t[0], from);
+    for(size_type i = 1; i < count; ++i)
+      {
+      if(at(index + i) != t[i])
+        {
+        return indexOf(t, count, index+1);
+        }
+      }
+
+    return index;
+    }
+
+  void popBack()
+    {
+    xAssert(_end);
+    --_end;
+    }
+
+  void pushBack(const T &t)
+    {
+    const size_type s = size();
+    if(s == capacity())
+      {
+      reserve(s + 1);
+      }
+
+    xAssert(_end < _last);
+    _alloc.construct(_end, t);
+    _end++;
+    }
+
+  void pushBack(const T &&t)
+    {
+    const size_type s = size();
+    if(s == capacity())
+      {
+      reserve(s + 1);
+      }
+
+    xAssert(_end < _last);
+    _alloc.construct(_end, t);
+    _end++;
+    }
+
+  template <typename T> void append(T vals, size_type count)
+    {
+    resizeAndCopy(size() + count, vals);
+    }
+
+  template <typename Vec> void append(const Vec &vals)
+    {
+    resizeAndCopy(size() + vals.size(), vals.begin());
+    }
+
+  template <typename T>
+      void copy(const iterator &begin, const iterator &end, T from)
+    {
+    for(iterator it = begin; it != end; ++it, ++from)
+      {
+      *it = *from;
+      }
+    }
+
+  template <typename X, typename AllocX>
+  void swap(XVector<X, AllocX> &oth)
+    {
+    if(v._alloc == oth._alloc)
+      {
+      std::swap(_first, oth._first);
+      std::swap(_last, oth._last);
+      std::swap(_end, oth._end);
+      }
+    else
+      {
+      resizeAndCopy(oth.size(), oth.data());
+      }
+    }
+
+  T &at(size_type i)
+    {
+    xAssert(i < size());
+    return *(_first + i);
+    }
+
+  const T &at(size_type i) const
+    {
+    xAssert(i < size());
+    return *(_first + i);
+    }
+
+  T &operator[](size_type i)
+    {
+    return at(i);
+    }
+
+  const T &operator[](size_type i) const
+    {
+    return at(i);
+    }
+
+  void setAllocator(const Alloc &a)
+    {
+    xAssert(_first == 0);
+    _alloc = a;
+    }
+
+  Alloc &allocator()
+    {
+    return _alloc;
+    }
+
+private:
+  size_type bestCapacity(size_type s) const
+    {
+    const size_type expandPolicy = 2;
+    return xMax(s, size() * expandPolicy);
+    }
+
+  Alloc _alloc;
+
+  // the first member of the vector
+  T *_first;
+  // the element one past the capasity.
+  T *_last;
+  // the element one past the end of the active elements
+  T *_end;
+  };
 
 #endif

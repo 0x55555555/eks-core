@@ -80,6 +80,7 @@ using Eigen::internal::result_of;
 # define X_QT_MATH_INTEROP 0
 # define X_DECLARE_METATYPES 0
 # define X_COMPILE_ARRAY_MATH 0
+# define X_VECTOR_IS_QVECTOR 0
 #else
 # define X_ASSERT_VALUE_HANDLING 1
 # define X_ADVANCED_ASSERT 1
@@ -88,6 +89,7 @@ using Eigen::internal::result_of;
 # define X_QT_MATH_INTEROP 1
 # define X_DECLARE_METATYPES 1
 # define X_COMPILE_ARRAY_MATH 1
+# define X_VECTOR_IS_QVECTOR 1
 #endif
 
 typedef signed char xint8;         /* 8 bit signed */

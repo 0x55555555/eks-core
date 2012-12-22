@@ -2,37 +2,366 @@
 #define XSTRING_H
 
 #include "XGlobal"
+#include "XAllocatorBase"
+#include "XVector"
 
-#if X_STRING_IS_QSTRING
-# include "QString"
-typedef QString String;
+typedef char XChar;
 
-#else
-# include <string>
-typedef std::string String;
+class XStringBuffer;
 
-#endif
-
-class EKSCORE_EXPORT XString : public String
+class XString
+  : public XVector<XChar, XTypedAllocator<XChar> >
   {
-
 public:
-  XString() { }
-  XString(const char *n) : String(n)
+  typedef XChar Char;
+  typedef XTypedAllocator<XChar> Alloc;
+  typedef std::char_traits<XChar> Traits;
+  typedef XVector<XChar, Alloc > String;
+  typedef std::ostream OStream;
+  typedef std::istream IStream;
+  typedef XStringBuffer Buffer;
+
+  XString(XAllocatorBase *alloc=XGlobalAllocator::instance())
+      : String(Alloc(alloc))
     {
     }
-  XString(const String &n) : String(n)
+  XString(const Char *n, XAllocatorBase *alloc=XGlobalAllocator::instance())
+      : String(Alloc(alloc))
     {
+    const size_type s = strlen(n);
+    resizeAndCopy(s, n);
+    xAssert(at(size()) == '\0');
+    }
+  XString(const String &n, XAllocatorBase *alloc=XGlobalAllocator::instance())
+      : String(n, Alloc(alloc))
+    {
+    xAssert(at(size()) == '\0');
+    }
+  XString(String &&n, XAllocatorBase *alloc=XGlobalAllocator::instance())
+      : String(n, Alloc(alloc))
+    {
+    xAssert(at(size()) == '\0');
     }
 
-
-#if !X_STRING_IS_QSTRING
-  template <typename T> static XString number(T n)
+  void clear()
     {
-    return std::to_string(n);
+    String::clear();
+    append("");
     }
 
-#endif
+  size_type length() const
+    {
+    return String::length() - 1;
+    }
+
+  size_type size() const
+    {
+    return String::size() - 1;
+    }
+
+  XChar &back()
+    {
+    xAssert(end()-2);
+    return *(end()-2);
+    }
+
+  const XChar &back() const
+    {
+    xAssert(end()-2);
+    return *(end()-2);
+    }
+
+  size_type capacity() const
+    {
+    return String::capacity() - 1;
+    }
+
+  iterator end()
+    {
+    return String::end() - 1;
+    }
+
+  const const_iterator end() const
+    {
+    return String::end() - 1;
+    }
+
+  const const_iterator cend() const
+    {
+    return String::cend() - 1;
+    }
+
+  void reserve(size_type newCapacity)
+    {
+    String::reserve(newCapacity+1);
+    }
+
+  template <typename T> void appendType(T n);
+  template <typename T> T toType(bool *error=0) const;
+
+  void fromUtf8(const XVector<char> &data, xsize pos, xsize len);
+
+  void resize(size_type newSize, const XChar &val)
+    {
+    // remove the \0
+    if(String::size())
+      {
+      String::popBack();
+      }
+    // resize up
+    String::resize(newSize+1, val);
+    at(newSize) = '\0';
+    }
+
+  template <typename It>
+  void resizeAndCopy(size_type newSize, It val)
+    {
+    // remove the \0
+    if(String::size())
+      {
+      String::popBack();
+      }
+
+    // ensure theres enough space for the new string and its /0
+    // note this calls the XString::reserve which allows for trailing zero.
+    reserve(newSize);
+
+    // resize up, copying from val
+    String::resizeAndCopy(newSize, val);
+
+    // append a \0
+    String::resize(newSize+1, '\0');
+    }
+
+  template <typename T>
+  void append(T data)
+    {
+    if(String::size())
+      {
+      String::popBack();
+      }
+    String::append(data);
+    xAssert(at(size()) == '\0');
+    }
+
+  void append(const XChar *data)
+    {
+    if(String::size())
+      {
+      String::popBack();
+      }
+    String::resizeAndCopy(String::size()+strlen(data)+1, data);
+    xAssert(at(size()) == '\0');
+    }
+
+  void append(XChar data)
+    {
+    if(String::size())
+      {
+      String::popBack();
+      }
+    String::resize(size() + 2, data);
+    String::at(String::size()-1) = '\0';
+    xAssert(at(size()) == '\0');
+    }
+
+  XString& operator+=(const XChar *data)
+    {
+    append(data);
+    return *this;
+    }
+
+  void popBack()
+    {
+    resize(size() - 1, ' ');
+    }
+
+  void pushBack(Char c)
+    {
+    popBack();
+    const Char arr[] = { c, '\0' };
+    append(arr);
+    }
+
+  XString& operator+=(const XString &t)
+    {
+    append(t);
+    return *this;
+    }
+
+  XString& operator+=(XChar t)
+    {
+    append(t);
+    return *this;
+    }
+
+  XString& operator<<(XChar t)
+    {
+    append(t);
+    return *this;
+    }
+
+  XString& operator<<(const XString &t)
+    {
+    append(t);
+    return *this;
+    }
   };
+
+#include "XAssert"
+
+class XStringBuffer : public std::streambuf
+  {
+public:
+  XStringBuffer(XString *str)
+      : _str(str), _readPos(0), _writePos(0)
+    {
+    }
+
+  XStringBuffer(const XString *str)
+      : _str(const_cast<XString *>(str)), _readPos(0), _writePos(X_SIZE_SENTINEL)
+    {
+    }
+
+  void imbue(const std::locale &) X_OVERRIDE
+    {
+    xAssertFail();
+    }
+
+  std::streambuf *setbuf(char *, std::streamsize) X_OVERRIDE
+    {
+    xAssert(_writePos != X_SIZE_SENTINEL);
+    xAssertFail();
+    return this;
+    }
+
+  std::streampos seekoff(
+      std::streamoff off,
+      std::ios_base::seekdir way,
+      std::ios_base::openmode which) X_OVERRIDE
+    {
+    xsize &pos = which == std::ios_base::in ? _readPos : _writePos;
+
+    if(way == std::ios_base::beg)
+      {
+      pos = off;
+      }
+    else if(way == std::ios_base::cur)
+      {
+      pos += off;
+      }
+    else if(way == std::ios_base::end)
+      {
+      pos = _str->size() + off;
+      }
+
+    return pos;
+    }
+
+  std::streampos seekpos(
+      std::streampos sp,
+      std::ios_base::openmode which) X_OVERRIDE
+    {
+    return seekoff(sp, std::ios_base::beg, which);
+    }
+
+  std::streamsize xsgetn(XString::Char *s, std::streamsize n ) X_OVERRIDE
+    {
+    std::streamsize num = xMin(_str->size(), (XString::size_type)n);
+    memcpy(s, _str->data(), num);
+    return num;
+    }
+
+  int underflow() X_OVERRIDE
+    {
+    if(_readPos < _str->size())
+      {
+      return _str->at(_readPos);
+      }
+    return XString::Traits::eof();
+    }
+
+  int uflow() X_OVERRIDE
+    {
+    int val = underflow();
+    ++_readPos;
+    return val;
+    }
+
+  int pbackfail(int c) X_OVERRIDE
+    {
+    xAssert(c == XString::Traits::eof());
+
+    if(_readPos >= 1)
+      {
+      --_readPos;
+      return 1;
+      }
+    return XString::Traits::eof();
+    }
+
+  std::streamsize xsputn(const XString::Char *s, std::streamsize n) X_OVERRIDE
+    {
+    xAssert(_writePos != X_SIZE_SENTINEL);
+    _str->resize(_writePos, ' ');
+    _writePos += n;
+    _str->resizeAndCopy(_writePos, s);
+    return _writePos;
+    }
+
+  int overflow(int c)
+    {
+    xAssert(_writePos != X_SIZE_SENTINEL);
+    xsize writePoint = _writePos;
+
+    xsize newSize = xMax(++_writePos, _str->size());
+    _str->resize(newSize, c);
+
+    _str->at(writePoint) = (XString::Char)c;
+    return 1;
+    }
+
+private:
+  XString *_str;
+  xsize _readPos;
+  xsize _writePos;
+  };
+
+template <typename T> void XString::appendType(T n)
+  {
+  XStringBuffer buf(this);
+  OStream str(&buf);
+
+  str.seekp(0, std::ios_base::end);
+  str.setf(std::ios_base::fixed);
+
+  str << n;
+  }
+
+template <typename T> T XString::toType(bool *error) const
+  {
+  T out;
+  XStringBuffer buf(this);
+  IStream stream(&buf);
+
+  stream >> out;
+  if(error)
+    {
+    *error = !stream.fail();
+    }
+  return out;
+  }
+
+inline void XString::fromUtf8(const XVector<char> &data, xsize pos, xsize len)
+  {
+  xAssert(pos < data.size());
+  xAssert(pos+len < data.size());
+
+  clear();
+
+  const char* start = (data.data() + pos);
+
+  resizeAndCopy(len, start);
+  }
 
 #endif // XSTRING_H
