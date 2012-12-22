@@ -6,7 +6,6 @@
 #include "XMathHelpers"
 #include "Eigen/Core"
 #include "QMetaType"
-#include "XMetaType"
 
 typedef Eigen::Matrix<xReal, 2, 1> XVector2D;
 typedef Eigen::Matrix<xReal, 3, 1> XVector3D;
@@ -16,13 +15,11 @@ typedef Eigen::Matrix<xint32, 2, 1> XVectorI2D;
 typedef Eigen::Matrix<xint32, 3, 1> XVectorI3D;
 typedef Eigen::Matrix<xint32, 4, 1> XVectorI4D;
 
-typedef XList<XVector2D> XVector2DList;
-typedef XList<XVector3D> XVector3DList;
-typedef XList<XVector4D> XVector4DList;
-
 // types for integration with d3d gl, tightly packed for uniform blocks etc.
 typedef Eigen::Matrix<float, 3, 1, Eigen::DontAlign> XVector3DTight;
+typedef Eigen::Matrix<float, 2, 1, Eigen::DontAlign> XVector2DTight;
 xCompileTimeAssert(sizeof(XVector3DTight) == sizeof(float) * 3);
+xCompileTimeAssert(sizeof(XVector2DTight) == sizeof(float) * 2);
 
 class QTextStream;
 class QDataStream;
