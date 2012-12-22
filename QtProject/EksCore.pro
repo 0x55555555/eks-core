@@ -8,15 +8,9 @@ INCLUDEPATH += ../
 
 include("../GeneralOptions.pri")
 
-SOURCES += ../src/XObject.cpp \
-    ../src/XMessageRouter.cpp \
-    ../src/XMessageHandler.cpp \
-    ../src/XVariant.cpp \
+SOURCES += \
     ../src/XFileSequence.cpp \
-    ../src/XChildEvent.cpp \
-    ../src/XBaseObject.cpp \
     ../src/XSize.cpp \
-    ../src/XMetaType.cpp \
     ../src/XTime.cpp \
     ../src/XProfiler.cpp \
     ../src/XAllocatorBase.cpp \
@@ -30,14 +24,11 @@ SOURCES += ../src/XObject.cpp \
     ../src/XProfileWidget.cpp \
     ../src/XAsyncTask.cpp
 
-HEADERS += ../XObject \
+HEADERS += \
     ../XGlobal \
     ../XVector \
-    ../XVariant \
     ../XSet \
     ../XList \
-    ../XMessageRouter \
-    ../XMessageHandler \
     ../XProperty \
     ../XVector2D \
     ../XVector3D \
@@ -46,15 +37,10 @@ HEADERS += ../XObject \
     ../XQuaternion \
     ../XMatrix4x4 \
     ../XMatrix3x3 \
-    ../XGenericMatrix \
     ../XFileSequence \
-    ../XChildEvent \
-    ../XSignal \
-    ../XBaseObject \
     ../XSize \
     ../XCurve \
     ../XShared \
-    ../XMetaType \
     ../XFlags \
     ../XWeakShared \
     ../XTime \
