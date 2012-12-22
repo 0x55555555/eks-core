@@ -1,4 +1,5 @@
 #include "XCodeLocation"
+#include "XSimpleString"
 #include "QHash"
 
 XCodeLocation::XCodeLocation(const char *file, xsize line, const char *function)
@@ -12,7 +13,7 @@ XString XCodeLocation::toString() const
 
   out += file();
   out += " ";
-  out += XString::number(line());
+  out.appendType(line());
   out += " ";
   out += function();
 

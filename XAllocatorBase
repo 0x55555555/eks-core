@@ -2,6 +2,7 @@
 #define XALLOCATORBASE_H
 
 #include "XGlobal"
+#include "XAssert"
 #include "XEventLogger"
 
 class XAllocatorBase
@@ -19,6 +20,86 @@ public:
   virtual void free(void *mem);
 
   static XGlobalAllocator *instance();
+  };
+
+template <typename T> class XTypedAllocator;
+
+template <typename T> class XTypedAllocatorBase
+  {
+public:
+  typedef T value_type;
+  typedef value_type* pointer;
+  typedef size_t size_type;
+
+  template <class O> struct rebind
+    {
+    typedef XTypedAllocator<O> other;
+    };
+
+  pointer allocate(xsize n, void *hint=0)
+    {
+    xAssert(_alloc);
+    (void)hint;
+    return (pointer)_alloc->alloc(sizeof(value_type) * n);
+    }
+
+  void deallocate(pointer p, size_type n)
+    {
+    xAssert(_alloc);
+    (void)n;
+    _alloc->free(p);
+    }
+
+  XAllocatorBase *allocator() const { return _alloc; }
+
+protected:
+  XAllocatorBase *_alloc;
+  };
+
+template <typename T> class XTypedAllocator : public XTypedAllocatorBase<T>
+  {
+public:
+  typedef value_type& reference;
+  typedef const value_type& const_reference;
+
+  XTypedAllocator(XAllocatorBase *alloc=0)
+    {
+    _alloc = alloc;
+    }
+
+  template <class U>
+      XTypedAllocator(const XTypedAllocator<U>& alloc)
+    {
+    _alloc = alloc.allocator();
+    }
+
+  void construct(pointer p, const_reference val)
+    {
+    new(p) T(val);
+    }
+
+  template <typename U> void destroy(U *p)
+    {
+    (void)p;
+    p->~U();
+    }
+  };
+
+template <> class XTypedAllocator<void> : public XTypedAllocatorBase<void>
+  {
+public:
+  typedef void* pointer;
+
+  XTypedAllocator(XAllocatorBase *alloc=0)
+    {
+    _alloc = alloc;
+    }
+
+  template <class U>
+      XTypedAllocator(const XTypedAllocator<U>& alloc)
+    {
+    _alloc = alloc._alloc;
+    }
   };
 
 #define xAllocateAndConstruct(a, t, ...) new(a->alloc(sizeof(t))) t(__VA_ARGS__)

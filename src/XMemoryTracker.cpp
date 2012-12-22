@@ -1,4 +1,5 @@
 #include "XMemoryTracker"
+#include "XAssert"
 
 XMemoryTracker::XMemoryTracker(XAllocatorBase* forwarder) : _forwarder(forwarder), _liveAllocations(0)
   {

@@ -2,6 +2,7 @@
 #define XMEMORYTRACKER
 
 #include "XAllocatorBase"
+#include "XProperty"
 #include "XHash"
 
 class EKSCORE_EXPORT XMemoryTracker : public XAllocatorBase

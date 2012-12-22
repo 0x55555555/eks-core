@@ -2,12 +2,13 @@
 #define XEVENTLOGGER_H
 
 #include "XGlobal"
-#include "XAssert"
-#include "XTime"
-#include "XSimpleString"
-#include "QMetaType"
 
 #ifdef X_ENABLE_EVENT_LOGGING
+
+#include "XTime"
+#include "QMetaType"
+#include "XAssert"
+#include "XSimpleString"
 
 template <typename T> struct EKSCORE_EXPORT XEventLoggerPair
   {

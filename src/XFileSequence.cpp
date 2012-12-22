@@ -1,5 +1,4 @@
 #include "XFileSequence"
-#include "XVariant"
 #include "QRegExp"
 
 #include "QDebug"

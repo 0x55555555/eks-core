@@ -4,7 +4,8 @@
 #include "XGlobal"
 #include "XProperty"
 #include "XMacroHelpers"
-#include "XSimpleString"
+
+class XString;
 
 class EKSCORE_EXPORT XCodeLocation
   {

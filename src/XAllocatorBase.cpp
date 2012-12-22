@@ -1,6 +1,10 @@
 #include "XAllocatorBase"
 #include "XAssert"
 
+#ifndef Q_CC_MSVC
+# include <malloc.h>
+#endif
+
 X_IMPLEMENT_MEMORY_LOGGER(xTotalGlobalAllocatorSize);
 
 XGlobalAllocator g_allocator;
@@ -29,7 +33,7 @@ void *XGlobalAllocator::alloc(xsize size, xsize alignment)
 #else
   // msvc malloc should always be 16 byte aligned
   xAssert(alignment == 16);
-  void *m = malloc(sizeof(MemoryHandle) + size);
+  void *m = _aligned_malloc(sizeof(MemoryHandle) + size, alignment);
 
 #endif
 
@@ -55,7 +59,7 @@ void XGlobalAllocator::free(void *mem)
 #ifndef Q_CC_MSVC
     qFreeAligned(h);
 #else
-    free(h);
+    _aligned_free(h);
 #endif
     }
   }
