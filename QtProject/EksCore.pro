@@ -10,7 +10,6 @@ include("../GeneralOptions.pri")
 
 SOURCES += \
     ../src/XFileSequence.cpp \
-    ../src/XSize.cpp \
     ../src/XTime.cpp \
     ../src/XProfiler.cpp \
     ../src/XAllocatorBase.cpp \
@@ -21,25 +20,17 @@ SOURCES += \
     ../src/XCodeLocation.cpp \
     ../src/XArrayMath.cpp \
     ../src/XMemoryTracker.cpp \
-    ../src/XProfileWidget.cpp \
-    ../src/XAsyncTask.cpp
+    ../src/XAsyncTask.cpp \
+    ../src/XMathHelpers.cpp
 
 HEADERS += \
     ../XGlobal \
     ../XVector \
     ../XSet \
-    ../XList \
     ../XProperty \
-    ../XVector2D \
-    ../XVector3D \
-    ../XVector4D \
     ../XColour \
     ../XQuaternion \
-    ../XMatrix4x4 \
-    ../XMatrix3x3 \
     ../XFileSequence \
-    ../XSize \
-    ../XCurve \
     ../XShared \
     ../XFlags \
     ../XWeakShared \
@@ -132,9 +123,7 @@ HEADERS += \
     ../XArrayMath \
     ../XTemplateHelpers \
     ../XMemoryTracker \
-    ../XProfileWidget \
     ../XOptional \
-    ../XSimpleString \
     ../Eigen/src/Core/util/XprHelper.h \
     ../Eigen/src/Core/util/StaticAssert.h \
     ../Eigen/src/Core/util/ReenableStupidWarnings.h \
@@ -150,7 +139,13 @@ HEADERS += \
     ../XPrivateImpl \
     ../XAsyncTask \
     ../XAsyncTaskImpl \
-    ../XUniquePointer
+    ../XUniquePointer \
+    ../XTypedAllocator \
+    ../XStringBuffer \
+    ../XMathVector \
+    ../XMathMatrix \
+    ../XStringSimple \
+    ../XMathCurve
 
 
 

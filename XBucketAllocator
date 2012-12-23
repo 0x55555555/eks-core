@@ -18,7 +18,10 @@
 
 X_DECLARE_MEMORY_LOGGER(EKSCORE_EXPORT, xTotalBucketAllocatorSize);
 
-class EKSCORE_EXPORT XFixedSizeBucketAllocator
+namespace Eks
+{
+
+class EKSCORE_EXPORT FixedSizeBucketAllocator
   {
 public:
 
@@ -162,7 +165,7 @@ public:
     xuint8 _alloc[1];
     };
 
-  XFixedSizeBucketAllocator(xsize s, xsize d=128, xsize e=1024, XAllocatorBase *allocator=XGlobalAllocator::instance())
+  FixedSizeBucketAllocator(xsize s, xsize d=128, xsize e=1024, AllocatorBase *allocator=GlobalAllocator::instance())
       : _freePtr(0), _size(s), _defaultSize(d), _expandSize(e), _first(0), _allocator(allocator)
     {
     xAssert(_allocator);
@@ -173,7 +176,7 @@ public:
       }
     }
 
-  ~XFixedSizeBucketAllocator()
+  ~FixedSizeBucketAllocator()
     {
     Bucket *b = _first;
     while(b)
@@ -311,31 +314,31 @@ public:
   void debugDump() const;
 
 private:
-  X_DISABLE_COPY(XFixedSizeBucketAllocator);
+  X_DISABLE_COPY(FixedSizeBucketAllocator);
   Bucket *_freePtr;
   xsize _size;
   xsize _defaultSize;
   xsize _expandSize;
   Bucket * _first;
-  XAllocatorBase *_allocator;
+  AllocatorBase *_allocator;
   };
 
-class EKSCORE_EXPORT XBucketAllocator : public XAllocatorBase
+class EKSCORE_EXPORT BucketAllocator : public AllocatorBase
   {
 public:
-  XBucketAllocator(xsize d=128, xsize e=1024, XAllocatorBase *alloc=XGlobalAllocator::instance())
+  BucketAllocator(xsize d=128, xsize e=1024, AllocatorBase *alloc=GlobalAllocator::instance())
       : _defaultSize(d), _expandSize(e), _internal(alloc), _allocator(alloc)
     {
     xAssert(_allocator);
     }
 
-  virtual ~XBucketAllocator()
+  virtual ~BucketAllocator()
     {
     HashType::iterator i = _internal.begin();
     HashType::iterator e = _internal.end();
     while (i != e)
       {
-      xDestroyAndFree(_allocator, XFixedSizeBucketAllocator, i.value());
+      xDestroyAndFree(_allocator, FixedSizeBucketAllocator, i.value());
       ++i;
       }
     }
@@ -345,10 +348,10 @@ public:
     size = X_ROUND_TO_SPECIFIC_ALIGNMENT(xsize, size, alignment);
     X_MEMORY_LOGGER_ALLOC(xTotalBucketAllocatorSize, size);
       
-    XFixedSizeBucketAllocator *b = _internal.value(size, 0);
+    FixedSizeBucketAllocator *b = _internal.value(size, 0);
     if(!b)
       {
-      b = xAllocateAndConstruct(_allocator, XFixedSizeBucketAllocator, size, _defaultSize, _expandSize, _allocator);
+      b = xAllocateAndConstruct(_allocator, FixedSizeBucketAllocator, size, _defaultSize, _expandSize, _allocator);
       _internal.insert(size, b);
       }
 
@@ -392,14 +395,16 @@ public:
   void debugDump() const;
 
 private:
-  X_DISABLE_COPY(XBucketAllocator);
+  X_DISABLE_COPY(BucketAllocator);
   xsize _defaultSize;
   xsize _expandSize;
 
-  typedef XUnorderedMap <xsize, XFixedSizeBucketAllocator *> HashType;
+  typedef UnorderedMap <xsize, FixedSizeBucketAllocator *> HashType;
   HashType _internal;
 
-  XAllocatorBase *_allocator;
+  AllocatorBase *_allocator;
   };
+
+}
 
 #endif // XRANDOMACCESSBLOCKALLOCATOR_H

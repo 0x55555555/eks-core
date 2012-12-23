@@ -1,15 +1,17 @@
 #ifndef XPROFILER_H
 #define XPROFILER_H
 
-#include "XProfiler"
 #include "XTime"
 #include "QString"
-#include "XHash"
+#include "XUnorderedMap"
 #include "XVector"
 #include "XBucketAllocator"
 #include "QMutex"
 
-class EKSCORE_EXPORT XProfiler
+namespace Eks
+{
+
+class EKSCORE_EXPORT Profiler
   {
 public:
   class EKSCORE_EXPORT ProfilingContext
@@ -38,7 +40,7 @@ public:
     ProfileHandle(ProfilingContext *key);
     ProfilingContext *_context;
     XTime _start;
-    friend class XProfiler;
+    friend class Profiler;
     };
 
   class EKSCORE_EXPORT ProfileScopedBlock
@@ -62,22 +64,23 @@ public:
   static void setStringForContext(xuint32 t, const QString &str);
 
 private:
-  XProfiler();
+  Profiler();
 
   ProfilingContext *_rootContext;
-  XHash<QThread *, ProfilingContext *> _currentContexts;
-  XFixedSizeBucketAllocator _contextAllocator;
+  UnorderedMap<QThread *, ProfilingContext *> _currentContexts;
+  FixedSizeBucketAllocator _contextAllocator;
   QHash<xuint32, QString> _contextStrings;
   QMutex _lock;
   };
 
 #ifdef X_PROFILING_ENABLED
-  #define XProfileFunctionBase(component) XProfiler::ProfileScopedBlock functionBlock(component, xCurrentFunction);
-  #define XProfileScopedBlockBase(component, mess) XProfiler::ProfileScopedBlock scopeBlock##__LINE__(component, mess);
+  #define XProfileFunctionBase(component) Profiler::ProfileScopedBlock functionBlock(component, xCurrentFunction);
+  #define XProfileScopedBlockBase(component, mess) Profiler::ProfileScopedBlock scopeBlock##__LINE__(component, mess);
 #else
   #define XProfileFunctionBase(component)
   #define XProfileScopedBlockBase(component, mess)
 #endif
 
+}
 
 #endif // XPROFILER_H

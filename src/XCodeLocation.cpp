@@ -1,15 +1,19 @@
 #include "XCodeLocation"
-#include "XSimpleString"
+#include "XStringSimple"
+#include "XStringBuffer"
 #include "QHash"
 
-XCodeLocation::XCodeLocation(const char *file, xsize line, const char *function)
+namespace Eks
+{
+
+CodeLocation::CodeLocation(const char *file, xsize line, const char *function)
     : _file(file), _line(line), _function(function)
   {
   }
 
-XString XCodeLocation::toString() const
+String CodeLocation::toString() const
   {
-  XString out;
+  String out;
 
   out += file();
   out += " ";
@@ -20,14 +24,16 @@ XString XCodeLocation::toString() const
   return out;
   }
 
-bool XCodeLocation::operator==(const XCodeLocation &a) const
+bool CodeLocation::operator==(const CodeLocation &a) const
   {
   return line() == a.line() &&
     strcmp(file(), a.file()) == 0 &&
     strcmp(function(), a.function()) == 0;
   }
 
-uint qHash(const XCodeLocation &a)
+}
+
+uint qHash(const Eks::CodeLocation &a)
   {
   uint hash = qHash(QPair<const char *, const char *>(a.file(), a.function()));
 

@@ -1,0 +1,256 @@
+#ifndef XSTRING_H
+#define XSTRING_H
+
+#include "XGlobal"
+#include "XAllocatorBase"
+#include "XVector"
+
+namespace Eks
+{
+
+typedef char XChar;
+
+template <typename C, xsize P, typename A> class StringBuffer;
+
+template <typename Char, xsize PreallocatedSize=0, typename Allocator=TypedAllocator<XChar> >
+    class StringBase : public Vector<XChar, PreallocatedSize, TypedAllocator<XChar> >
+  {
+public:
+  typedef XChar Char;
+  typedef TypedAllocator<XChar> Alloc;
+  typedef std::char_traits<XChar> Traits;
+  typedef Vector<XChar, PreallocatedSize, Alloc> String;
+  typedef StringBase<Char, PreallocatedSize, Allocator> ThisType;
+  typedef std::ostream OStream;
+  typedef std::istream IStream;
+  typedef StringBuffer<Char, PreallocatedSize, Allocator> Buffer;
+
+  StringBase(AllocatorBase *alloc=GlobalAllocator::instance())
+      : String(Alloc(alloc))
+    {
+    }
+  StringBase(const Char *n, AllocatorBase *alloc=GlobalAllocator::instance())
+      : String(Alloc(alloc))
+    {
+    const size_type s = strlen(n);
+    resizeAndCopy(s, n);
+    xAssert(at(size()) == '\0');
+    }
+  StringBase(const String &n, AllocatorBase *alloc=GlobalAllocator::instance())
+      : String(n, Alloc(alloc))
+    {
+    xAssert(at(size()) == '\0');
+    }
+  StringBase(String &&n, AllocatorBase *alloc=GlobalAllocator::instance())
+      : String(n, Alloc(alloc))
+    {
+    xAssert(at(size()) == '\0');
+    }
+
+  void clear()
+    {
+    String::clear();
+    append("");
+    }
+
+  size_type length() const
+    {
+    return String::length() - 1;
+    }
+
+  size_type size() const
+    {
+    return String::size() - 1;
+    }
+
+  XChar &back()
+    {
+    xAssert(end()-2);
+    return *(end()-2);
+    }
+
+  const XChar &back() const
+    {
+    xAssert(end()-2);
+    return *(end()-2);
+    }
+
+  size_type capacity() const
+    {
+    return String::capacity() - 1;
+    }
+
+  iterator end()
+    {
+    return String::end() - 1;
+    }
+
+  const const_iterator end() const
+    {
+    return String::end() - 1;
+    }
+
+  const const_iterator cend() const
+    {
+    return String::cend() - 1;
+    }
+
+  void reserve(size_type newCapacity)
+    {
+    String::reserve(newCapacity+1);
+    }
+
+  template <typename T> void appendType(T n);
+  template <typename T> T toType(bool *error=0) const;
+
+  template <typename Vec> void mid(const Vec &data, xsize pos, xsize len);
+
+  void resize(size_type newSize, const XChar &val)
+    {
+    // remove the \0
+    if(String::size())
+      {
+      String::popBack();
+      }
+    // resize up
+    String::resize(newSize+1, val);
+    at(newSize) = '\0';
+    }
+
+  template <typename It>
+  void resizeAndCopy(size_type newSize, It val)
+    {
+    // remove the \0
+    if(String::size())
+      {
+      String::popBack();
+      }
+
+    // ensure theres enough space for the new string and its /0
+    // note this calls the String::reserve which allows for trailing zero.
+    reserve(newSize);
+
+    // resize up, copying from val
+    String::resizeAndCopy(newSize, val);
+
+    // append a \0
+    String::resize(newSize+1, '\0');
+    }
+
+  template <typename T>
+  void append(T data)
+    {
+    if(String::size())
+      {
+      String::popBack();
+      }
+    String::append(data);
+    xAssert(at(size()) == '\0');
+    }
+
+  void append(const XChar *data)
+    {
+    if(String::size())
+      {
+      String::popBack();
+      }
+    String::resizeAndCopy(String::size()+strlen(data)+1, data);
+    xAssert(at(size()) == '\0');
+    }
+
+  void append(XChar data)
+    {
+    if(String::size())
+      {
+      String::popBack();
+      }
+    String::resize(size() + 2, data);
+    String::at(String::size()-1) = '\0';
+    xAssert(at(size()) == '\0');
+    }
+
+  ThisType& operator+=(const XChar *data)
+    {
+    append(data);
+    return *this;
+    }
+
+  void popBack()
+    {
+    resize(size() - 1, ' ');
+    }
+
+  void pushBack(Char c)
+    {
+    popBack();
+    const Char arr[] = { c, '\0' };
+    append(arr);
+    }
+
+  String& operator+=(const String &t)
+    {
+    append(t);
+    return *this;
+    }
+
+  String& operator+=(XChar t)
+    {
+    append(t);
+    return *this;
+    }
+
+  String& operator<<(XChar t)
+    {
+    append(t);
+    return *this;
+    }
+
+  String& operator<<(const String &t)
+    {
+    append(t);
+    return *this;
+    }
+  };
+
+template <typename Char, xsize PreallocatedSize, typename Allocator>
+  template <typename Vec>
+    inline void StringBase<Char, PreallocatedSize, Allocator>::mid(const Vec &data, xsize pos, xsize len)
+  {
+  xAssert(pos < data.size());
+  xAssert(pos+len < data.size());
+
+  clear();
+
+  const char* start = (data.data() + pos);
+
+  resizeAndCopy(len, start);
+  }
+
+class String : public StringBase<XChar>
+  {
+public:
+  typedef StringBase<XChar> BaseType;
+
+  String(AllocatorBase *alloc=GlobalAllocator::instance())
+      : BaseType(alloc)
+    {
+    }
+  String(const Char *n, AllocatorBase *alloc=GlobalAllocator::instance())
+      : BaseType(n, alloc)
+    {
+    }
+  String(const BaseType::String &n, AllocatorBase *alloc=GlobalAllocator::instance())
+      : BaseType(n, alloc)
+    {
+    }
+  String(String &&n, AllocatorBase *alloc=GlobalAllocator::instance())
+      : BaseType(n, alloc)
+    {
+    }
+  };
+
+}
+
+
+
+#endif // XSTRING_H

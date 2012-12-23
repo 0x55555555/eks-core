@@ -12,13 +12,19 @@
 # include <signal.h>
 #endif
 
-XAssert::XAssert(const XCodeLocation &location, const char *condition, const char* message)
+namespace Eks
+{
+
+namespace detail
+{
+
+Assert::Assert(const CodeLocation &location, const char *condition, const char* message)
     : _location(location), _condition(condition), _message(message), _argCount(0)
   {
   }
 
-XUnorderedMap<XCodeLocation, bool> g_disabledAsserts;
-bool XAssert::defaultFire(const XAssert &a)
+UnorderedMap<CodeLocation, bool> g_disabledAsserts;
+bool Assert::defaultFire(const Assert &a)
   {
   if(g_disabledAsserts.contains(a.location()))
     {
@@ -67,7 +73,7 @@ bool XAssert::defaultFire(const XAssert &a)
     text += "Arguments:\n";
     for(xsize i = 0; i < a._argCount; ++i)
       {
-      const XAssert::Argument &arg = a._arguments[a._argCount];
+      const Assert::Argument &arg = a._arguments[a._argCount];
 
       text + "  ";
       text += arg.name;
@@ -102,13 +108,13 @@ bool XAssert::defaultFire(const XAssert &a)
   return false;
   }
 
-XAssert::FireFunction *g_currentFireFunction = 0;
-XAssert::FireFunction *XAssert::currentFireFunction()
+Assert::FireFunction *g_currentFireFunction = 0;
+Assert::FireFunction *Assert::currentFireFunction()
   {
   return g_currentFireFunction ? g_currentFireFunction : defaultFire;
   }
 
-void XAssert::setCurrentFireFunction(FireFunction *f)
+void Assert::setCurrentFireFunction(FireFunction *f)
   {
   g_currentFireFunction = f;
   }
@@ -128,10 +134,10 @@ void __stdcall interuptBreak()
   }
 #endif
 
-XAssert::BreakFunction *g_currentBreakFunction = 0;
-XAssert::BreakFunction *XAssert::currentBreakFunction()
+Assert::BreakFunction *g_currentBreakFunction = 0;
+Assert::BreakFunction *Assert::currentBreakFunction()
   {
-  XAssert::BreakFunction *f = g_currentBreakFunction;
+  Assert::BreakFunction *f = g_currentBreakFunction;
 
   if(!f)
     {
@@ -145,7 +151,11 @@ XAssert::BreakFunction *XAssert::currentBreakFunction()
   return f;
   }
 
-void XAssert::setCurrentBreakFunction(BreakFunction *f)
+void Assert::setCurrentBreakFunction(BreakFunction *f)
   {
   g_currentBreakFunction = f;
   }
+
+}
+
+}

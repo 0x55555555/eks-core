@@ -6,7 +6,7 @@
 #include "QTextStream"
 #include "QDataStream"
 
-typedef Eigen::Quaternion<xReal> XQuaternion;
+typedef Eigen::Quaternion<Real> XQuaternion;
 
 inline bool operator==(const XQuaternion &a, const XQuaternion& b)
   {

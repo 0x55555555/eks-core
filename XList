@@ -1,8 +1,0 @@
-#ifndef XLIST_H
-#define XLIST_H
-
-#include "QList"
-
-#define XList QList
-
-#endif

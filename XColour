@@ -3,11 +3,16 @@
 
 #include "XGlobal"
 #include "XAssert"
-#include "XVector4D"
-#include "QColor"
+#include "XMathVector"
+#if X_QCOLOUR_COMPATIBILITY
+# include "QColor"
+#endif
 
+namespace Eks
+{
+
+#if X_QCOLOUR_COMPATIBILITY
 typedef QColor XLDRColour;
-
 
 inline XLDRColour operator*( const XLDRColour &a, const XLDRColour &b )
   {
@@ -19,54 +24,59 @@ inline XLDRColour operator+( const XLDRColour &a, const XLDRColour &b )
   return XLDRColour( xClamp( a.red() + b.red(), 0, 255 ), xClamp( a.green() + b.green(), 0, 255 ), xClamp( a.blue() + b.blue(), 0, 255 ), xClamp( a.alpha() + b.alpha(), 0, 255 ) );
   }
 
-inline XLDRColour operator*( xReal a, const XLDRColour &b )
+inline XLDRColour operator*( Real a, const XLDRColour &b )
   {
   return XLDRColour::fromRgbF( a * b.redF(), a * b.greenF(), a * b.blueF(), a * b.alphaF() );
   }
+#endif
 
-class XColour : public XVector4D
+class Colour : public Vector4D
   {
 public:
-  XColour()
+  Colour()
     {
     }
 
-  XColour( float *in ) : XVector4D( in[0], in[1], in[2], in[3] )
+  Colour( float *in ) : Vector4D( in[0], in[1], in[2], in[3] )
     {
     }
 
-  XColour( double *in ) : XVector4D( in[0], in[1], in[2], in[3] )
+  Colour( double *in ) : Vector4D( in[0], in[1], in[2], in[3] )
     {
     }
 
-  XColour( xReal r, xReal g, xReal b ) : XVector4D( r, g, b, 1.0 )
+  Colour( Real r, Real g, Real b ) : Vector4D( r, g, b, 1.0 )
     {
     }
 
-  XColour( xReal r, xReal g, xReal b, xReal a ) : XVector4D( r, g, b, a )
+  Colour( Real r, Real g, Real b, Real a ) : Vector4D( r, g, b, a )
     {
     }
 
-  XColour( const XVector4D &vec ) : XVector4D( vec.x(), vec.y(), vec.z(), vec.w() )
+  Colour( const Vector4D &vec ) : Vector4D( vec.x(), vec.y(), vec.z(), vec.w() )
     {
     }
 
-  XColour( const XLDRColour &col ) : XVector4D( col.redF(), col.greenF(), col.blueF(), col.alphaF() )
+#if X_QCOLOUR_COMPATIBILITY
+  Colour( const XLDRColour &col ) : Vector4D( col.redF(), col.greenF(), col.blueF(), col.alphaF() )
     {
     }
+#endif
 
   template <typename Derived>
-      XColour(const Eigen::EigenBase<Derived> &oth) : XVector4D(oth)
+      Colour(const Eigen::EigenBase<Derived> &oth) : Vector4D(oth)
     {
     }
 
+#if X_QCOLOUR_COMPATIBILITY
   XLDRColour toLDRColour( ) const
     {
     return XLDRColour::fromRgbF( coeff(0), coeff(1), coeff(2), coeff(3) );
     }
+#endif
 
   template <typename Derived>
-  XColour &operator=(const Eigen::EigenBase<Derived> &oth)
+  Colour &operator=(const Eigen::EigenBase<Derived> &oth)
     {
     XVector4D& ths(*this);
     ths = oth;
@@ -74,14 +84,11 @@ public:
     }
   };
 
-typedef XColour XColourTight;
-typedef XVector3DTight XColourRGBTight;
-xCompileTimeAssert(sizeof(xReal) == sizeof(float));
-xCompileTimeAssert(sizeof(XColour) == sizeof(float) * 4);
+typedef Colour ColourTight;
+typedef Eks::Vector3DTight ColourRGBTight;
+xCompileTimeAssert(sizeof(Real) == sizeof(float));
+xCompileTimeAssert(sizeof(Colour) == sizeof(float) * 4);
 
-#if X_DECLARE_METATYPES
-X_DECLARE_SERIALISABLE_METATYPE(XColour);
-Q_DECLARE_METATYPE(XColour);
-#endif
+}
 
 #endif // XCOLOUR_H

@@ -1,44 +1,60 @@
 #ifndef XMATHHELPERS_H
 #define XMATHHELPERS_H
 
-#include "QtGlobal"
+#include "XGlobal"
+#include "cstdlib"
+#include "cmath"
 
-typedef float xReal;
-#define EKS_XREAL_IS_DOUBLE 0
+#undef min
+#undef max
+#include "Eigen/Core"
 
-#if EKS_XREAL_IS_DOUBLE
+namespace Eks
+{
+
+typedef float Real;
+#define EKS_REAL_IS_DOUBLE 0
+
+#if EKS_REAL_IS_DOUBLE
 # define X_PI (M_PI)
 #else
-# define X_PI ((float)M_PI)
+# define X_PI ((Real)M_PI)
 #endif
 
-template <typename T>T xMix( xReal t, const T &a, const T &b )
+xint32 rand( xint32 min, xint32 max );
+Real randF();
+Real randF( Real min, Real max );
+xuint32 factorial( xuint32 in );
+xuint32 binomialCoefficient( xuint32 n, xuint32 k );
+
+inline Real cos(Real c)
   {
-  return ( (1-t) * a  ) + ( t * b );
+#if EKS_REAL_IS_DOUBLE
+  return cos(c);
+#else
+  return cosf(c);
+#endif
   }
 
-inline int xRand()
+inline Real tan(Real c)
   {
-  return qrand();
+#if EKS_REAL_IS_DOUBLE
+  return tan(c);
+#else
+  return tanf(c);
+#endif
   }
 
-inline int xRand( int min, int max )
+inline Real sin(Real c)
   {
-  return min + ( xRand() % (max-min+1) );
+#if EKS_REAL_IS_DOUBLE
+  return sin(c);
+#else
+  return sinf(c);
+#endif
   }
 
-inline xReal xRandF( )
-  {
-  return xRand() / (double)RAND_MAX;
-  }
-
-inline xReal xRandF( xReal min, xReal max )
-  {
-  return min + ( xRandF() * (max-min) );
-  }
-
-template <typename T>
-inline T xClamp( T in, T min, T max )
+template <typename T> T clamp( T in, T min, T max )
   {
   if( in < min )
     {
@@ -51,27 +67,11 @@ inline T xClamp( T in, T min, T max )
   return in;
   }
 
-template <typename T>
-inline T xLerp(T a, T b, xReal factor)
+template <typename T> T lerp(T a, T b, Real factor)
   {
   return a + (factor * (b-a));
   }
 
-inline unsigned int xFactorial( unsigned int in )
-  {
-  // multiply 1 * 2 * 3 * ... * in
-  unsigned int ret = 1;
-  for( unsigned int x=2; x<=in; x++ )
-    {
-    ret *= x;
-    }
-  return ret;
-  }
-
-inline unsigned int xBinomialCoefficient( unsigned int n, unsigned int k )
-  {
-  // Find the coefficient of n and k...
-  return xFactorial( n ) / ( ( xFactorial( n - k ) * xFactorial( k ) ) );
-  }
+}
 
 #endif // XMATHHELPERS_H

@@ -1,11 +1,14 @@
 #include "XMemoryTracker"
 #include "XAssert"
 
-XMemoryTracker::XMemoryTracker(XAllocatorBase* forwarder) : _forwarder(forwarder), _liveAllocations(0)
+namespace Eks
+{
+
+MemoryTracker::MemoryTracker(AllocatorBase* forwarder) : _forwarder(forwarder), _liveAllocations(0)
   {
   }
 
-void *XMemoryTracker::alloc(xsize size, xsize alignment)
+void *MemoryTracker::alloc(xsize size, xsize alignment)
   {
   xAssert(_forwarder);
 
@@ -15,7 +18,7 @@ void *XMemoryTracker::alloc(xsize size, xsize alignment)
   return mem;
   }
 
-void XMemoryTracker::free(void *mem)
+void MemoryTracker::free(void *mem)
   {
   xAssert(_forwarder);
 
@@ -24,3 +27,5 @@ void XMemoryTracker::free(void *mem)
 
   _forwarder->free(mem);
   }
+
+}

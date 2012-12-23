@@ -3,16 +3,19 @@
 
 X_IMPLEMENT_MEMORY_LOGGER(xTotalBucketAllocatorSize);
 
-void XBucketAllocator::debugDump() const
+namespace Eks
+{
+
+void BucketAllocator::debugDump() const
   {
   Q_FOREACH(xsize s, _internal.keys())
     {
-    XFixedSizeBucketAllocator *alloc = _internal.value(s);
+    FixedSizeBucketAllocator *alloc = _internal.value(s);
     alloc->debugDump();
     }
   }
 
-void XFixedSizeBucketAllocator::debugDump() const
+void FixedSizeBucketAllocator::debugDump() const
   {
   qDebug() << "Bucket allocator (Size: " << _size << " bytes)," << bucketCount() << "buckets.";
   if(!empty())
@@ -32,7 +35,7 @@ void XFixedSizeBucketAllocator::debugDump() const
     }
   }
 
-void XFixedSizeBucketAllocator::Bucket::debugDump() const
+void FixedSizeBucketAllocator::Bucket::debugDump() const
   {
   xuint32 mask = 0;
   for(xsize i=0, s=(_count/32); i<s; ++i)
@@ -41,3 +44,5 @@ void XFixedSizeBucketAllocator::Bucket::debugDump() const
     qDebug() << "    Mask " << i << "/" << s << ": Free mask:" << mask << "|" << QString::number(mask, 2).rightJustified(32, QChar('0'));
     }
   }
+
+}

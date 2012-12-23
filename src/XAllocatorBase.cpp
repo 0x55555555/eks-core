@@ -7,9 +7,12 @@
 
 X_IMPLEMENT_MEMORY_LOGGER(xTotalGlobalAllocatorSize);
 
-XGlobalAllocator g_allocator;
+namespace Eks
+{
 
-XGlobalAllocator *XGlobalAllocator::instance()
+GlobalAllocator g_allocator;
+
+GlobalAllocator *GlobalAllocator::instance()
   {
   return &g_allocator;
   }
@@ -21,7 +24,7 @@ struct MemoryHandle
   };
 
 
-void *XGlobalAllocator::alloc(xsize size, xsize alignment)
+void *GlobalAllocator::alloc(xsize size, xsize alignment)
   {
   xAssert(((alignment-1) & sizeof(MemoryHandle)) == 0);
 
@@ -47,7 +50,7 @@ void *XGlobalAllocator::alloc(xsize size, xsize alignment)
   return handle+1;
   }
 
-void XGlobalAllocator::free(void *mem)
+void GlobalAllocator::free(void *mem)
   {
   if(mem)
     {
@@ -63,3 +66,5 @@ void XGlobalAllocator::free(void *mem)
 #endif
     }
   }
+
+}

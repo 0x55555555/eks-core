@@ -5,19 +5,24 @@
 #include "XProperty"
 #include "XHash"
 
-class EKSCORE_EXPORT XMemoryTracker : public XAllocatorBase
+namespace Eks
+{
+
+class EKSCORE_EXPORT MemoryTracker : public AllocatorBase
   {
 XProperties:
-  XProperty(XAllocatorBase*, forwarder, setForwarder);
+  XProperty(AllocatorBase*, forwarder, setForwarder);
   XROProperty(xsize, liveAllocations);
 
 public:
-  XMemoryTracker(XAllocatorBase* forwarder);
+  MemoryTracker(AllocatorBase* forwarder);
 
   bool empty() const { return liveAllocations() == 0; }
 
   void *alloc(xsize size, xsize alignment=X_ALIGN_BYTE_COUNT);
   void free(void *mem);
   };
+
+}
 
 #endif // XMEMORYTRACKER

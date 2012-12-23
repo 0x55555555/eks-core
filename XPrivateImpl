@@ -4,7 +4,10 @@
 #include "XGlobal"
 #include "XAssert"
 
-template <xsize size> class XPrivateImpl
+namespace Eks
+{
+
+template <xsize size> class PrivateImpl
   {
 public:
   template <typename T> T *data()
@@ -39,12 +42,12 @@ public:
     }
 
 protected:
-  XPrivateImpl()
+  PrivateImpl()
     {
     _valid = false;
     }
 
-  ~XPrivateImpl()
+  ~PrivateImpl()
     {
     xAssert(!_valid);
     }
@@ -53,5 +56,7 @@ private:
   bool _valid;
   xuint8 _data[size];
   };
+
+}
 
 #endif // XPRIVATEIMPL_H

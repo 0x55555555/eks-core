@@ -54,6 +54,9 @@
 #include <qstring.h>
 #endif
 
+namespace Eks
+{
+
 /*
     The prime_deltas array is a table of selected prime values, even
     though it doesn't look like one. The primes we are using are 1,
@@ -97,48 +100,48 @@ static int countBits(int hint)
 }
 
 /*
-    A XUnorderedMap has initially around pow(2, MinNumBits) buckets. For
+    A UnorderedMap has initially around pow(2, MinNumBits) buckets. For
     example, if MinNumBits is 4, it has 17 buckets.
 */
 const int MinNumBits = 4;
 
-XUnorderedMapData XUnorderedMapData::shared_null = {
-    0, 0, Q_BASIC_ATOMIC_INITIALIZER(1), 0, 0, MinNumBits, 0, 0, true, false, 0, 0
+UnorderedMapData UnorderedMapData::shared_null = {
+    0, 0, 1, 0, 0, MinNumBits, 0, 0, true, false, 0, 0
 };
 
-void *XUnorderedMapData::allocateNode()
+void *UnorderedMapData::allocateNode()
 {
     return allocateNode(0);
 }
 
-void *XUnorderedMapData::allocateNode(int nodeAlign)
+void *UnorderedMapData::allocateNode(int nodeAlign)
 {
     void *ptr = strictAlignment ? allocator->alloc(nodeSize, nodeAlign) : allocator->alloc(nodeSize);
     xAssert(ptr);
     return ptr;
 }
 
-void XUnorderedMapData::freeNode(void *node)
+void UnorderedMapData::freeNode(void *node)
 {
     allocator->free(node);
 }
 
-XUnorderedMapData *XUnorderedMapData::detach_helper(void (*node_duplicate)(Node *, void *), int nodeSize, XAllocatorBase *inpAlloc)
+UnorderedMapData *UnorderedMapData::detach_helper(void (*node_duplicate)(Node *, void *), int nodeSize, AllocatorBase *inpAlloc)
 {
     return detach_helper2( node_duplicate, 0, nodeSize, 0, inpAlloc );
 }
 
-XUnorderedMapData *XUnorderedMapData::detach_helper2(void (*node_duplicate)(Node *, void *),
+UnorderedMapData *UnorderedMapData::detach_helper2(void (*node_duplicate)(Node *, void *),
                                      void (*node_delete)(Node *),
                                      int nodeSize,
                                      int nodeAlign,
-                                     XAllocatorBase *inpAlloc)
+                                     AllocatorBase *inpAlloc)
 {
     union {
-        XUnorderedMapData *d;
+        UnorderedMapData *d;
         Node *e;
     };
-    d = xAllocateAndConstruct(inpAlloc, XUnorderedMapData);
+    d = xAllocateAndConstruct(inpAlloc, UnorderedMapData);
     d->fakeNext = 0;
     d->buckets = 0;
     d->ref = 1;
@@ -197,7 +200,7 @@ XUnorderedMapData *XUnorderedMapData::detach_helper2(void (*node_duplicate)(Node
     return d;
 }
 
-void XUnorderedMapData::free_helper(void (*node_delete)(Node *))
+void UnorderedMapData::free_helper(void (*node_delete)(Node *))
 {
     if (node_delete) {
         Node *this_e = reinterpret_cast<Node *>(this);
@@ -218,15 +221,15 @@ void XUnorderedMapData::free_helper(void (*node_delete)(Node *))
     allocator->free(this);
 }
 
-XUnorderedMapData::Node *XUnorderedMapData::nextNode(Node *node)
+UnorderedMapData::Node *UnorderedMapData::nextNode(Node *node)
 {
     union {
         Node *next;
         Node *e;
-        XUnorderedMapData *d;
+        UnorderedMapData *d;
     };
     next = node->next;
-    xAssert(next, "XUnorderedMap", "Iterating beyond end()");
+    xAssert(next, "UnorderedMap", "Iterating beyond end()");
     if (next->next)
         return next;
 
@@ -241,11 +244,11 @@ XUnorderedMapData::Node *XUnorderedMapData::nextNode(Node *node)
     return e;
 }
 
-XUnorderedMapData::Node *XUnorderedMapData::previousNode(Node *node)
+UnorderedMapData::Node *UnorderedMapData::previousNode(Node *node)
 {
     union {
         Node *e;
-        XUnorderedMapData *d;
+        UnorderedMapData *d;
     };
 
     e = node;
@@ -272,7 +275,7 @@ XUnorderedMapData::Node *XUnorderedMapData::previousNode(Node *node)
         --bucket;
         --start;
     }
-    xAssert(start >= 0, "XUnorderedMap", "Iterating backward beyond begin()");
+    xAssert(start >= 0, "UnorderedMap", "Iterating backward beyond begin()");
     return e;
 }
 
@@ -282,7 +285,7 @@ XUnorderedMapData::Node *XUnorderedMapData::previousNode(Node *node)
     nonnegative, (1 << hint) gives the approximate number
     of buckets that should be used.
 */
-void XUnorderedMapData::rehash(int hint)
+void UnorderedMapData::rehash(int hint)
 {
     if (hint < 0) {
         hint = countBits(-hint);
@@ -328,14 +331,14 @@ void XUnorderedMapData::rehash(int hint)
     }
 }
 
-void XUnorderedMapData::destroyAndFree()
+void UnorderedMapData::destroyAndFree()
 {
     free_helper(0);
 }
 
 #ifdef QT_QHASH_DEBUG
 
-void XUnorderedMapData::dump()
+void UnorderedMapData::dump()
 {
     qDebug("Hash data (ref = %d, size = %d, nodeSize = %d, userNumBits = %d, numBits = %d, numBuckets = %d)",
             int(ref), size, nodeSize, userNumBits, numBits,
@@ -359,7 +362,7 @@ void XUnorderedMapData::dump()
     }
 }
 
-void XUnorderedMapData::checkSanity()
+void UnorderedMapData::checkSanity()
 {
     if (fakeNext)
         qFatal("Fake next isn't 0");
@@ -379,3 +382,5 @@ void XUnorderedMapData::checkSanity()
     }
 }
 #endif
+
+}

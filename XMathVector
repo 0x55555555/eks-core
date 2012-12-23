@@ -7,19 +7,24 @@
 #include "Eigen/Core"
 #include "QMetaType"
 
-typedef Eigen::Matrix<xReal, 2, 1> XVector2D;
-typedef Eigen::Matrix<xReal, 3, 1> XVector3D;
-typedef Eigen::Matrix<xReal, 4, 1> XVector4D;
+namespace Eks
+{
 
-typedef Eigen::Matrix<xint32, 2, 1> XVectorI2D;
-typedef Eigen::Matrix<xint32, 3, 1> XVectorI3D;
-typedef Eigen::Matrix<xint32, 4, 1> XVectorI4D;
+typedef Eigen::Matrix<Real, 2, 1> Vector2D;
+typedef Eigen::Matrix<Real, 3, 1> Vector3D;
+typedef Eigen::Matrix<Real, 4, 1> Vector4D;
+
+typedef Eigen::Matrix<xint32, 2, 1> VectorI2D;
+typedef Eigen::Matrix<xint32, 3, 1> VectorI3D;
+typedef Eigen::Matrix<xint32, 4, 1> VectorI4D;
 
 // types for integration with d3d gl, tightly packed for uniform blocks etc.
-typedef Eigen::Matrix<float, 3, 1, Eigen::DontAlign> XVector3DTight;
-typedef Eigen::Matrix<float, 2, 1, Eigen::DontAlign> XVector2DTight;
-xCompileTimeAssert(sizeof(XVector3DTight) == sizeof(float) * 3);
-xCompileTimeAssert(sizeof(XVector2DTight) == sizeof(float) * 2);
+typedef Eigen::Matrix<float, 3, 1, Eigen::DontAlign> Vector3DTight;
+typedef Eigen::Matrix<float, 2, 1, Eigen::DontAlign> Vector2DTight;
+xCompileTimeAssert(sizeof(Vector3DTight) == sizeof(float) * 3);
+xCompileTimeAssert(sizeof(Vector2DTight) == sizeof(float) * 2);
+
+}
 
 class QTextStream;
 class QDataStream;
@@ -152,7 +157,7 @@ inline QVector2D toQt(const XVector2D &vec)
   return QVector2D(vec(0), vec(1));
   }
 
-inline QVector3D toQt(const XVector3D &vec)
+inline QVector3D toQt(const Eks::Vector3D &vec)
   {
   return QVector3D(vec(0), vec(1), vec(2));
   }
@@ -162,16 +167,10 @@ inline QVector4D toQt(const XVector4D &vec)
   return QVector4D(vec(0), vec(1), vec(2), vec(3));
   }
 
-Q_DECLARE_METATYPE(XVector2D);
-Q_DECLARE_METATYPE(XVector3D);
-Q_DECLARE_METATYPE(XVector4D);
+Q_DECLARE_METATYPE(Eks::Vector2D);
+Q_DECLARE_METATYPE(Eks::Vector3D);
+Q_DECLARE_METATYPE(Eks::Vector4D);
 
-#endif
-
-#if X_DECLARE_METATYPES
-X_DECLARE_SERIALISABLE_METATYPE(XVector2D);
-X_DECLARE_SERIALISABLE_METATYPE(XVector3D);
-X_DECLARE_SERIALISABLE_METATYPE(XVector4D);
 #endif
 
 #endif // XVECTORXD_H

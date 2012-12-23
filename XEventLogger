@@ -21,8 +21,8 @@ class EKSCORE_EXPORT XEventLoggerInternal
 public:
   XEventLoggerInternal(const char *name, int type, xsize size, xsize count, const char *units);
 
-  XString name;
-  XString units;
+  String name;
+  String units;
   int type;
   xsize size;
   xsize count;

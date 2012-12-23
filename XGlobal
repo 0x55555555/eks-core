@@ -18,17 +18,7 @@
 #endif
 
 #include "QtGlobal"
-#include "cstdlib"
-#include "cmath"
 
-#undef min
-#undef max
-#include "Eigen/Core"
-
-namespace Eks
-{
-using Eigen::internal::result_of;
-}
 
 #define X_DECL_EXPORT Q_DECL_EXPORT
 #define X_DECL_IMPORT Q_DECL_IMPORT
@@ -75,21 +65,17 @@ using Eigen::internal::result_of;
 #ifdef X_ARCH_ARM
 # define X_ASSERT_VALUE_HANDLING 0
 # define X_ADVANCED_ASSERT 0
-# define X_UNORDERED_MAP_THREAD_SAFE 0
-# define X_STRING_IS_QSTRING 0
 # define X_QT_MATH_INTEROP 0
-# define X_DECLARE_METATYPES 0
 # define X_COMPILE_ARRAY_MATH 0
 # define X_VECTOR_IS_QVECTOR 0
+# define X_QCOLOUR_COMPATIBILITY 0
 #else
 # define X_ASSERT_VALUE_HANDLING 1
 # define X_ADVANCED_ASSERT 1
-# define X_UNORDERED_MAP_THREAD_SAFE 1
-# define X_STRING_IS_QSTRING 1
 # define X_QT_MATH_INTEROP 1
-# define X_DECLARE_METATYPES 1
 # define X_COMPILE_ARRAY_MATH 1
 # define X_VECTOR_IS_QVECTOR 1
+# define X_QCOLOUR_COMPATIBILITY 1
 #endif
 
 typedef signed char xint8;         /* 8 bit signed */

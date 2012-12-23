@@ -1,0 +1,148 @@
+#ifndef TypedAllocator_H
+#define TypedAllocator_H
+
+#include "XAllocatorBase"
+
+namespace Eks
+{
+
+template <typename T> class TypedAllocator;
+
+template <typename Derived, typename T> class TypedAllocatorBase
+  {
+public:
+  typedef T value_type;
+  typedef value_type* pointer;
+  typedef size_t size_type;
+
+  template <class O> struct rebind
+    {
+    typedef TypedAllocator<O> other;
+    };
+
+  pointer allocate(xsize n, void *hint=0)
+    {
+    (void)hint;
+    return (pointer)allocator()->alloc(sizeof(value_type) * n);
+    }
+
+  void deallocate(pointer p, size_type n)
+    {
+    (void)n;
+    allocator()->free(p);
+    }
+
+  AllocatorBase *allocator() { return static_cast<Derived*>(this)->allocator(); }
+  };
+
+template <typename T> class TypedAllocator : public TypedAllocatorBase<TypedAllocator<T>, T>
+  {
+public:
+  typedef value_type& reference;
+  typedef const value_type& const_reference;
+
+  TypedAllocator(AllocatorBase *alloc=0)
+    {
+    _alloc = alloc;
+    }
+
+  template <class U>
+      TypedAllocator(const TypedAllocator<U>& alloc)
+    {
+    _alloc = alloc._alloc;
+    }
+
+  void construct(pointer p, const_reference val)
+    {
+    new(p) T(val);
+    }
+
+  template <typename U> void destroy(U *p)
+    {
+    (void)p;
+    p->~U();
+    }
+
+  AllocatorBase *allocator() const { return _alloc; }
+
+protected:
+  AllocatorBase *_alloc;
+  };
+
+template <> class TypedAllocator<void> : public TypedAllocatorBase<TypedAllocator<void>, void>
+  {
+public:
+  typedef void* pointer;
+
+  TypedAllocator(AllocatorBase *alloc=0)
+    {
+    _alloc = alloc;
+    }
+
+  template <class U>
+      TypedAllocator(const TypedAllocator<U>& alloc)
+    {
+    _alloc = alloc._alloc;
+    }
+
+  AllocatorBase *allocator() const { return _alloc; }
+
+protected:
+  AllocatorBase *_alloc;
+  };
+
+
+template <typename Allocator, typename T> class StaticTypedAllocator
+    : public TypedAllocatorBase<StaticTypedAllocator<Allocator, T>, T>
+  {
+public:
+  typedef value_type& reference;
+  typedef const value_type& const_reference;
+
+  StaticTypedAllocator()
+    {
+    }
+
+  template <class U>
+      StaticTypedAllocator(const StaticTypedAllocator<Allocator, U>& alloc)
+    {
+    }
+
+  void construct(pointer p, const_reference val)
+    {
+    new(p) T(val);
+    }
+
+  template <typename U> void destroy(U *p)
+    {
+    (void)p;
+    p->~U();
+    }
+
+  AllocatorBase *allocator() const { return Allocator::instance(); }
+  };
+
+template <typename Allocator> class StaticTypedAllocator<Allocator, void>
+    : public TypedAllocatorBase<StaticTypedAllocator<Allocator, void>, void>
+  {
+public:
+  typedef void* pointer;
+
+  StaticTypedAllocator()
+    {
+    }
+
+  template <class U>
+      StaticTypedAllocator(const StaticTypedAllocator<Allocator, U>& alloc)
+    {
+    }
+
+  AllocatorBase *allocator() const { return Allocator::instance(); }
+  };
+
+// should be minimally sized.
+xCompileTimeAssert(sizeof(StaticTypedAllocator<GlobalAllocator, void>) == 1);
+
+}
+
+#endif // TypedAllocator_H

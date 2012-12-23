@@ -5,9 +5,12 @@
 #include "XProperty"
 #include "XMacroHelpers"
 
-class XString;
+namespace Eks
+{
 
-class EKSCORE_EXPORT XCodeLocation
+class String;
+
+class EKSCORE_EXPORT CodeLocation
   {
 XProperties:
   XROProperty(const char *, file);
@@ -15,15 +18,17 @@ XProperties:
   XROProperty(const char *, function);
 
 public:
-  XCodeLocation(const char *file, xsize line, const char *function);
+  CodeLocation(const char *file, xsize line, const char *function);
 
-  XString toString() const;
+  String toString() const;
 
-  bool operator==(const XCodeLocation &a) const;
+  bool operator==(const CodeLocation &a) const;
   };
 
-uint qHash(const XCodeLocation &a);
+}
 
-#define X_CURRENT_CODE_LOCATION XCodeLocation(__FILE__, __LINE__, xCurrentFunction)
+uint qHash(const Eks::CodeLocation &a);
+
+#define X_CURRENT_CODE_LOCATION Eks::CodeLocation(__FILE__, __LINE__, xCurrentFunction)
 
 #endif // XCODELOCATION_H

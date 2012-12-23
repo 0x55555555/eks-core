@@ -3,14 +3,17 @@
 #include "QThread"
 #include "QMutexLocker"
 
-XProfiler::ProfilingContext::ProfilingContext(ProfilingContext* parent, xuint32 context, const char *message)
+namespace Eks
+{
+
+Profiler::ProfilingContext::ProfilingContext(ProfilingContext* parent, xuint32 context, const char *message)
     : _parent(parent), _context(context), _firstChild(0), _nextSibling(0), _message(message)
   {
   }
 
-XProfiler* g_instance = 0;
+Profiler* g_instance = 0;
 
-XProfiler::ProfilingContext *XProfiler::ProfilingContext::findChildContext(xuint32 context, const char *mes)
+Profiler::ProfilingContext *Profiler::ProfilingContext::findChildContext(xuint32 context, const char *mes)
   {
   xAssert(g_instance);
 
@@ -37,7 +40,7 @@ XProfiler::ProfilingContext *XProfiler::ProfilingContext::findChildContext(xuint
   return _firstChild;
   }
 
-const XProfiler::ProfilingContext *XProfiler::ProfilingContext::findChildContext(xuint32 context, const char *mes) const
+const Profiler::ProfilingContext *Profiler::ProfilingContext::findChildContext(xuint32 context, const char *mes) const
   {
   xAssert(g_instance);
 
@@ -53,17 +56,17 @@ const XProfiler::ProfilingContext *XProfiler::ProfilingContext::findChildContext
   return 0;
   }
 
-XProfiler::ProfileHandle::ProfileHandle(ProfilingContext* ctx)
+Profiler::ProfileHandle::ProfileHandle(ProfilingContext* ctx)
     : _context(ctx), _start(XTime::now())
   {
   }
 
 
-XProfiler::ProfileHandle XProfiler::start(xuint32 component, const char *mess)
+Profiler::ProfileHandle Profiler::start(xuint32 component, const char *mess)
   {
   if(g_instance == 0)
     {
-    g_instance = new XProfiler();
+    g_instance = new Profiler();
     }
   QMutexLocker lock(&g_instance->_lock);
 
@@ -82,7 +85,7 @@ XProfiler::ProfileHandle XProfiler::start(xuint32 component, const char *mess)
   return ProfileHandle(currentCtx);
   }
 
-void XProfiler::end(const ProfileHandle &handle)
+void Profiler::end(const ProfileHandle &handle)
   {
   xAssert(g_instance);
   QMutexLocker lock(&g_instance->_lock);
@@ -96,7 +99,7 @@ void XProfiler::end(const ProfileHandle &handle)
   currentCtx = currentCtx->parent();
   }
 
-XProfiler::ProfilingContext *XProfiler::rootContext()
+Profiler::ProfilingContext *Profiler::rootContext()
   {
   if(g_instance)
     {
@@ -105,22 +108,22 @@ XProfiler::ProfilingContext *XProfiler::rootContext()
   return 0;
   }
 
-void XProfiler::clearResults()
+void Profiler::clearResults()
   {
   // todo: write this neatly, but for now this will work.
 
   if(g_instance)
     {
     g_instance->_currentContexts.clear();
-    g_instance->_contextAllocator.~XFixedSizeBucketAllocator();
-    new(&g_instance->_contextAllocator) XFixedSizeBucketAllocator(sizeof(ProfilingContext), 256, 1024);
+    g_instance->_contextAllocator.~FixedSizeBucketAllocator();
+    new(&g_instance->_contextAllocator) FixedSizeBucketAllocator(sizeof(ProfilingContext), 256, 1024);
 
     g_instance->_rootContext = (ProfilingContext *)g_instance->_contextAllocator.alloc();
     new(g_instance->_rootContext) ProfilingContext(0, X_UINT32_SENTINEL, "");
     }
   }
 
-QString XProfiler::stringForContext(xuint32 t)
+QString Profiler::stringForContext(xuint32 t)
   {
   if(g_instance)
     {
@@ -129,28 +132,30 @@ QString XProfiler::stringForContext(xuint32 t)
   return "";
   }
 
-void XProfiler::setStringForContext(xuint32 t, const QString &str)
+void Profiler::setStringForContext(xuint32 t, const QString &str)
   {
   if(g_instance == 0)
     {
-    g_instance = new XProfiler();
+    g_instance = new Profiler();
     }
 
   g_instance->_contextStrings[t] = str;
   }
 
-XProfiler::XProfiler() : _contextAllocator(sizeof(ProfilingContext), 256, 1024)
+Profiler::Profiler() : _contextAllocator(sizeof(ProfilingContext), 256, 1024)
   {
   _rootContext = (ProfilingContext *)_contextAllocator.alloc();
   new(_rootContext) ProfilingContext(0, X_UINT32_SENTINEL, "");
   }
 
-XProfiler::ProfileScopedBlock::ProfileScopedBlock(xuint32 component, const char *message)
-    : _handle(XProfiler::start(component, message))
+Profiler::ProfileScopedBlock::ProfileScopedBlock(xuint32 component, const char *message)
+    : _handle(Profiler::start(component, message))
   {
   }
 
-XProfiler::ProfileScopedBlock::~ProfileScopedBlock()
+Profiler::ProfileScopedBlock::~ProfileScopedBlock()
   {
-  XProfiler::end(_handle);
+  Profiler::end(_handle);
   }
+
+}

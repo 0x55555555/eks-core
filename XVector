@@ -4,54 +4,100 @@
 #include "XGlobal"
 #include "XAssert"
 #include "XAllocatorBase"
+#include "XTypedAllocator"
 #include <algorithm>
 
-template <typename T, typename Alloc = XTypedAllocator<T> >
-    class XVector
+namespace Eks
+{
+
+namespace detail
+{
+
+template <typename T, xsize Size, typename Alloc> class VectorStorage : public Alloc
   {
 public:
+  VectorStorage(const Alloc& a)
+      : Alloc(a),
+        _first(data),
+        _last(data+Size),
+        _end(data)
+    {
+    }
+
+  bool isUsingEmbeddedStorage() const { return _first == data; }
+
+  // the first member of the vector
+  T *_first;
+  // the element one past the capasity.
+  T *_last;
+  // the element one past the end of the active elements
+  T *_end;
+
+private:
+  T data[Size];
+  };
+
+template <typename T, typename Alloc> class VectorStorage<T, 0, Alloc> : public Alloc
+  {
+public:
+  VectorStorage(const Alloc& a)
+      : Alloc(a),
+        _first(0),
+        _last(0),
+        _end(0)
+    {
+    }
+
+  bool isUsingEmbeddedStorage() const { return false; }
+
+  // the first member of the vector
+  T *_first;
+  // the element one past the capasity.
+  T *_last;
+  // the element one past the end of the active elements
+  T *_end;
+  };
+}
+
+template <typename T,
+          xsize PreallocatedSize = 0,
+          typename Alloc = TypedAllocator<T> >
+  class Vector
+    : private detail::VectorStorage<T, PreallocatedSize, Alloc>
+  {
+public:
+  typedef detail::VectorStorage<T, PreallocatedSize, Alloc> ThisBase;
+  typedef Vector<T, PreallocatedSize, Alloc> ThisType;
   typedef xsize size_type;
   typedef T* iterator;
   typedef const T* const_iterator;
 
-  XVector(const Alloc &alloc=Alloc())
-      : _alloc(alloc),
-      _first(0),
-      _last(0),
-      _end(0)
+  Vector(const Alloc &alloc=Alloc())
+      : ThisBase(alloc)
     {
     }
 
-  template <typename X, typename AllocX>
-    XVector(const XVector<X, AllocX> &v, const Alloc &alloc=Alloc())
-      : _alloc(alloc),
-      _first(0),
-      _last(0),
-      _end(0)
+  template <typename X, xsize Pre, typename AllocX>
+    Vector(const Vector<X, Pre, AllocX> &v, const Alloc &alloc=Alloc())
+      : ThisBase(alloc)
     {
     resizeAndCopy(v.size(), v.begin());
     }
 
-  template <typename X, typename AllocX>
-    XVector(XVector<X, AllocX> &&v, const Alloc &alloc=Alloc())
-      : _alloc(alloc),
-      _first(0),
-      _last(0),
-      _end(0)
+  template <typename X, xsize Pre, typename AllocX>
+    Vector(Vector<X, Pre, AllocX> &&v, const Alloc &alloc=Alloc())
+      : ThisBase(alloc)
     {
-    swap(*this, v);
+    swap(v);
     }
 
-  explicit XVector(size_type size, const T& t, const Alloc &alloc=Alloc())
-      : _alloc(alloc),
-      _first(0),
-      _last(0),
-      _end(0)
+  explicit Vector(size_type size, const T& t, const Alloc &alloc=Alloc())
+      : ThisBase(alloc)
     {
     resize(size, t);
     }
 
-  ~XVector()
+  ~Vector()
     {
     clear();
     squeeze();
@@ -102,27 +148,27 @@ public:
     return _first;
     }
 
-  XVector<T, Alloc>& operator<<(const T &&t)
+  ThisType& operator<<(const T &&t)
     {
     pushBack(t);
     return *this;
     }
 
-  XVector<T, Alloc>& operator<<(const T &t)
+  ThisType& operator<<(const T &t)
     {
     pushBack(t);
     return *this;
     }
 
   template <typename VecX>
-  XVector<T, Alloc>& operator<<(const VecX &t)
+  ThisType& operator<<(const VecX &t)
     {
     append(t);
     return *this;
     }
 
   template <typename VecX>
-  XVector<T, Alloc>& operator+=(const VecX &t)
+  ThisType& operator+=(const VecX &t)
     {
     append(t);
     return *this;
@@ -166,15 +212,29 @@ public:
       }
 
     const size_type s = size();
+    const size_type oldCapacity = capacity();
+
     const size_type newBestCapacity = bestCapacity(newCapacity);
 
-    T *newData = _alloc.allocate(newBestCapacity);
+    T *newData = allocate(newBestCapacity);
 
-    copy(newData, newData+s, _first);
+    swap(newData, newData+s, _first);
+
+    // destroy the old data
+    for(size_type i = 0; i < s; ++i)
+      {
+      destroy(_first+i);
+      }
+
+    // always destroy the old data if it existed
+    if(_first && !isUsingEmbeddedStorage())
+      {
+      deallocate(_first, oldCapacity);
+      }
 
     _first = newData;
     _end = _first + s;
-    _last = _first + newCapacity;
+    _last = _first + newBestCapacity;
     }
 
   void squeeze()
@@ -188,11 +248,12 @@ public:
     const size_type newCapacity = s;
 
     T *oldData = _first;
+    bool shouldDestroy = oldData && !isUsingEmbeddedStorage();
     xsize oldCapacity = capacity();
 
     if(s)
       {
-      T *newData = _alloc.allocate(newCapacity);
+      T *newData = allocate(newCapacity);
 
       // copy the new elements
       copy(newData, newData+s, _first);
@@ -200,7 +261,7 @@ public:
       // destroy the old data
       for(size_type i = 0; i < s; ++i)
         {
-        _alloc.destroy(oldData+i);
+        destroy(oldData+i);
         }
 
       _first = newData;
@@ -213,9 +274,9 @@ public:
       }
 
     // always destroy the old data if it existed
-    if(oldData)
+    if(shouldDestroy)
       {
-      _alloc.deallocate(oldData, oldCapacity);
+      deallocate(oldData, oldCapacity);
       }
     }
 
@@ -226,7 +287,7 @@ public:
     // destroy extra members
     for(size_type i = newSize; i < s; ++i)
       {
-      _alloc.destroy(&at(i));
+      destroy(&at(i));
       }
 
     // adjust the end
@@ -241,7 +302,7 @@ public:
     // construct the extra members
     for(size_type i = s; i < newSize; ++i)
       {
-      _alloc.construct(&at(i), val);
+      construct(&at(i), val);
       }
     }
 
@@ -253,7 +314,7 @@ public:
     // destroy extra members
     for(size_type i = newSize; i < s; ++i)
       {
-      _alloc.destroy(&at(i));
+      destroy(&at(i));
       }
 
     // adjust the end
@@ -268,7 +329,7 @@ public:
     // construct the extra members
     for(size_type i = s; i < newSize; ++i, ++val)
       {
-      _alloc.construct(&at(i), *val);
+      construct(&at(i), *val);
       }
     }
 
@@ -333,7 +394,7 @@ public:
       }
 
     xAssert(_end < _last);
-    _alloc.construct(_end, t);
+    construct(_end, t);
     _end++;
     }
 
@@ -346,7 +407,7 @@ public:
       }
 
     xAssert(_end < _last);
-    _alloc.construct(_end, t);
+    construct(_end, t);
     _end++;
     }
 
@@ -369,10 +430,19 @@ public:
       }
     }
 
-  template <typename X, typename AllocX>
-  void swap(XVector<X, AllocX> &oth)
+  template <typename T>
+      void swap(const iterator &begin, const iterator &end, T from)
     {
-    if(v._alloc == oth._alloc)
+    for(iterator it = begin; it != end; ++it, ++from)
+      {
+      std::swap(*it, *from);
+      }
+    }
+
+  template <typename X, xsize Pre, typename AllocX>
+  void swap(Vector<X, Pre, AllocX> &oth)
+    {
+    if(oth._alloc == oth._alloc)
       {
       std::swap(_first, oth._first);
       std::swap(_last, oth._last);
@@ -409,29 +479,39 @@ public:
   void setAllocator(const Alloc &a)
     {
     xAssert(_first == 0);
-    _alloc = a;
+    allocator() = a;
     }
 
   Alloc &allocator()
     {
-    return _alloc;
+    return *this;
     }
 
-private:
   size_type bestCapacity(size_type s) const
     {
-    const size_type expandPolicy = 2;
-    return xMax(s, size() * expandPolicy);
+    const size_type expandExistingPolicy = 2;
+    const size_type expandReservePolicy = 2;
+    return xMax(s * expandExistingPolicy, size() * expandReservePolicy);
     }
-
-  Alloc _alloc;
-
-  // the first member of the vector
-  T *_first;
-  // the element one past the capasity.
-  T *_last;
-  // the element one past the end of the active elements
-  T *_end;
   };
+
+namespace detail
+{
+typedef StaticTypedAllocator<GlobalAllocator, int> testIntGSA;
+typedef VectorStorage <int, 0, testIntGSA> testVectorStorage;
+
+// this is important - a simple vector should only be three pointers
+xCompileTimeAssert(sizeof(testVectorStorage) == sizeof(void *) * 3);
+xCompileTimeAssert(sizeof(Vector <int, 0, testIntGSA>) == sizeof(testVectorStorage));
+
+// a vector with preallocation should be more or less three pointers with the extra data appended
+xCompileTimeAssert(sizeof(Vector <int, 6, testIntGSA>) == (sizeof(void *) * 3 + sizeof(int) * 6));
+
+// and a vector with preallocation and an allocator should be only one extra pointer
+xCompileTimeAssert(sizeof(Vector <int, 6, TypedAllocator<int> >)
+                     == (sizeof(void *) * 3 + sizeof(void *) + sizeof(int) * 6));
+}
+
+}
 
 #endif

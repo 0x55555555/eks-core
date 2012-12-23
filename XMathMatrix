@@ -2,18 +2,17 @@
 #define XMATRIX4X4_H
 
 #include "XGlobal"
-#include "Eigen/Core"
-#include "XVector2D"
+#include "XMathHelpers"
 #include "QDebug"
 
-typedef Eigen::Matrix<xReal, 4, 4> XMatrix4x4;
-typedef Eigen::Matrix<xReal, 3, 3> XMatrix3x3;
+namespace Eks
+{
 
-#if X_DECLARE_METATYPES
-Q_DECLARE_METATYPE(XMatrix3x3)
-#endif
+using Eigen::Matrix;
+typedef Eigen::Matrix<Real, 4, 4> Matrix4x4;
+typedef Eigen::Matrix<Real, 3, 3> Matrix3x3;
 
-#define XMatrix Eigen::Matrix
+}
 
 template <typename Derived> QDebug operator <<(QDebug str, const Eigen::DenseBase <Derived> &data)
   {

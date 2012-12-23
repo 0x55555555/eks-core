@@ -41,27 +41,25 @@
 **
 ****************************************************************************/
 
-#ifndef XUNORDEREDMAP_H
-#define XUNORDEREDMAP_H
+#ifndef XUNORDERERMAP_H
+#define XUNORDERERMAP_H
 
 #include "XGlobal"
 #include "XAssert"
-#if X_UNORDERED_MAP_THREAD_SAFE
-# include <QtCore/qatomic.h>
-#endif
-#include <QtCore/qchar.h>
-#include <QtCore/qiterator.h>
-#include <QtCore/qlist.h>
-#include <QtCore/qpair.h>
-
 #include "XAllocatorBase"
+#include "XVector"
+#include <atomic>
+
 
 class QBitArray;
 class QByteArray;
 class QString;
 class QStringRef;
 
-struct EKSCORE_EXPORT XUnorderedMapData
+namespace Eks
+{
+
+struct EKSCORE_EXPORT UnorderedMapData
 {
     struct Node {
         Node *next;
@@ -70,11 +68,7 @@ struct EKSCORE_EXPORT XUnorderedMapData
 
     Node *fakeNext;
     Node **buckets;
-#if X_UNORDERED_MAP_THREAD_SAFE
-    QBasicAtomicInt ref;
-#else
-    int ref;
-#endif
+    std::atomic<int> ref;
     int size;
     int nodeSize;
     short userNumBits;
@@ -83,14 +77,14 @@ struct EKSCORE_EXPORT XUnorderedMapData
     uint sharable : 1;
     uint strictAlignment : 1;
     uint reserved : 30;
-    XAllocatorBase *allocator;
+    AllocatorBase *allocator;
 
     void *allocateNode(); // ### Qt5 remove me
     void *allocateNode(int nodeAlign);
     void freeNode(void *node);
-    XUnorderedMapData *detach_helper(void (*node_duplicate)(Node *, void *), int nodeSize, XAllocatorBase *inpAlloc); // ### Qt5 remove me
-    XUnorderedMapData *detach_helper2(void (*node_duplicate)(Node *, void *), void (*node_delete)(Node *),
-                              int nodeSize, int nodeAlign, XAllocatorBase *inpAlloc);
+    UnorderedMapData *detach_helper(void (*node_duplicate)(Node *, void *), int nodeSize, AllocatorBase *inpAlloc); // ### Qt5 remove me
+    UnorderedMapData *detach_helper2(void (*node_duplicate)(Node *, void *), void (*node_delete)(Node *),
+                              int nodeSize, int nodeAlign, AllocatorBase *inpAlloc);
     void mightGrow();
     bool willGrow();
     void hasShrunk();
@@ -105,16 +99,16 @@ struct EKSCORE_EXPORT XUnorderedMapData
     static Node *nextNode(Node *node);
     static Node *previousNode(Node *node);
 
-    static XUnorderedMapData shared_null;
+    static UnorderedMapData shared_null;
 };
 
-inline void XUnorderedMapData::mightGrow() // ### Qt 5: eliminate
+inline void UnorderedMapData::mightGrow() // ### Qt 5: eliminate
 {
     if (size >= numBuckets)
         rehash(numBits + 1);
 }
 
-inline bool XUnorderedMapData::willGrow()
+inline bool UnorderedMapData::willGrow()
 {
     if (size >= numBuckets) {
         rehash(numBits + 1);
@@ -124,7 +118,7 @@ inline bool XUnorderedMapData::willGrow()
     }
 }
 
-inline void XUnorderedMapData::hasShrunk()
+inline void UnorderedMapData::hasShrunk()
 {
     if (size <= (numBuckets >> 3) && numBits > userNumBits) {
         QT_TRY {
@@ -135,7 +129,7 @@ inline void XUnorderedMapData::hasShrunk()
     }
 }
 
-inline XUnorderedMapData::Node *XUnorderedMapData::firstNode()
+inline UnorderedMapData::Node *UnorderedMapData::firstNode()
 {
     Node *e = reinterpret_cast<Node *>(this);
     Node **bucket = buckets;
@@ -148,58 +142,58 @@ inline XUnorderedMapData::Node *XUnorderedMapData::firstNode()
     return e;
 }
 
-struct XUnorderedMapDummyValue
+struct UnorderedMapDummyValue
 {
 };
 
-inline bool operator==(const XUnorderedMapDummyValue & /* v1 */, const XUnorderedMapDummyValue & /* v2 */)
+inline bool operator==(const UnorderedMapDummyValue & /* v1 */, const UnorderedMapDummyValue & /* v2 */)
 {
     return true;
 }
 
-Q_DECLARE_TYPEINFO(XUnorderedMapDummyValue, Q_MOVABLE_TYPE | Q_DUMMY_TYPE);
+Q_DECLARE_TYPEINFO(UnorderedMapDummyValue, Q_MOVABLE_TYPE | Q_DUMMY_TYPE);
 
 template <class Key, class T>
-struct XUnorderedMapDummyNode
+struct UnorderedMapDummyNode
 {
-    XUnorderedMapDummyNode *next;
+    UnorderedMapDummyNode *next;
     uint h;
     Key key;
 
-    inline XUnorderedMapDummyNode(const Key &key0) : key(key0) {}
+    inline UnorderedMapDummyNode(const Key &key0) : key(key0) {}
 };
 
 template <class Key, class T>
-struct XUnorderedMapNode
+struct UnorderedMapNode
 {
-    XUnorderedMapNode *next;
+    UnorderedMapNode *next;
     uint h;
     Key key;
     T value;
 
-    inline XUnorderedMapNode(const Key &key0) : key(key0) {} // ### remove in 5.0
-    inline XUnorderedMapNode(const Key &key0, const T &value0) : key(key0), value(value0) {}
+    inline UnorderedMapNode(const Key &key0) : key(key0) {} // ### remove in 5.0
+    inline UnorderedMapNode(const Key &key0, const T &value0) : key(key0), value(value0) {}
     inline bool same_key(uint h0, const Key &key0) { return h0 == h && key0 == key; }
 };
 
 #ifndef QT_NO_PARTIAL_TEMPLATE_SPECIALIZATION
 #define Q_HASH_DECLARE_INT_NODES(key_type) \
     template <class T> \
-    struct XUnorderedMapDummyNode<key_type, T> { \
-        XUnorderedMapDummyNode *next; \
+    struct UnorderedMapDummyNode<key_type, T> { \
+        UnorderedMapDummyNode *next; \
         union { uint h; key_type key; }; \
 \
-        inline XUnorderedMapDummyNode(key_type /* key0 */) {} \
+        inline UnorderedMapDummyNode(key_type /* key0 */) {} \
     }; \
 \
     template <class T> \
-    struct XUnorderedMapNode<key_type, T> { \
-        XUnorderedMapNode *next; \
+    struct UnorderedMapNode<key_type, T> { \
+        UnorderedMapNode *next; \
         union { uint h; key_type key; }; \
         T value; \
 \
-        inline XUnorderedMapNode(key_type /* key0 */) {} \
-        inline XUnorderedMapNode(key_type /* key0 */, const T &value0) : value(value0) {} \
+        inline UnorderedMapNode(key_type /* key0 */) {} \
+        inline UnorderedMapNode(key_type /* key0 */, const T &value0) : value(value0) {} \
         inline bool same_key(uint h0, key_type) { return h0 == h; } \
     }
 
@@ -213,18 +207,18 @@ Q_HASH_DECLARE_INT_NODES(uint);
 #endif // QT_NO_PARTIAL_TEMPLATE_SPECIALIZATION
 
 template <class Key, class T>
-class XUnorderedMap
+class UnorderedMap
 {
-    typedef XUnorderedMapDummyNode<Key, T> DummyNode;
-    typedef XUnorderedMapNode<Key, T> Node;
+    typedef UnorderedMapDummyNode<Key, T> DummyNode;
+    typedef UnorderedMapNode<Key, T> Node;
 
     union {
-        XUnorderedMapData *d;
-        XUnorderedMapNode<Key, T> *e;
+        UnorderedMapData *d;
+        UnorderedMapNode<Key, T> *e;
     };
-    XAllocatorBase *allocator;
+    AllocatorBase *allocator;
 
-    static inline Node *concrete(XUnorderedMapData::Node *node) {
+    static inline Node *concrete(UnorderedMapData::Node *node) {
         return reinterpret_cast<Node *>(node);
     }
 
@@ -237,7 +231,7 @@ class XUnorderedMap
 #endif
 
 public:
-    inline XUnorderedMap(XAllocatorBase *a=XGlobalAllocator::instance()) : d(&XUnorderedMapData::shared_null), allocator(a)
+    inline UnorderedMap(AllocatorBase *a=GlobalAllocator::instance()) : d(&UnorderedMapData::shared_null), allocator(a)
       {
 #if X_UNORDERED_MAP_THREAD_SAFE
       d->ref.ref();
@@ -245,8 +239,8 @@ public:
       ++d->ref;
 #endif
       }
-    inline XUnorderedMap(const XUnorderedMap<Key, T> &other) : d(other.d), allocator(other.allocator) { d->ref.ref(); if (!d->sharable) detach(); }
-    inline ~XUnorderedMap()
+    inline UnorderedMap(const UnorderedMap<Key, T> &other) : d(other.d), allocator(other.allocator) { d->ref.ref(); if (!d->sharable) detach(); }
+    inline ~UnorderedMap()
       {
 #if X_UNORDERED_MAP_THREAD_SAFE
       if (!d->ref.deref())
@@ -258,10 +252,10 @@ public:
         }
       }
 
-    XUnorderedMap<Key, T> &operator=(const XUnorderedMap<Key, T> &other);
+    UnorderedMap<Key, T> &operator=(const UnorderedMap<Key, T> &other);
 
-    bool operator==(const XUnorderedMap<Key, T> &other) const;
-    inline bool operator!=(const XUnorderedMap<Key, T> &other) const { return !(*this == other); }
+    bool operator==(const UnorderedMap<Key, T> &other) const;
+    inline bool operator!=(const UnorderedMap<Key, T> &other) const { return !(*this == other); }
 
     inline int size() const { return d->size; }
 
@@ -274,7 +268,7 @@ public:
     inline void detach() { if (d->ref != 1) detach_helper(); }
     inline bool isDetached() const { return d->ref == 1; }
     inline void setSharable(bool sharable) { if (!sharable) detach(); d->sharable = sharable; }
-    inline bool isSharedWith(const XUnorderedMap<Key, T> &other) const { return d == other.d; }
+    inline bool isSharedWith(const UnorderedMap<Key, T> &other) const { return d == other.d; }
 
     void clear();
 
@@ -289,11 +283,11 @@ public:
     T &operator[](const Key &key);
     const T operator[](const Key &key) const;
 
-    QList<Key> uniqueKeys() const;
-    QList<Key> keys() const;
-    QList<Key> keys(const T &value) const;
-    QList<T> values() const;
-    QList<T> values(const Key &key) const;
+    Vector<Key> uniqueKeys() const;
+    Vector<Key> keys() const;
+    Vector<Key> keys(const T &value) const;
+    Vector<T> values() const;
+    Vector<T> values(const Key &key) const;
     int count(const Key &key) const;
 
     class const_iterator;
@@ -301,7 +295,7 @@ public:
     class iterator
     {
         friend class const_iterator;
-        XUnorderedMapData::Node *i;
+        UnorderedMapData::Node *i;
 
     public:
         typedef std::bidirectional_iterator_tag iterator_category;
@@ -313,7 +307,7 @@ public:
         // ### Qt 5: get rid of 'operator Node *'
         inline operator Node *() const { return concrete(i); }
         inline iterator() : i(0) { }
-        explicit inline iterator(void *node) : i(reinterpret_cast<XUnorderedMapData::Node *>(node)) { }
+        explicit inline iterator(void *node) : i(reinterpret_cast<UnorderedMapData::Node *>(node)) { }
 
         inline const Key &key() const { return concrete(i)->key; }
         inline T &value() const { return concrete(i)->value; }
@@ -323,21 +317,21 @@ public:
         inline bool operator!=(const iterator &o) const { return i != o.i; }
 
         inline iterator &operator++() {
-            i = XUnorderedMapData::nextNode(i);
+            i = UnorderedMapData::nextNode(i);
             return *this;
         }
         inline iterator operator++(int) {
             iterator r = *this;
-            i = XUnorderedMapData::nextNode(i);
+            i = UnorderedMapData::nextNode(i);
             return r;
         }
         inline iterator &operator--() {
-            i = XUnorderedMapData::previousNode(i);
+            i = UnorderedMapData::previousNode(i);
             return *this;
         }
         inline iterator operator--(int) {
             iterator r = *this;
-            i = XUnorderedMapData::previousNode(i);
+            i = UnorderedMapData::previousNode(i);
             return r;
         }
         inline iterator operator+(int j) const
@@ -366,7 +360,7 @@ public:
     class const_iterator
     {
         friend class iterator;
-        XUnorderedMapData::Node *i;
+        UnorderedMapData::Node *i;
 
     public:
         typedef std::bidirectional_iterator_tag iterator_category;
@@ -379,7 +373,7 @@ public:
         inline operator Node *() const { return concrete(i); }
         inline const_iterator() : i(0) { }
         explicit inline const_iterator(void *node)
-            : i(reinterpret_cast<XUnorderedMapData::Node *>(node)) { }
+            : i(reinterpret_cast<UnorderedMapData::Node *>(node)) { }
 #ifdef QT_STRICT_ITERATORS
         explicit inline const_iterator(const iterator &o)
 #else
@@ -395,21 +389,21 @@ public:
         inline bool operator!=(const const_iterator &o) const { return i != o.i; }
 
         inline const_iterator &operator++() {
-            i = XUnorderedMapData::nextNode(i);
+            i = UnorderedMapData::nextNode(i);
             return *this;
         }
         inline const_iterator operator++(int) {
             const_iterator r = *this;
-            i = XUnorderedMapData::nextNode(i);
+            i = UnorderedMapData::nextNode(i);
             return r;
         }
         inline const_iterator &operator--() {
-            i = XUnorderedMapData::previousNode(i);
+            i = UnorderedMapData::previousNode(i);
             return *this;
         }
         inline const_iterator operator--(int) {
             const_iterator r = *this;
-            i = XUnorderedMapData::previousNode(i);
+            i = UnorderedMapData::previousNode(i);
             return r;
         }
         inline const_iterator operator+(int j) const
@@ -449,7 +443,7 @@ public:
     const_iterator constFind(const Key &key) const;
     iterator insert(const Key &key, const T &value);
     iterator insertMulti(const Key &key, const T &value);
-    XUnorderedMap<Key, T> &unite(const XUnorderedMap<Key, T> &other);
+    UnorderedMap<Key, T> &unite(const UnorderedMap<Key, T> &other);
 
     // STL compatibility
     typedef T mapped_type;
@@ -466,37 +460,37 @@ public:
 
 private:
     void detach_helper();
-    void freeData(XUnorderedMapData *d);
+    void freeData(UnorderedMapData *d);
     Node **findNode(const Key &key, uint *hp = 0) const;
     Node *createNode(uint h, const Key &key, const T &value, Node **nextNode);
     void deleteNode(Node *node);
-    static void deleteNode2(XUnorderedMapData::Node *node);
+    static void deleteNode2(UnorderedMapData::Node *node);
 
-    static void duplicateNode(XUnorderedMapData::Node *originalNode, void *newNode);
+    static void duplicateNode(UnorderedMapData::Node *originalNode, void *newNode);
 };
 
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE void XUnorderedMap<Key, T>::deleteNode(Node *node)
+Q_INLINE_TEMPLATE void UnorderedMap<Key, T>::deleteNode(Node *node)
 {
-    deleteNode2(reinterpret_cast<XUnorderedMapData::Node*>(node));
+    deleteNode2(reinterpret_cast<UnorderedMapData::Node*>(node));
     d->freeNode(node);
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE void XUnorderedMap<Key, T>::deleteNode2(XUnorderedMapData::Node *node)
+Q_INLINE_TEMPLATE void UnorderedMap<Key, T>::deleteNode2(UnorderedMapData::Node *node)
 {
 #ifdef Q_CC_BOR
-    concrete(node)->~XUnorderedMapNode<Key, T>();
+    concrete(node)->~UnorderedMapNode<Key, T>();
 #elif defined(QT_NO_PARTIAL_TEMPLATE_SPECIALIZATION)
-    concrete(node)->~XUnorderedMapNode();
+    concrete(node)->~UnorderedMapNode();
 #else
     concrete(node)->~Node();
 #endif
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE void XUnorderedMap<Key, T>::duplicateNode(XUnorderedMapData::Node *node, void *newNode)
+Q_INLINE_TEMPLATE void UnorderedMap<Key, T>::duplicateNode(UnorderedMapData::Node *node, void *newNode)
 {
     Node *concreteNode = concrete(node);
     if (QTypeInfo<T>::isDummy) {
@@ -507,8 +501,8 @@ Q_INLINE_TEMPLATE void XUnorderedMap<Key, T>::duplicateNode(XUnorderedMapData::N
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE typename XUnorderedMap<Key, T>::Node *
-XUnorderedMap<Key, T>::createNode(uint ah, const Key &akey, const T &avalue, Node **anextNode)
+Q_INLINE_TEMPLATE typename UnorderedMap<Key, T>::Node *
+UnorderedMap<Key, T>::createNode(uint ah, const Key &akey, const T &avalue, Node **anextNode)
 {
     Node *node;
 
@@ -526,9 +520,9 @@ XUnorderedMap<Key, T>::createNode(uint ah, const Key &akey, const T &avalue, Nod
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE XUnorderedMap<Key, T> &XUnorderedMap<Key, T>::unite(const XUnorderedMap<Key, T> &other)
+Q_INLINE_TEMPLATE UnorderedMap<Key, T> &UnorderedMap<Key, T>::unite(const UnorderedMap<Key, T> &other)
 {
-    XUnorderedMap<Key, T> copy(other);
+    UnorderedMap<Key, T> copy(other);
     const_iterator it = copy.constEnd();
     while (it != copy.constBegin()) {
         --it;
@@ -538,21 +532,21 @@ Q_INLINE_TEMPLATE XUnorderedMap<Key, T> &XUnorderedMap<Key, T>::unite(const XUno
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE void XUnorderedMap<Key, T>::freeData(XUnorderedMapData *x)
+Q_OUTOFLINE_TEMPLATE void UnorderedMap<Key, T>::freeData(UnorderedMapData *x)
 {
     x->free_helper(deleteNode2);
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE void XUnorderedMap<Key, T>::clear()
+Q_INLINE_TEMPLATE void UnorderedMap<Key, T>::clear()
 {
-    *this = XUnorderedMap<Key,T>();
+    *this = UnorderedMap<Key,T>();
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE void XUnorderedMap<Key, T>::detach_helper()
+Q_OUTOFLINE_TEMPLATE void UnorderedMap<Key, T>::detach_helper()
 {
-    XUnorderedMapData *x = d->detach_helper2(duplicateNode, deleteNode2,
+    UnorderedMapData *x = d->detach_helper2(duplicateNode, deleteNode2,
         QTypeInfo<T>::isDummy ? sizeof(DummyNode) : sizeof(Node),
         QTypeInfo<T>::isDummy ? alignOfDummyNode() : alignOfNode(), allocator);
 #if X_UNORDERED_MAP_THREAD_SAFE
@@ -567,12 +561,12 @@ Q_OUTOFLINE_TEMPLATE void XUnorderedMap<Key, T>::detach_helper()
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE XUnorderedMap<Key, T> &XUnorderedMap<Key, T>::operator=(const XUnorderedMap<Key, T> &other)
+Q_INLINE_TEMPLATE UnorderedMap<Key, T> &UnorderedMap<Key, T>::operator=(const UnorderedMap<Key, T> &other)
 {
     if (d != other.d) {
-        XUnorderedMapData *o = other.d;
-        o->ref.ref();
-        if (!d->ref.deref())
+        UnorderedMapData *o = other.d;
+        ++o->ref;
+        if (!--d->ref)
             freeData(d);
         d = o;
         if (!d->sharable)
@@ -582,7 +576,7 @@ Q_INLINE_TEMPLATE XUnorderedMap<Key, T> &XUnorderedMap<Key, T>::operator=(const 
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE const T XUnorderedMap<Key, T>::value(const Key &akey) const
+Q_INLINE_TEMPLATE const T UnorderedMap<Key, T>::value(const Key &akey) const
 {
     Node *node;
     if (d->size == 0 || (node = *findNode(akey)) == e) {
@@ -593,7 +587,7 @@ Q_INLINE_TEMPLATE const T XUnorderedMap<Key, T>::value(const Key &akey) const
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE const T XUnorderedMap<Key, T>::value(const Key &akey, const T &adefaultValue) const
+Q_INLINE_TEMPLATE const T UnorderedMap<Key, T>::value(const Key &akey, const T &adefaultValue) const
 {
     Node *node;
     if (d->size == 0 || (node = *findNode(akey)) == e) {
@@ -604,9 +598,9 @@ Q_INLINE_TEMPLATE const T XUnorderedMap<Key, T>::value(const Key &akey, const T 
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE QList<Key> XUnorderedMap<Key, T>::uniqueKeys() const
+Q_OUTOFLINE_TEMPLATE Vector<Key> UnorderedMap<Key, T>::uniqueKeys() const
 {
-    QList<Key> res;
+    Vector<Key> res;
     res.reserve(size()); // May be too much, but assume short lifetime
     const_iterator i = begin();
     if (i != end()) {
@@ -624,39 +618,39 @@ break_out_of_outer_loop:
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE QList<Key> XUnorderedMap<Key, T>::keys() const
+Q_OUTOFLINE_TEMPLATE Vector<Key> UnorderedMap<Key, T>::keys() const
 {
-    QList<Key> res;
+    Vector<Key> res;
     res.reserve(size());
     const_iterator i = begin();
     while (i != end()) {
-        res.append(i.key());
+        res << i.key();
         ++i;
     }
     return res;
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE QList<Key> XUnorderedMap<Key, T>::keys(const T &avalue) const
+Q_OUTOFLINE_TEMPLATE Vector<Key> UnorderedMap<Key, T>::keys(const T &avalue) const
 {
-    QList<Key> res;
+    Vector<Key> res;
     const_iterator i = begin();
     while (i != end()) {
         if (i.value() == avalue)
-            res.append(i.key());
+            res << i.key();
         ++i;
     }
     return res;
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE const Key XUnorderedMap<Key, T>::key(const T &avalue) const
+Q_OUTOFLINE_TEMPLATE const Key UnorderedMap<Key, T>::key(const T &avalue) const
 {
     return key(avalue, Key());
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE const Key XUnorderedMap<Key, T>::key(const T &avalue, const Key &defaultValue) const
+Q_OUTOFLINE_TEMPLATE const Key UnorderedMap<Key, T>::key(const T &avalue, const Key &defaultValue) const
 {
     const_iterator i = begin();
     while (i != end()) {
@@ -669,22 +663,22 @@ Q_OUTOFLINE_TEMPLATE const Key XUnorderedMap<Key, T>::key(const T &avalue, const
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE QList<T> XUnorderedMap<Key, T>::values() const
+Q_OUTOFLINE_TEMPLATE Vector<T> UnorderedMap<Key, T>::values() const
 {
-    QList<T> res;
+    Vector<T> res;
     res.reserve(size());
     const_iterator i = begin();
     while (i != end()) {
-        res.append(i.value());
+        res << i.value();
         ++i;
     }
     return res;
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE QList<T> XUnorderedMap<Key, T>::values(const Key &akey) const
+Q_OUTOFLINE_TEMPLATE Vector<T> UnorderedMap<Key, T>::values(const Key &akey) const
 {
-    QList<T> res;
+    Vector<T> res;
     Node *node = *findNode(akey);
     if (node != e) {
         do {
@@ -695,7 +689,7 @@ Q_OUTOFLINE_TEMPLATE QList<T> XUnorderedMap<Key, T>::values(const Key &akey) con
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE int XUnorderedMap<Key, T>::count(const Key &akey) const
+Q_OUTOFLINE_TEMPLATE int UnorderedMap<Key, T>::count(const Key &akey) const
 {
     int cnt = 0;
     Node *node = *findNode(akey);
@@ -708,13 +702,13 @@ Q_OUTOFLINE_TEMPLATE int XUnorderedMap<Key, T>::count(const Key &akey) const
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE const T XUnorderedMap<Key, T>::operator[](const Key &akey) const
+Q_INLINE_TEMPLATE const T UnorderedMap<Key, T>::operator[](const Key &akey) const
 {
     return value(akey);
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE T &XUnorderedMap<Key, T>::operator[](const Key &akey)
+Q_INLINE_TEMPLATE T &UnorderedMap<Key, T>::operator[](const Key &akey)
 {
     detach();
 
@@ -729,7 +723,7 @@ Q_INLINE_TEMPLATE T &XUnorderedMap<Key, T>::operator[](const Key &akey)
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE typename XUnorderedMap<Key, T>::iterator XUnorderedMap<Key, T>::insert(const Key &akey,
+Q_INLINE_TEMPLATE typename UnorderedMap<Key, T>::iterator UnorderedMap<Key, T>::insert(const Key &akey,
                                                                          const T &avalue)
 {
     detach();
@@ -748,7 +742,7 @@ Q_INLINE_TEMPLATE typename XUnorderedMap<Key, T>::iterator XUnorderedMap<Key, T>
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE typename XUnorderedMap<Key, T>::iterator XUnorderedMap<Key, T>::insertMulti(const Key &akey,
+Q_INLINE_TEMPLATE typename UnorderedMap<Key, T>::iterator UnorderedMap<Key, T>::insertMulti(const Key &akey,
                                                                               const T &avalue)
 {
     detach();
@@ -760,7 +754,7 @@ Q_INLINE_TEMPLATE typename XUnorderedMap<Key, T>::iterator XUnorderedMap<Key, T>
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE int XUnorderedMap<Key, T>::remove(const Key &akey)
+Q_OUTOFLINE_TEMPLATE int UnorderedMap<Key, T>::remove(const Key &akey)
 {
     if (isEmpty()) // prevents detaching shared null
         return 0;
@@ -783,7 +777,7 @@ Q_OUTOFLINE_TEMPLATE int XUnorderedMap<Key, T>::remove(const Key &akey)
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE T XUnorderedMap<Key, T>::take(const Key &akey)
+Q_OUTOFLINE_TEMPLATE T UnorderedMap<Key, T>::take(const Key &akey)
 {
     if (isEmpty()) // prevents detaching shared null
         return T();
@@ -803,7 +797,7 @@ Q_OUTOFLINE_TEMPLATE T XUnorderedMap<Key, T>::take(const Key &akey)
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE typename XUnorderedMap<Key, T>::iterator XUnorderedMap<Key, T>::erase(iterator it)
+Q_OUTOFLINE_TEMPLATE typename UnorderedMap<Key, T>::iterator UnorderedMap<Key, T>::erase(iterator it)
 {
     if (it == iterator(e))
         return it;
@@ -822,39 +816,39 @@ Q_OUTOFLINE_TEMPLATE typename XUnorderedMap<Key, T>::iterator XUnorderedMap<Key,
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE void XUnorderedMap<Key, T>::reserve(int asize)
+Q_INLINE_TEMPLATE void UnorderedMap<Key, T>::reserve(int asize)
 {
     detach();
     d->rehash(-qMax(asize, 1));
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE typename XUnorderedMap<Key, T>::const_iterator XUnorderedMap<Key, T>::find(const Key &akey) const
+Q_INLINE_TEMPLATE typename UnorderedMap<Key, T>::const_iterator UnorderedMap<Key, T>::find(const Key &akey) const
 {
     return const_iterator(*findNode(akey));
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE typename XUnorderedMap<Key, T>::const_iterator XUnorderedMap<Key, T>::constFind(const Key &akey) const
+Q_INLINE_TEMPLATE typename UnorderedMap<Key, T>::const_iterator UnorderedMap<Key, T>::constFind(const Key &akey) const
 {
     return const_iterator(*findNode(akey));
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE typename XUnorderedMap<Key, T>::iterator XUnorderedMap<Key, T>::find(const Key &akey)
+Q_INLINE_TEMPLATE typename UnorderedMap<Key, T>::iterator UnorderedMap<Key, T>::find(const Key &akey)
 {
     detach();
     return iterator(*findNode(akey));
 }
 
 template <class Key, class T>
-Q_INLINE_TEMPLATE bool XUnorderedMap<Key, T>::contains(const Key &akey) const
+Q_INLINE_TEMPLATE bool UnorderedMap<Key, T>::contains(const Key &akey) const
 {
     return *findNode(akey) != e;
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE typename XUnorderedMap<Key, T>::Node **XUnorderedMap<Key, T>::findNode(const Key &akey,
+Q_OUTOFLINE_TEMPLATE typename UnorderedMap<Key, T>::Node **UnorderedMap<Key, T>::findNode(const Key &akey,
                                                                             uint *ahp) const
 {
     Node **node;
@@ -874,7 +868,7 @@ Q_OUTOFLINE_TEMPLATE typename XUnorderedMap<Key, T>::Node **XUnorderedMap<Key, T
 }
 
 template <class Key, class T>
-Q_OUTOFLINE_TEMPLATE bool XUnorderedMap<Key, T>::operator==(const XUnorderedMap<Key, T> &other) const
+Q_OUTOFLINE_TEMPLATE bool UnorderedMap<Key, T>::operator==(const UnorderedMap<Key, T> &other) const
 {
     if (size() != other.size())
         return false;
@@ -897,6 +891,8 @@ Q_OUTOFLINE_TEMPLATE bool XUnorderedMap<Key, T>::operator==(const XUnorderedMap<
         } while (it != end() && it.key() == akey);
     }
     return true;
-};
+}
 
-#endif // XUNORDEREDMAP_H
+}
+
+#endif // XUNORDERERMAP_H
