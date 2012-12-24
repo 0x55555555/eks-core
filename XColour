@@ -78,7 +78,7 @@ public:
   template <typename Derived>
   Colour &operator=(const Eigen::EigenBase<Derived> &oth)
     {
-    XVector4D& ths(*this);
+    Vector4D& ths(*this);
     ths = oth;
     return *this;
     }
