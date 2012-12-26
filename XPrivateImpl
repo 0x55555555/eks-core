@@ -12,21 +12,21 @@ template <xsize size> class PrivateImpl
 public:
   template <typename T> T *data()
     {
-    xCompileTimeAssert(size <= sizeof(T));
+    xCompileTimeAssert(sizeof(T) <= size);
 
     return reinterpret_cast<T*>(_data);
     }
 
   template <typename T> const T *data() const
     {
-    xCompileTimeAssert(size <= sizeof(T));
+    xCompileTimeAssert(sizeof(T) <= size);
 
     return reinterpret_cast<const T*>(_data);
     }
 
   template <typename T> void destoy()
     {
-    xCompileTimeAssert(size <= sizeof(T));
+    xCompileTimeAssert(sizeof(T) <= size);
 
     if(_valid)
       {
