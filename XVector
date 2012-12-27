@@ -148,7 +148,7 @@ public:
     return _first;
     }
 
-  ThisType& operator<<(const T &&t)
+  ThisType& operator<<(T &&t)
     {
     pushBack(t);
     return *this;
@@ -157,13 +157,6 @@ public:
   ThisType& operator<<(const T &t)
     {
     pushBack(t);
-    return *this;
-    }
-
-  template <typename VecX>
-  ThisType& operator<<(const VecX &t)
-    {
-    append(t);
     return *this;
     }
 
