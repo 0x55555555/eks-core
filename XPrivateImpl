@@ -24,15 +24,16 @@ public:
     return reinterpret_cast<const T*>(_data);
     }
 
-  template <typename T> void destoy()
+  template <typename T> void destroy()
     {
     xCompileTimeAssert(sizeof(T) <= size);
 
     if(_valid)
       {
-      T *d = data();
+      T *d = data<T>();
       (void)d;
       d->~T();
+      _valid = false;
       }
     }
 
