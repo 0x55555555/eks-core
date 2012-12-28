@@ -12,21 +12,34 @@ template <xsize size> class PrivateImpl
 public:
   template <typename T> T *data()
     {
-    xCompileTimeAssert(sizeof(T) <= size);
+    sizeCheck<T>();
+    xAssert(_valid);
 
     return reinterpret_cast<T*>(_data);
     }
 
   template <typename T> const T *data() const
     {
-    xCompileTimeAssert(sizeof(T) <= size);
+    sizeCheck<T>();
+    xAssert(_valid);
 
     return reinterpret_cast<const T*>(_data);
     }
 
+  template <typename T> T *create()
+    {
+    sizeCheck<T>();
+    xAssert(!_valid);
+
+    T *res = new(_data) T();
+    _valid = true;
+
+    return res;
+    }
+
   template <typename T> void destroy()
     {
-    xCompileTimeAssert(sizeof(T) <= size);
+    sizeCheck<T>();
 
     if(_valid)
       {
@@ -54,6 +67,14 @@ protected:
     }
 
 private:
+  X_DISABLE_COPY(PrivateImpl)
+
+  template <typename T> X_CONST_EXPR void sizeCheck() const
+    {
+    typedef typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type Type;
+    xCompileTimeAssert(sizeof(Type) <= size);
+    }
+
   bool _valid;
   xuint8 _data[size];
   };
