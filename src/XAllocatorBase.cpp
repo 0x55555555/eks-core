@@ -1,10 +1,12 @@
 #include "XAllocatorBase"
+#include "XEventLogger"
 #include "XAssert"
 
 #ifndef Q_CC_MSVC
 # include <malloc.h>
 #endif
 
+X_DECLARE_MEMORY_LOGGER(EKSCORE_EXPORT, xTotalGlobalAllocatorSize);
 X_IMPLEMENT_MEMORY_LOGGER(xTotalGlobalAllocatorSize);
 
 namespace Eks

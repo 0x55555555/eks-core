@@ -146,13 +146,13 @@ template <typename Derived> QDataStream &operator<<(QDataStream &str, const Eige
   return str;
   }
 
-#if X_QT_MATH_INTEROP
+#if X_QT_INTEROP
 
 #include "QVector2D"
 #include "QVector3D"
 #include "QVector4D"
 
-inline QVector2D toQt(const XVector2D &vec)
+inline QVector2D toQt(const Eks::Vector2D &vec)
   {
   return QVector2D(vec(0), vec(1));
   }
@@ -162,10 +162,14 @@ inline QVector3D toQt(const Eks::Vector3D &vec)
   return QVector3D(vec(0), vec(1), vec(2));
   }
 
-inline QVector4D toQt(const XVector4D &vec)
+inline QVector4D toQt(const Eks::Vector4D &vec)
   {
   return QVector4D(vec(0), vec(1), vec(2), vec(3));
   }
+
+#endif
+
+#if X_QT_INTEROP
 
 Q_DECLARE_METATYPE(Eks::Vector2D);
 Q_DECLARE_METATYPE(Eks::Vector3D);

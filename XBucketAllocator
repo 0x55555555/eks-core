@@ -8,6 +8,7 @@
 #include "QHash"
 #include "XUnorderedMap"
 #include "XAllocatorBase"
+#include "XEventLogger"
 
 #define Bit(index) 1 << index
 #define Bits1To8   0x000000FF
@@ -36,7 +37,7 @@ public:
       {
       xAssertIsAligned(objectSize);
       xAssert((count % 32) == 0);
-      _memory = X_ROUND_TO_ALIGNMENT(xuint8 *, _alloc);
+      _memory = Eks::roundToAlignment(_alloc);
       xAssertIsAligned(_memory);
       _masks = (xuint32*)((xuint8*)_memory + (_count*_size));
 
@@ -345,7 +346,7 @@ public:
 
   void *alloc(xsize size, xsize alignment=X_ALIGN_BYTE_COUNT)
     {
-    size = X_ROUND_TO_SPECIFIC_ALIGNMENT(xsize, size, alignment);
+    size = Eks::roundToAlignment(size, alignment);
     X_MEMORY_LOGGER_ALLOC(xTotalBucketAllocatorSize, size);
       
     FixedSizeBucketAllocator *b = _internal.value(size, 0);

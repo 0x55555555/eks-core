@@ -97,7 +97,7 @@ template<typename Derived>
 template<typename OtherDerived>
 bool DenseBase<Derived>::isApprox(
   const DenseBase<OtherDerived>& other,
-  RealScalar prec
+  const RealScalar& prec
 ) const
 {
   return internal::isApprox_selector<Derived, OtherDerived>::run(derived(), other.derived(), prec);
@@ -119,7 +119,7 @@ bool DenseBase<Derived>::isApprox(
 template<typename Derived>
 bool DenseBase<Derived>::isMuchSmallerThan(
   const typename NumTraits<Scalar>::Real& other,
-  RealScalar prec
+  const RealScalar& prec
 ) const
 {
   return internal::isMuchSmallerThan_scalar_selector<Derived>::run(derived(), other, prec);
@@ -139,7 +139,7 @@ template<typename Derived>
 template<typename OtherDerived>
 bool DenseBase<Derived>::isMuchSmallerThan(
   const DenseBase<OtherDerived>& other,
-  RealScalar prec
+  const RealScalar& prec
 ) const
 {
   return internal::isMuchSmallerThan_object_selector<Derived, OtherDerived>::run(derived(), other.derived(), prec);

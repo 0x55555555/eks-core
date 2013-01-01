@@ -6,21 +6,24 @@
 namespace Eks
 {
 
-Profiler::ProfilingContext::ProfilingContext(ProfilingContext* parent, xuint32 context, const char *message)
+ProfilerProfilingContext::ProfilerProfilingContext(
+    ProfilerProfilingContext* parent,
+    xuint32 context,
+    const char *message)
     : _parent(parent), _context(context), _firstChild(0), _nextSibling(0), _message(message)
   {
   }
 
 Profiler* g_instance = 0;
 
-Profiler::ProfilingContext *Profiler::ProfilingContext::findChildContext(xuint32 context, const char *mes)
+ProfilerProfilingContext *ProfilerProfilingContext::findChildContext(xuint32 context, const char *mes)
   {
   xAssert(g_instance);
 
-  ProfilingContext* child = firstChild();
+  ProfilerProfilingContext* child = firstChild();
   if(child)
     {
-    ProfilingContext* oldSibling = 0;
+    ProfilerProfilingContext* oldSibling = 0;
     while(child)
       {
       if(child->context() == context && strcmp(mes, child->message()) == 0)
@@ -30,21 +33,21 @@ Profiler::ProfilingContext *Profiler::ProfilingContext::findChildContext(xuint32
       oldSibling = child;
       child = child->nextSibling();
       }
-    oldSibling->_nextSibling = (ProfilingContext*)g_instance->_contextAllocator.alloc();
-    new(oldSibling->_nextSibling) ProfilingContext(this, context, mes);
+    oldSibling->_nextSibling = (ProfilerProfilingContext*)g_instance->_contextAllocator.alloc();
+    new(oldSibling->_nextSibling) ProfilerProfilingContext(this, context, mes);
     return oldSibling->_nextSibling;
     }
 
-  _firstChild = (ProfilingContext*)g_instance->_contextAllocator.alloc();
-  new(_firstChild) ProfilingContext(this, context, mes);
+  _firstChild = (ProfilerProfilingContext*)g_instance->_contextAllocator.alloc();
+  new(_firstChild) ProfilerProfilingContext(this, context, mes);
   return _firstChild;
   }
 
-const Profiler::ProfilingContext *Profiler::ProfilingContext::findChildContext(xuint32 context, const char *mes) const
+const ProfilerProfilingContext *ProfilerProfilingContext::findChildContext(xuint32 context, const char *mes) const
   {
   xAssert(g_instance);
 
-  ProfilingContext* child = firstChild();
+  ProfilerProfilingContext* child = firstChild();
   while(child)
     {
     if(child->context() == context && strcmp(mes, child->message()) == 0)

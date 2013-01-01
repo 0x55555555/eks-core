@@ -93,7 +93,7 @@ void XMathsOperation::setOperation(XMathsOperation::OperationType t)
     }
   }
 
-void XMathsOperation::setValue(const XVector4D &v)
+void XMathsOperation::setValue(const Eks::Vector4D &v)
   {
   if(!_vectorData.isApprox(v))
     {
@@ -149,7 +149,7 @@ void XMathsOperation::setValueDirty()
 
 void XMathsOperation::copy(const XMathsOperation &a)
   {
-  add(a, XVector4D::Zero());
+  add(a, Eks::Vector4D::Zero());
   }
 
 void XMathsOperation::load(DataType t, void* data, xsize stride, xsize dataWidth, xsize dataHeight, xsize dataChannels, const XVectorI2D &m)
@@ -171,7 +171,7 @@ void XMathsOperation::add(const XMathsOperation &a, const XMathsOperation &b)
   setOperation(Add);
   }
 
-void XMathsOperation::add(const XMathsOperation &a, const XVector4D &v)
+void XMathsOperation::add(const XMathsOperation &a, const Eks::Vector4D &v)
   {
   setInput(&_inputA, &a);
   setInput(&_inputB, 0);
@@ -188,7 +188,7 @@ void XMathsOperation::multiply(const XMathsOperation &a, const XMathsOperation &
   setOperation(Multiply);
   }
 
-void XMathsOperation::multiply(const XMathsOperation &a, const XVector4D &v)
+void XMathsOperation::multiply(const XMathsOperation &a, const Eks::Vector4D &v)
   {
   setInput(&_inputA, &a);
   setInput(&_inputB, 0);

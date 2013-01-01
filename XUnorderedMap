@@ -239,7 +239,7 @@ public:
       ++d->ref;
 #endif
       }
-    inline UnorderedMap(const UnorderedMap<Key, T> &other) : d(other.d), allocator(other.allocator) { d->ref.ref(); if (!d->sharable) detach(); }
+    inline UnorderedMap(const UnorderedMap<Key, T> &other) : d(other.d), allocator(other.allocator) { d->ref++; if (!d->sharable) detach(); }
     inline ~UnorderedMap()
       {
 #if X_UNORDERED_MAP_THREAD_SAFE

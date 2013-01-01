@@ -4,6 +4,8 @@
 TARGET = EksCore
 TEMPLATE = lib
 
+QT += widgets
+
 INCLUDEPATH += ../
 
 include("../GeneralOptions.pri")
@@ -21,7 +23,8 @@ SOURCES += \
     ../src/XArrayMath.cpp \
     ../src/XMemoryTracker.cpp \
     ../src/XAsyncTask.cpp \
-    ../src/XMathHelpers.cpp
+    ../src/XMathHelpers.cpp \
+    ../src/XStringSimple.cpp
 
 HEADERS += \
     ../XGlobal \
@@ -145,7 +148,8 @@ HEADERS += \
     ../XMathVector \
     ../XMathMatrix \
     ../XStringSimple \
-    ../XMathCurve
+    ../XMathCurve \
+    ../XResourceDescription
 
 
 

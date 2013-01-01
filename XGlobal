@@ -33,13 +33,6 @@
 # define EKSCORE_EXPORT
 #endif
 
-#define X_ALIGNED_OPERATOR_NEW EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-#define X_ALIGN_BYTE_COUNT 16
-#define X_ROUND_TO_ALIGNMENT(type, exp) X_ROUND_TO_SPECIFIC_ALIGNMENT(type, exp, X_ALIGN_BYTE_COUNT)
-#define X_ROUND_TO_SPECIFIC_ALIGNMENT(type, exp, align) ((type)((xuint8*)exp + ((ptrdiff_t)align - (((ptrdiff_t)exp)&((ptrdiff_t)align-1)))))
-#define xAssertIsAligned(ptr) xAssertIsSpecificAligned(ptr, X_ALIGN_BYTE_COUNT)
-#define xAssertIsSpecificAligned(ptr, alignment) xAssert((alignment > 1) && (((xsize)(ptr)&(alignment-1)) == 0), (xsize)ptr, alignment, ((xsize)(ptr)&(alignment-1)))
-
 #ifndef QT_NO_DEBUG
 # define X_DEBUG
 #endif
@@ -65,17 +58,17 @@
 #ifdef X_ARCH_ARM
 # define X_ASSERT_VALUE_HANDLING 0
 # define X_ADVANCED_ASSERT 0
-# define X_QT_MATH_INTEROP 0
 # define X_COMPILE_ARRAY_MATH 0
 # define X_VECTOR_IS_QVECTOR 0
 # define X_QCOLOUR_COMPATIBILITY 0
+# define X_QT_INTEROP 0
 #else
 # define X_ASSERT_VALUE_HANDLING 1
 # define X_ADVANCED_ASSERT 1
-# define X_QT_MATH_INTEROP 1
 # define X_COMPILE_ARRAY_MATH 1
 # define X_VECTOR_IS_QVECTOR 1
 # define X_QCOLOUR_COMPATIBILITY 1
+# define X_QT_INTEROP 1
 #endif
 
 typedef signed char xint8;         /* 8 bit signed */

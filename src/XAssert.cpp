@@ -1,8 +1,12 @@
 #include "XAssert"
 #include "XUnorderedMap"
-#include "QMessageBox"
-#include "QPushButton"
-#include "QApplication"
+#include "XStringSimple"
+
+#if X_ADVANCED_ASSERT
+# include "QtWidgets/QMessageBox"
+# include "QtWidgets/QPushButton"
+# include "QtWidgets/QApplication"
+#endif
 
 #if defined(Q_CC_MSVC)
 # define WIN32_LEAN_AND_MEAN
@@ -59,7 +63,7 @@ bool Assert::defaultFire(const Assert &a)
 
   msgBox.setWindowTitle(text);
 
-  QString location = a.location().toString();
+  QString location = QString::fromUtf8(a.location().toString().data());
 
   text += " in " + location + "\n\n";
 

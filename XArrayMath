@@ -4,7 +4,7 @@
 #if X_COMPILE_ARRAY_MATH
 
 #include "XMatrix3x3"
-#include "XVector4D"
+#include "Eks::Vector4D"
 #include "QRectF"
 #include "XProperty"
 #include "XAssert"
@@ -29,7 +29,7 @@ XProperties:
   XROProperty(OperationType, operation);
   XROProperty(const XMathsOperation *, inputA);
   XROProperty(const XMathsOperation *, inputB);
-  XROProperty(XVector4D, vectorData);
+  XROProperty(Eks::Vector4D, vectorData);
   XROProperty(xuint32, integerData);
   XROProperty(void *, userData);
 
@@ -63,10 +63,10 @@ public:
   void load(DataType, void* data, xsize stride, xsize dataWidth, xsize dataHeight, xsize dataChannels, const XVectorI2D &);
 
   void add(const XMathsOperation &, const XMathsOperation &);
-  void add(const XMathsOperation &, const XVector4D &);
+  void add(const XMathsOperation &, const Eks::Vector4D &);
 
   void multiply(const XMathsOperation &, const XMathsOperation &);
-  void multiply(const XMathsOperation &, const XVector4D &);
+  void multiply(const XMathsOperation &, const Eks::Vector4D &);
 
   enum ShuffleSpecialTypes
     {
@@ -109,7 +109,7 @@ private:
   void setOperationDirty();
   void setValueDirty();
 
-  void setValue(const XVector4D &);
+  void setValue(const Eks::Vector4D &);
   void setValue(xuint32 );
   void setOperation(OperationType t);
   void setInput(const XMathsOperation **inp, const XMathsOperation *in);

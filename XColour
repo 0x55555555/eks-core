@@ -21,7 +21,7 @@ inline XLDRColour operator*( const XLDRColour &a, const XLDRColour &b )
 
 inline XLDRColour operator+( const XLDRColour &a, const XLDRColour &b )
   {
-  return XLDRColour( xClamp( a.red() + b.red(), 0, 255 ), xClamp( a.green() + b.green(), 0, 255 ), xClamp( a.blue() + b.blue(), 0, 255 ), xClamp( a.alpha() + b.alpha(), 0, 255 ) );
+  return XLDRColour( Eks::clamp( a.red() + b.red(), 0, 255 ), Eks::clamp( a.green() + b.green(), 0, 255 ), Eks::clamp( a.blue() + b.blue(), 0, 255 ), Eks::clamp( a.alpha() + b.alpha(), 0, 255 ) );
   }
 
 inline XLDRColour operator*( Real a, const XLDRColour &b )
@@ -91,4 +91,10 @@ xCompileTimeAssert(sizeof(Colour) == sizeof(float) * 4);
 
 }
 
+
+#if X_QT_INTEROP
+
+Q_DECLARE_METATYPE(Eks::Colour);
+
+#endif
 #endif // XCOLOUR_H

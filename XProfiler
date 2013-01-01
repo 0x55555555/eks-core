@@ -10,29 +10,30 @@
 
 namespace Eks
 {
+class EKSCORE_EXPORT ProfilerProfilingContext
+  {
+XProperties:
+  XROProperty(ProfilerProfilingContext *, parent);
+  XRORefProperty(xuint32, context);
+  XROProperty(ProfilerProfilingContext *, firstChild);
+  XROProperty(ProfilerProfilingContext *, nextSibling);
+  XRefProperty(XTimeStatistics, timeStats);
+
+  const char *message() const { return _message; }
+
+  ProfilerProfilingContext *findChildContext(xuint32 context, const char *);
+  const ProfilerProfilingContext *findChildContext(xuint32 context, const char *) const;
+
+  ProfilerProfilingContext(ProfilerProfilingContext* parent, xuint32 context, const char *message);
+
+private:
+  const char *_message;
+  };
 
 class EKSCORE_EXPORT Profiler
   {
 public:
-  class EKSCORE_EXPORT ProfilingContext
-    {
-  XProperties:
-    XROProperty(ProfilingContext *, parent);
-    XRORefProperty(xuint32, context);
-    XROProperty(ProfilingContext *, firstChild);
-    XROProperty(ProfilingContext *, nextSibling);
-    XRefProperty(XTimeStatistics, timeStats);
-
-    const char *message() const { return _message; }
-
-    ProfilingContext *findChildContext(xuint32 context, const char *);
-    const ProfilingContext *findChildContext(xuint32 context, const char *) const;
-
-    ProfilingContext(ProfilingContext* parent, xuint32 context, const char *message);
-
-  private:
-    const char *_message;
-    };
+  typedef ProfilerProfilingContext ProfilingContext;
 
   class EKSCORE_EXPORT ProfileHandle
     {
@@ -66,6 +67,8 @@ public:
 private:
   Profiler();
 
+  friend class ProfilerProfilingContext;
+
   ProfilingContext *_rootContext;
   UnorderedMap<QThread *, ProfilingContext *> _currentContexts;
   FixedSizeBucketAllocator _contextAllocator;
@@ -74,8 +77,8 @@ private:
   };
 
 #ifdef X_PROFILING_ENABLED
-  #define XProfileFunctionBase(component) Profiler::ProfileScopedBlock functionBlock(component, xCurrentFunction);
-  #define XProfileScopedBlockBase(component, mess) Profiler::ProfileScopedBlock scopeBlock##__LINE__(component, mess);
+  #define XProfileFunctionBase(component) Eks::Profiler::ProfileScopedBlock functionBlock(component, xCurrentFunction);
+  #define XProfileScopedBlockBase(component, mess) Eks::Profiler::ProfileScopedBlock scopeBlock##__LINE__(component, mess);
 #else
   #define XProfileFunctionBase(component)
   #define XProfileScopedBlockBase(component, mess)

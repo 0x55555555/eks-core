@@ -6,9 +6,9 @@
 #ifdef X_ENABLE_EVENT_LOGGING
 
 #include "XTime"
-#include "QMetaType"
 #include "XAssert"
-#include "XSimpleString"
+#include "XStringSimple"
+#include "QMetaType"
 
 template <typename T> struct EKSCORE_EXPORT XEventLoggerPair
   {
@@ -21,8 +21,8 @@ class EKSCORE_EXPORT XEventLoggerInternal
 public:
   XEventLoggerInternal(const char *name, int type, xsize size, xsize count, const char *units);
 
-  String name;
-  String units;
+  Eks::String name;
+  Eks::String units;
   int type;
   xsize size;
   xsize count;
@@ -135,7 +135,8 @@ public:
 #endif
 
 #define X_IMPLEMENT_MEMORY_LOGGER(name) X_IMPLEMENT_LOGGER(name, xsize, XEventLogger<xsize>::Large, "bytes")
-#define X_DECLARE_MEMORY_LOGGER X_DECLARE_LOGGER
+#define X_DECLARE_MEMORY_LOGGER(exp, name) X_DECLARE_LOGGER(exp, name)
 
+X_DECLARE_MEMORY_LOGGER(EKSCORE_EXPORT, xTotalGlobalAllocatorSize);
 
 #endif // XEVENTLOGGER_H

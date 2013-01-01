@@ -181,19 +181,19 @@ void GenericCurveSegment<SIZE,RETURN,TORETURN,FROMRETURN>::setBasis( BasisMode m
   if( mode == Bezier )
     {
     Matrix4x4 mat;
-    mat.row(0) = XVector4D( -1, 3, -3, 1 );
-    mat.row(1) = XVector4D( 3, -6, 3, 0 );
-    mat.row(2) = XVector4D( -3, 3, 0, 0 );
-    mat.row(3) = XVector4D( 1, 0, 0, 0 );
+    mat.row(0) = Eks::Vector4D( -1, 3, -3, 1 );
+    mat.row(1) = Eks::Vector4D( 3, -6, 3, 0 );
+    mat.row(2) = Eks::Vector4D( -3, 3, 0, 0 );
+    mat.row(3) = Eks::Vector4D( 1, 0, 0, 0 );
     setBasis( mat );
     }
   else if( mode == Hermite )
     {
     Matrix4x4 mat;
-    mat.row(0) = XVector4D( 2, -2, 1, 1 );
-    mat.row(1) = XVector4D( -3, 3, -2, -1 );
-    mat.row(2) = XVector4D( 0, 0, 1, 0 );
-    mat.row(3) = XVector4D( 1, 0, 0, 0 );
+    mat.row(0) = Eks::Vector4D( 2, -2, 1, 1 );
+    mat.row(1) = Eks::Vector4D( -3, 3, -2, -1 );
+    mat.row(2) = Eks::Vector4D( 0, 0, 1, 0 );
+    mat.row(3) = Eks::Vector4D( 1, 0, 0, 0 );
     setBasis( mat );
     }
   else

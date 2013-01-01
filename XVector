@@ -109,6 +109,11 @@ public:
     return _end - _first;
     }
 
+  bool isEmpty() const
+    {
+    return _first == _end;
+    }
+
   size_type capacity() const
     {
     return _last - _first;
@@ -211,7 +216,7 @@ public:
 
     T *newData = allocate(newBestCapacity);
 
-    swap(newData, newData+s, _first);
+    move(newData, newData+s, _first);
 
     // destroy the old data
     for(size_type i = 0; i < s; ++i)
@@ -343,9 +348,22 @@ public:
     return memcmp(ths, other, sizeof(T) * count) == 0;
     }
 
+  bool operator==(const ThisType &oth) const
+    {
+    const size_type s = size();
+
+    return s == oth.size() &&
+        compare(oth.data(), s);
+    }
+
+  bool operator!=(const ThisType &oth) const
+    {
+    return !(*this == oth);
+    }
+
   size_type length() const { return size(); }
 
-  size_type indexOf(const T &t, size_type from) const
+  size_type indexOf(const T &t, size_type from = 0) const
     {
     const_iterator it = begin() + from;
     const_iterator found = std::find(it, cend(), t);
@@ -370,6 +388,11 @@ public:
       }
 
     return index;
+    }
+
+  bool contains(const T &t) const
+    {
+    return indexOf(t) != X_SIZE_SENTINEL;
     }
 
   void popBack()
@@ -424,27 +447,37 @@ public:
     }
 
   template <typename T>
-      void swap(const iterator &begin, const iterator &end, T from)
+      void move(const iterator &begin, const iterator &end, T from)
     {
     for(iterator it = begin; it != end; ++it, ++from)
       {
-      std::swap(*it, *from);
+      *it = std::move(*from);
       }
     }
 
-  template <typename X, xsize Pre, typename AllocX>
-  void swap(Vector<X, Pre, AllocX> &oth)
+  bool isUsingEmbeddedStorage() const { return ThisBase::isUsingEmbeddedStorage(); }
+
+  template <xsize Pre, typename AllocX>
+  void swap(Vector<T, Pre, AllocX> &oth)
     {
-    if(oth._alloc == oth._alloc)
+    if(oth.allocator() == oth.allocator() &&
+       !isUsingEmbeddedStorage() &&
+       !oth.isUsingEmbeddedStorage())
       {
-      std::swap(_first, oth._first);
-      std::swap(_last, oth._last);
-      std::swap(_end, oth._end);
+      oth.swapInternal(&_first, &_last, &_end);
       }
     else
       {
+      clear();
       resizeAndCopy(oth.size(), oth.data());
       }
+    }
+
+  void swapInternal(T **f, T **l, T **e)
+    {
+    std::swap(_first, *f);
+    std::swap(_last, *l);
+    std::swap(_end, *e);
     }
 
   T &at(size_type i)
@@ -486,6 +519,55 @@ public:
     const size_type expandReservePolicy = 2;
     return xMax(s * expandExistingPolicy, size() * expandReservePolicy);
     }
+
+  void removeAt(size_type idx)
+    {
+    remove(begin() + idx);
+    }
+
+  iterator remove(iterator it)
+    {
+    return remove(it, it + 1);
+    }
+
+  iterator remove(iterator b, iterator e)
+    {
+    xAssertFail(); // test this fn.
+    xAssert(b >= _first && b <= _end);
+    xAssert(e >= _first && e <= _end);
+    xAssert(b <= _end);
+
+    const size_type elementsToRemove = (e - b);
+    const size_type newSize = size() - elementsToRemove;
+
+    // remove all the intermediate elements
+    for(iterator it = b, from = e;
+        it != e && from != _end;
+        ++it, ++from)
+      {
+      it = std::move(from);
+      }
+
+    resize(newSize);
+
+    // return the new pointer to the element after the last element
+    return b;
+    }
+
+  void removeAll(const T &t)
+    {
+    for(iterator i = begin(), e = end();
+        i != e;
+        ++i
+        )
+      {
+      if(*i == t)
+        {
+        i = remove(i);
+        e = end();
+        }
+      }
+    }
   };
 
 namespace detail
@@ -506,5 +588,62 @@ xCompileTimeAssert(sizeof(Vector <int, 6, TypedAllocator<int> >)
 }
 
 }
+
+#if X_QT_INTEROP
+
+#include "QtCore/QTextStream"
+#include "QtCore/QDataStream"
+
+template <typename T> QTextStream &operator>>(QTextStream &str, Eks::Vector<T> &vec)
+  {
+  xuint64 size = 0;
+  str >> size;
+  vec.resize(size);
+
+  for(xsize i = 0, s = vec.size(); i < s; ++i)
+    {
+    str >> vec[i];
+    }
+  return str;
+  }
+
+template <typename T> QTextStream &operator<<(QTextStream &str, const Eks::Vector<T> &vec)
+  {
+  str << (xuint64)vec.length() << " ";
+
+  for(xsize i = 0, s = vec.size(); i < s; ++i)
+    {
+    str << vec[i] << " ";
+    }
+  return str;
+  }
+
+template <typename T> QDataStream &operator>>(QDataStream &str, Eks::Vector<T> &vec)
+  {
+  xuint64 size = 0;
+  str >> size;
+  vec.resize(size);
+
+  for(xsize i = 0, s = vec.size(); i < s; ++i)
+    {
+    T &el = vec[i];
+    str >> el;
+    }
+
+  return str;
+  }
+
+template <typename T> QDataStream &operator<<(QDataStream &str, const Eks::Vector<T> &vec)
+  {
+  str << (xuint64)vec.length();
+
+  for(xsize i = 0, s = vec.size(); i < s; ++i)
+    {
+    str << vec[i];
+    }
+  return str;
+  }
+
+#endif
 
 #endif

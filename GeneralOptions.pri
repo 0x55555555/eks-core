@@ -1,3 +1,5 @@
+CONFIG += debug
+
 include($$PWD"/SIMD.pri")
 include($$PWD"/C++0x.pri")
 
@@ -16,7 +18,7 @@ win32-msvc2008 {
     QMAKE_CXXFLAGS += /MDd
   }
   release {
-    QMAKE_CXXFLAGS += /MD /DEBUG
+    QMAKE_CXXFLAGS += /MD
   }
 }
 
@@ -24,6 +26,21 @@ win32-msvc2010 {
   INCLUDEPATH += "C:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\VC\\include" \
                 "C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Include"
   LIBS += -L"C:\\Program Files (x86)\\Microsoft Visual Studio 10.0\\VC\\lib" \
+          -L"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib"
+
+  release {
+    QMAKE_CFLAGS += /Zi
+    QMAKE_CXXFLAGS += /Zi
+    QMAKE_LFLAGS += /DEBUG
+  }
+}
+
+win32-msvc2012 {
+  INCLUDEPATH += "C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\include" \
+                "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\um" \
+                "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\shared" \
+                "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\winrt"
+  LIBS += -L"C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\lib" \
           -L"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib"
 
   release {

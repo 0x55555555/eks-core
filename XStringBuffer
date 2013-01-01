@@ -91,6 +91,7 @@ public:
 
   int pbackfail(int c) X_OVERRIDE
     {
+    (void)c;
     xAssert(c == String::Traits::eof());
 
     if(_readPos >= 1)
