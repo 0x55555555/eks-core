@@ -1,0 +1,66 @@
+#ifndef XRESOURCEDESCRIPTION_H
+#define XRESOURCEDESCRIPTION_H
+
+#include "XGlobal"
+#include "XProperty"
+
+namespace Eks
+{
+
+#define X_ALIGN_BYTE_COUNT 16
+#define X_ALIGNED_OPERATOR_NEW EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+#define xAssertIsSpecificAligned(ptr, alignment) xAssert(Eks::isAligned(ptr, alignment), (xsize)ptr, alignment, ((xsize)(ptr)&(alignment-1)))
+#define xAssertIsAligned(ptr) xAssertIsSpecificAligned(ptr, X_ALIGN_BYTE_COUNT)
+
+template <typename T> bool isAligned(T ptr, xsize alignment = X_ALIGN_BYTE_COUNT)
+  {
+  const xptrdiff bitmask = (xptrdiff)alignment - 1;
+  const xsize ptrD = (xsize)ptr;
+
+  return (alignment > 1) &&
+         ((ptrD&bitmask) == 0);
+  }
+
+template <typename T> inline T roundToAlignment(T exp, xsize alignment = X_ALIGN_BYTE_COUNT)
+  {
+  const xptrdiff bitmask = (xptrdiff)alignment - 1;
+  const xptrdiff bits = ((xptrdiff)exp)&bitmask;
+
+  const xptrdiff offset = (xptrdiff)alignment - bits;
+
+  xuint8 *aligned = (xuint8*)exp + offset;
+
+  return (T)aligned;
+  }
+
+
+class ResourceDescription;
+
+template <typename T> class ResourceDescriptionTypeHelper
+  {
+  static ResourceDescription createFor();
+  };
+
+class ResourceDescription
+  {
+XProperties:
+  XProperty(xsize, size, setSize);
+  XProperty(xsize, alignment, setAlignment);
+
+public:
+  ResourceDescription()
+    : _size(0),
+      _alignment(0)
+    {
+    }
+  };
+
+template <typename T>
+    ResourceDescription ResourceDescriptionTypeHelper<T>::createFor()
+  {
+  return ResourceDescription(sizeof(T), std::alignment_of<T>::value);
+  }
+}
+
+#endif // XRESOURCEDESCRIPTION_H
