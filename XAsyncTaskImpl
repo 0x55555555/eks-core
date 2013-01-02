@@ -1,6 +1,7 @@
 #ifndef XASYNCTASKIMPL_H
 #define XASYNCTASKIMPL_H
 
+#include "XThreadSafeAllocator"
 // Implementation details of Eks::Task
 
 namespace Eks
@@ -12,7 +13,7 @@ namespace detail
 class EKSCORE_EXPORT TaskImpl
   {
 public:
-  static TaskImpl *create();
+  static TaskImpl *create(ThreadSafeAllocator *allocator);
   static void completeAndDestroy(TaskImpl *, const void *result);
 
   void addDependent(TaskImpl *);
@@ -48,6 +49,7 @@ public:
   void (*_onDependencyComplete)(TaskImpl *impl, TaskImpl *dep, const void *data);
   TaskImpl *_dependents[MaxDependents];
   xsize _dependentCount;
+  ThreadSafeAllocator *_allocator;
   };
 
 template <typename Fn, typename Arg, typename ResultType> class ContinuationTaskImpl

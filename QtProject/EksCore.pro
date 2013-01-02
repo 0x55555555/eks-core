@@ -149,7 +149,8 @@ HEADERS += \
     ../XMathMatrix \
     ../XStringSimple \
     ../XMathCurve \
-    ../XResourceDescription
+    ../XResourceDescription \
+    ../XThreadSafeAllocator
 
 
 

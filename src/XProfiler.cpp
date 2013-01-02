@@ -67,10 +67,7 @@ Profiler::ProfileHandle::ProfileHandle(ProfilingContext* ctx)
 
 Profiler::ProfileHandle Profiler::start(xuint32 component, const char *mess)
   {
-  if(g_instance == 0)
-    {
-    g_instance = new Profiler();
-    }
+  xAssert(g_instance);
   QMutexLocker lock(&g_instance->_lock);
 
   ProfilingContext *&currentCtx = g_instance->_currentContexts[QThread::currentThread()];
@@ -135,17 +132,27 @@ QString Profiler::stringForContext(xuint32 t)
   return "";
   }
 
+void Profiler::initialise(AllocatorBase *a)
+  {
+  xAssert(!g_instance);
+  g_instance = a->create<Profiler>(a);
+  }
+
+void Profiler::terminate()
+  {
+  xAssert(g_instance);
+  g_instance->_allocator->destroy(g_instance);
+  }
+
 void Profiler::setStringForContext(xuint32 t, const QString &str)
   {
-  if(g_instance == 0)
-    {
-    g_instance = new Profiler();
-    }
+  xAssert(g_instance);
 
   g_instance->_contextStrings[t] = str;
   }
 
-Profiler::Profiler() : _contextAllocator(sizeof(ProfilingContext), 256, 1024)
+Profiler::Profiler(AllocatorBase *allocator)
+    : _contextAllocator(sizeof(ProfilingContext), 256, 1024, allocator)
   {
   _rootContext = (ProfilingContext *)_contextAllocator.alloc();
   new(_rootContext) ProfilingContext(0, X_UINT32_SENTINEL, "");

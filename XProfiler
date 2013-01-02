@@ -64,9 +64,12 @@ public:
   static QString stringForContext(xuint32 t);
   static void setStringForContext(xuint32 t, const QString &str);
 
-private:
-  Profiler();
+  static void initialise(AllocatorBase *a);
+  static void terminate();
 
+  Profiler(AllocatorBase *a);
+
+private:
   friend class ProfilerProfilingContext;
 
   ProfilingContext *_rootContext;
@@ -74,6 +77,7 @@ private:
   FixedSizeBucketAllocator _contextAllocator;
   QHash<xuint32, QString> _contextStrings;
   QMutex _lock;
+  AllocatorBase *_allocator;
   };
 
 #ifdef X_PROFILING_ENABLED

@@ -14,6 +14,26 @@ public:
   virtual ~AllocatorBase() {}
   virtual void *alloc(xsize size, xsize alignment=X_ALIGN_BYTE_COUNT) = 0;
   virtual void free(void *mem) = 0;
+
+  // todo, variadic template args here...
+  template <typename T> T *create(xsize alignment=0)
+    {
+    void *d = alloc(sizeof(T), alignment);
+    return new(d) T();
+    }
+
+  template <typename T, typename A> T *create(A a, xsize alignment=0)
+    {
+    void *d = alloc(sizeof(T), alignment);
+    return new(d) T(a);
+    }
+
+  template <typename T> void destroy(T *t)
+    {
+    (void)t;
+    t->~T();
+    free(t);
+    }
   };
 
 class EKSCORE_EXPORT GlobalAllocator : public AllocatorBase
