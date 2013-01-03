@@ -105,9 +105,23 @@ static int countBits(int hint)
 */
 const int MinNumBits = 4;
 
-UnorderedMapData UnorderedMapData::shared_null = {
-    0, 0, 1, 0, 0, MinNumBits, 0, 0, true, false, 0, 0
-};
+UnorderedMapData UnorderedMapData::shared_null(UnorderedMapData::Dummy);
+
+UnorderedMapData::UnorderedMapData(DefaultCtor)
+  {
+  fakeNext = 0;
+  buckets = 0;
+  ref = 1;
+  size = 0;
+  nodeSize = 0;
+  userNumBits = MinNumBits;
+  numBits = 0;
+  numBuckets = 0;
+  sharable = true;
+  strictAlignment  = false;
+  reserved  = 0;
+  allocator = 0;
+  }
 
 void *UnorderedMapData::allocateNode()
 {

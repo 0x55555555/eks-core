@@ -24,6 +24,9 @@ public:
   typedef std::ostream OStream;
   typedef std::istream IStream;
   typedef StringBuffer<Char, PreallocatedSize, Allocator> Buffer;
+  typedef typename String::size_type size_type;
+  typedef typename String::iterator iterator;
+  typedef typename String::const_iterator const_iterator;
 
   StringBase(AllocatorBase *alloc=GlobalAllocator::instance())
       : String(Alloc(alloc))
@@ -64,7 +67,7 @@ public:
 
   QString toQString() const
     {
-    return QString::fromUtf8(data(), size());
+    return QString::fromUtf8(String::data(), size());
     }
 
 #endif
@@ -102,7 +105,7 @@ public:
 
   bool isEmpty() const
     {
-    return begin() == end();
+    return String::begin() == end();
     }
 
   Char &back()

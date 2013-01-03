@@ -79,6 +79,10 @@ struct EKSCORE_EXPORT UnorderedMapData
     uint reserved : 30;
     AllocatorBase *allocator;
 
+    UnorderedMapData() { }
+    enum DefaultCtor { Dummy };
+    UnorderedMapData(DefaultCtor dummy);
+
     void *allocateNode(); // ### Qt5 remove me
     void *allocateNode(int nodeAlign);
     void freeNode(void *node);
@@ -151,7 +155,13 @@ inline bool operator==(const UnorderedMapDummyValue & /* v1 */, const UnorderedM
     return true;
 }
 
-Q_DECLARE_TYPEINFO(UnorderedMapDummyValue, Q_MOVABLE_TYPE | Q_DUMMY_TYPE);
+}
+
+Q_DECLARE_TYPEINFO(Eks::UnorderedMapDummyValue, Q_MOVABLE_TYPE | Q_DUMMY_TYPE);
+
+namespace Eks
+{
+
 
 template <class Key, class T>
 struct UnorderedMapDummyNode

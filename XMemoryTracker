@@ -3,7 +3,6 @@
 
 #include "XAllocatorBase"
 #include "XProperty"
-#include "XHash"
 
 namespace Eks
 {

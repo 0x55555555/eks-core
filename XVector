@@ -101,56 +101,56 @@ public:
     {
     clear();
     squeeze();
-    xAssert(_first == 0);
+    xAssert(ThisBase::_first == 0);
     }
 
   size_type size() const
     {
-    return _end - _first;
+    return ThisBase::_end - ThisBase::_first;
     }
 
   bool isEmpty() const
     {
-    return _first == _end;
+    return ThisBase::_first == ThisBase::_end;
     }
 
   size_type capacity() const
     {
-    return _last - _first;
+    return ThisBase::_last - ThisBase::_first;
     }
 
   T &front()
     {
-    xAssert(_first);
-    return *_first;
+    xAssert(ThisBase::_first);
+    return *ThisBase::_first;
     }
 
   const T &front() const
     {
-    xAssert(_first);
-    return *_first;
+    xAssert(ThisBase::_first);
+    return *ThisBase::_first;
     }
 
   T &back()
     {
-    xAssert(_end-1);
-    return *(_end-1);
+    xAssert(ThisBase::_end-1);
+    return *(ThisBase::_end-1);
     }
 
   const T &back() const
     {
-    xAssert(_end-1);
-    return *(_end-1);
+    xAssert(ThisBase::_end-1);
+    return *(ThisBase::_end-1);
     }
 
   T *data()
     {
-    return _first;
+    return ThisBase::_first;
     }
 
   const T *data() const
     {
-    return _first;
+    return ThisBase::_first;
     }
 
   ThisType& operator<<(T &&t)
@@ -174,32 +174,32 @@ public:
 
   iterator begin()
     {
-    return _first;
+    return ThisBase::_first;
     }
 
   iterator end()
     {
-    return _end;
+    return ThisBase::_end;
     }
 
   const_iterator begin() const
     {
-    return _first;
+    return ThisBase::_first;
     }
 
   const_iterator end() const
     {
-    return _end;
+    return ThisBase::_end;
     }
 
   const_iterator cbegin() const
     {
-    return _first;
+    return ThisBase::_first;
     }
 
   const_iterator cend() const
     {
-    return _end;
+    return ThisBase::_end;
     }
 
   void reserve(size_type newCapacity)
@@ -214,30 +214,30 @@ public:
 
     const size_type newBestCapacity = bestCapacity(newCapacity);
 
-    T *newData = allocate(newBestCapacity);
+    T *newData = ThisBase::allocate(newBestCapacity);
 
-    move(newData, newData+s, _first);
+    move(newData, newData+s, ThisBase::_first);
 
     // destroy the old data
     for(size_type i = 0; i < s; ++i)
       {
-      destroy(_first+i);
+      destroy(ThisBase::_first+i);
       }
 
     // always destroy the old data if it existed
-    if(_first && !isUsingEmbeddedStorage())
+    if(ThisBase::_first && !isUsingEmbeddedStorage())
       {
-      deallocate(_first, oldCapacity);
+      deallocate(ThisBase::_first, oldCapacity);
       }
 
-    _first = newData;
-    _end = _first + s;
-    _last = _first + newBestCapacity;
+    ThisBase::_first = newData;
+    ThisBase::_end = ThisBase::_first + s;
+    ThisBase::_last = ThisBase::_first + newBestCapacity;
     }
 
   void squeeze()
     {
-    if(_last == _end)
+    if(ThisBase::_last == ThisBase::_end)
       {
       return;
       }
@@ -245,16 +245,16 @@ public:
     const size_type s = size();
     const size_type newCapacity = s;
 
-    T *oldData = _first;
+    T *oldData = ThisBase::_first;
     bool shouldDestroy = oldData && !isUsingEmbeddedStorage();
     xsize oldCapacity = capacity();
 
     if(s)
       {
-      T *newData = allocate(newCapacity);
+      T *newData = ThisBase::allocate(newCapacity);
 
       // copy the new elements
-      copy(newData, newData+s, _first);
+      copy(newData, newData+s, ThisBase::_first);
 
       // destroy the old data
       for(size_type i = 0; i < s; ++i)
@@ -262,13 +262,13 @@ public:
         destroy(oldData+i);
         }
 
-      _first = newData;
-      _last = _end = _first + s;
+      ThisBase::_first = newData;
+      ThisBase::_last = ThisBase::_end = ThisBase::_first + s;
       }
     else
       {
       // no old size, just reset pointers
-      _last = _end = _first = 0;
+      ThisBase::_last = ThisBase::_end = ThisBase::_first = 0;
       }
 
     // always destroy the old data if it existed
@@ -289,13 +289,13 @@ public:
       }
 
     // adjust the end
-    _end = _first + xMin(s, newSize);
+    ThisBase::_end = ThisBase::_first + xMin(s, newSize);
 
     // now expand, copying the needed members
     reserve(newSize);
 
     // adjust the new end
-    _end = _first + newSize;
+    ThisBase::_end = ThisBase::_first + newSize;
 
     // construct the extra members
     for(size_type i = s; i < newSize; ++i)
@@ -316,13 +316,13 @@ public:
       }
 
     // adjust the end
-    _end = _first + xMin(s, newSize);
+    ThisBase::_end = ThisBase::_first + xMin(s, newSize);
 
     // now expand, copying the needed members
     reserve(newSize);
 
     // adjust the new end
-    _end = _first + newSize;
+    ThisBase::_end = ThisBase::_first + newSize;
 
     // construct the extra members
     for(size_type i = s; i < newSize; ++i, ++val)
@@ -397,8 +397,13 @@ public:
 
   void popBack()
     {
-    xAssert(_end);
-    --_end;
+    xAssert(ThisBase::_end);
+
+    --ThisBase::_end;
+
+    // destroy extra member
+    destroy(ThisBase::_end);
+
     }
 
   void pushBack(const T &t)
@@ -409,9 +414,9 @@ public:
       reserve(s + 1);
       }
 
-    xAssert(_end < _last);
-    construct(_end, t);
-    _end++;
+    xAssert(ThisBase::_end < ThisBase::_last);
+    construct(ThisBase::_end, t);
+    ThisBase::_end++;
     }
 
   void pushBack(const T &&t)
@@ -422,12 +427,12 @@ public:
       reserve(s + 1);
       }
 
-    xAssert(_end < _last);
-    construct(_end, t);
-    _end++;
+    xAssert(ThisBase::_end < _last);
+    construct(ThisBase::_end, t);
+    ThisBase::_end++;
     }
 
-  template <typename T> void append(T vals, size_type count)
+  template <typename X> void append(X vals, size_type count)
     {
     resizeAndCopy(size() + count, vals);
     }
@@ -437,8 +442,8 @@ public:
     resizeAndCopy(size() + vals.size(), vals.begin());
     }
 
-  template <typename T>
-      void copy(const iterator &begin, const iterator &end, T from)
+  template <typename X>
+      void copy(const iterator &begin, const iterator &end, X from)
     {
     for(iterator it = begin; it != end; ++it, ++from)
       {
@@ -446,8 +451,8 @@ public:
       }
     }
 
-  template <typename T>
-      void move(const iterator &begin, const iterator &end, T from)
+  template <typename X>
+      void move(const iterator &begin, const iterator &end, X from)
     {
     for(iterator it = begin; it != end; ++it, ++from)
       {
@@ -464,7 +469,7 @@ public:
        !isUsingEmbeddedStorage() &&
        !oth.isUsingEmbeddedStorage())
       {
-      oth.swapInternal(&_first, &_last, &_end);
+      oth.swapInternal(&ThisBase::_first, &ThisBase::_last, &ThisBase::_end);
       }
     else
       {
@@ -475,21 +480,21 @@ public:
 
   void swapInternal(T **f, T **l, T **e)
     {
-    std::swap(_first, *f);
-    std::swap(_last, *l);
-    std::swap(_end, *e);
+    std::swap(ThisBase::_first, *f);
+    std::swap(ThisBase::_last, *l);
+    std::swap(ThisBase::_end, *e);
     }
 
   T &at(size_type i)
     {
     xAssert(i < size());
-    return *(_first + i);
+    return *(ThisBase::_first + i);
     }
 
   const T &at(size_type i) const
     {
     xAssert(i < size());
-    return *(_first + i);
+    return *(ThisBase::_first + i);
     }
 
   T &operator[](size_type i)
@@ -504,7 +509,7 @@ public:
 
   void setAllocator(const Alloc &a)
     {
-    xAssert(_first == 0);
+    xAssert(ThisBase::_first == 0);
     allocator() = a;
     }
 
@@ -533,8 +538,8 @@ public:
   iterator remove(iterator b, iterator e)
     {
     xAssertFail(); // test this fn.
-    xAssert(b >= _first && b <= _end);
-    xAssert(e >= _first && e <= _end);
+    xAssert(b >= ThisBase::_first && b <= ThisBase::_end);
+    xAssert(e >= ThisBase::_first && e <= ThisBase::_end);
     xAssert(b <= _end);
 
     const size_type elementsToRemove = (e - b);
@@ -542,7 +547,7 @@ public:
 
     // remove all the intermediate elements
     for(iterator it = b, from = e;
-        it != e && from != _end;
+        it != e && from != ThisBase::_end;
         ++it, ++from)
       {
       it = std::move(from);

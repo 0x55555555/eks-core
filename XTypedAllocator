@@ -54,8 +54,9 @@ public:
 template <typename T> class TypedAllocator : public TypedAllocatorBase<TypedAllocator<T>, T>
   {
 public:
-  typedef value_type& reference;
-  typedef const value_type& const_reference;
+  typedef TypedAllocatorBase<TypedAllocator<T>, T> Base;
+  typedef typename Base::value_type& reference;
+  typedef const typename Base::value_type& const_reference;
 
   TypedAllocator(AllocatorBase *alloc=0)
     {
@@ -68,7 +69,7 @@ public:
     _alloc = alloc._alloc;
     }
 
-  void construct(pointer p, const_reference val)
+  void construct(typename Base::pointer p, const_reference val)
     {
     new(p) T(val);
     }
@@ -112,8 +113,9 @@ template <typename Allocator, typename T> class StaticTypedAllocator
     : public TypedAllocatorBase<StaticTypedAllocator<Allocator, T>, T>
   {
 public:
-  typedef value_type& reference;
-  typedef const value_type& const_reference;
+  typedef TypedAllocatorBase<StaticTypedAllocator<Allocator, T>, T> Base;
+  typedef typename Base::value_type& reference;
+  typedef const typename Base::value_type& const_reference;
 
   StaticTypedAllocator()
     {
@@ -124,7 +126,7 @@ public:
     {
     }
 
-  void construct(pointer p, const_reference val)
+  void construct(typename Base::pointer p, const_reference val)
     {
     new(p) T(val);
     }
