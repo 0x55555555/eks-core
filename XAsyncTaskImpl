@@ -113,7 +113,7 @@ public:
     arg.token()->addDependent(token);
 
     // set the userdata of the token so we can get it in complete
-    token->setUserData<Fn, Fn>(fn);
+    token->setUserData(fn);
 
     // setup the complete callback for the token
     token->_onDependencyComplete = complete;
@@ -145,8 +145,8 @@ public:
 
 }
 
-template <typename Result> Task<Result>::Task()
-    : _token(Impl::create())
+template <typename Result> Task<Result>::Task(Eks::AllocatorBase *allocator)
+    : _token(Impl::create(allocator))
   {
   }
 

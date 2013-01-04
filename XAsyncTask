@@ -4,6 +4,7 @@
 #include "XGlobal"
 #include "XProperty"
 #include "XAssert"
+#include "XAllocatorBase"
 #include <atomic>
 
 namespace Eks
@@ -39,7 +40,7 @@ XProperties:
 
 public:
   // create a new task
-  Task();
+  Task(Eks::AllocatorBase *allocator);
 
   // complete the task now, with the given value as an argument
   template <typename T> static void completeTaskSync(Token token, const T *val);

@@ -6,6 +6,8 @@
 #include "XMathHelpers"
 #include "Eigen/Core"
 #include "QMetaType"
+#include "QTextStream"
+#include "QDataStream"
 
 namespace Eks
 {
@@ -33,7 +35,7 @@ class QDataStream;
 
 template <typename Derived> QTextStream &operator>>(QTextStream &str, Eigen::PlainObjectBase<Derived> &vec)
   {
-  xint32 rows = Derived::RowsAtCompileTime;
+  qint32 rows = Derived::RowsAtCompileTime;
   xint32 cols = Derived::ColsAtCompileTime;
 
   if(rows == Eigen::Dynamic)
