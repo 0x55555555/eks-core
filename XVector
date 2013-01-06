@@ -469,7 +469,10 @@ public:
        !isUsingEmbeddedStorage() &&
        !oth.isUsingEmbeddedStorage())
       {
-      oth.swapInternal(&ThisBase::_first, &ThisBase::_last, &ThisBase::_end);
+      T *&f = ThisBase::_first;
+      T *&l = ThisBase::_last;
+      T *&e = ThisBase::_end;
+      oth.swapInternal(&f, &l, &e);
       }
     else
       {
