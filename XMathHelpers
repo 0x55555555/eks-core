@@ -16,9 +16,9 @@ typedef float Real;
 #define EKS_REAL_IS_DOUBLE 0
 
 #if EKS_REAL_IS_DOUBLE
-# define X_PI (M_PI)
+# define X_PI (3.14159265358979323846)
 #else
-# define X_PI ((Real)M_PI)
+# define X_PI (3.14159265358979323846f)
 #endif
 
 xint32 rand( xint32 min, xint32 max );
@@ -26,6 +26,17 @@ Real randF();
 Real randF( Real min, Real max );
 xuint32 factorial( xuint32 in );
 xuint32 binomialCoefficient( xuint32 n, xuint32 k );
+
+
+inline Real degreesToRadians(Real ang)
+  {
+  return (ang / 360.0f) * 2.0f * X_PI;
+  }
+
+inline Real radiansToDegrees(Real ang)
+  {
+  return (ang / 2.0f * X_PI) * 360.0f;
+  }
 
 inline Real cos(Real c)
   {

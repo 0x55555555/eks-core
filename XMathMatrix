@@ -55,4 +55,12 @@ template <typename Derived> QDebug operator <<(QDebug str, const Eigen::DenseBas
   return str;
   }
 
+#if X_QT_INTEROP
+
+Q_DECLARE_METATYPE(Eks::Matrix4x4);
+Q_DECLARE_METATYPE(Eks::Matrix3x3);
+
+#endif
+
+
 #endif
