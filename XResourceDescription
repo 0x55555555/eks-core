@@ -18,8 +18,7 @@ template <typename T> bool isAligned(T ptr, xsize alignment = X_ALIGN_BYTE_COUNT
   const xptrdiff bitmask = (xptrdiff)alignment - 1;
   const xsize ptrD = (xsize)ptr;
 
-  return (alignment > 1) &&
-         ((ptrD&bitmask) == 0);
+  return (ptrD&bitmask) == 0;
   }
 
 template <typename T> inline T roundToAlignment(T exp, xsize alignment = X_ALIGN_BYTE_COUNT)

@@ -155,7 +155,7 @@ UnorderedMapData *UnorderedMapData::detach_helper2(void (*node_duplicate)(Node *
         UnorderedMapData *d;
         Node *e;
     };
-    d = xAllocateAndConstruct(inpAlloc, UnorderedMapData);
+    d = inpAlloc->create<UnorderedMapData>();
     d->fakeNext = 0;
     d->buckets = 0;
     d->ref = 1;

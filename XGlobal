@@ -62,6 +62,7 @@
 # define X_VECTOR_IS_QVECTOR 0
 # define X_QCOLOUR_COMPATIBILITY 0
 # define X_QT_INTEROP 0
+# define X_STL_INTEROP 0
 #else
 # define X_ASSERT_VALUE_HANDLING 1
 # define X_ADVANCED_ASSERT 1
@@ -69,6 +70,7 @@
 # define X_VECTOR_IS_QVECTOR 1
 # define X_QCOLOUR_COMPATIBILITY 1
 # define X_QT_INTEROP 1
+# define X_STL_INTEROP 1
 #endif
 
 typedef signed char xint8;         /* 8 bit signed */

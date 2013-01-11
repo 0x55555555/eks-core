@@ -1,0 +1,21 @@
+#ifndef XGLOBALALLOCATOR_H
+#define XGLOBALALLOCATOR_H
+
+#include "XGlobal"
+#include "XThreadSafeAllocator"
+
+namespace Eks
+{
+
+class EKSCORE_EXPORT GlobalAllocator : public ThreadSafeAllocator
+  {
+public:
+  virtual void *alloc(xsize size, xsize alignment=0);
+  virtual void free(void *mem);
+
+  static GlobalAllocator *instance();
+  };
+
+}
+
+#endif // XGLOBALALLOCATOR_H

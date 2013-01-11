@@ -14,7 +14,6 @@ SOURCES += \
     ../src/XFileSequence.cpp \
     ../src/XTime.cpp \
     ../src/XProfiler.cpp \
-    ../src/XAllocatorBase.cpp \
     ../src/XUnorderedMap.cpp \
     ../src/XEventLogger.cpp \
     ../src/XBucketAllocator.cpp \
@@ -24,7 +23,8 @@ SOURCES += \
     ../src/XMemoryTracker.cpp \
     ../src/XAsyncTask.cpp \
     ../src/XMathHelpers.cpp \
-    ../src/XStringSimple.cpp
+    ../src/XStringSimple.cpp \
+    ../src/XGlobalAllocator.cpp
 
 HEADERS += \
     ../XGlobal \
@@ -150,7 +150,8 @@ HEADERS += \
     ../XStringSimple \
     ../XMathCurve \
     ../XResourceDescription \
-    ../XThreadSafeAllocator
+    ../XThreadSafeAllocator \
+    ../XGlobalAllocator
 
 
 

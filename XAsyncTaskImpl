@@ -2,6 +2,7 @@
 #define XASYNCTASKIMPL_H
 
 #include "XThreadSafeAllocator"
+
 // Implementation details of Eks::Task
 
 namespace Eks
@@ -18,10 +19,16 @@ public:
 
   void addDependent(TaskImpl *);
 
-  template <typename T, typename X> void setUserData(const X &t)
+  template <typename T> void setUserData(const T &t)
     {
     xCompileTimeAssert(sizeof(T) <= UserDataSize);
     new(_userData) T(t);
+    }
+
+  template <typename T> T &createUserData()
+    {
+    xCompileTimeAssert(sizeof(T) <= UserDataSize);
+    return *new(_userData) T();
     }
 
   template <typename T> void clearUserData()
@@ -104,7 +111,7 @@ public:
   static TaskT create(const Task<Arg> &arg, const Fn &fn)
     {
     // create a new task
-    TaskT res;
+    TaskT res(arg.token()->_allocator);
 
     // get the task token, so we can set up dependencies
     typename TaskT::Token token = res.token();
@@ -113,7 +120,7 @@ public:
     arg.token()->addDependent(token);
 
     // set the userdata of the token so we can get it in complete
-    token->setUserData(fn);
+    token->setUserData<Fn>(fn);
 
     // setup the complete callback for the token
     token->_onDependencyComplete = complete;
@@ -145,7 +152,7 @@ public:
 
 }
 
-template <typename Result> Task<Result>::Task(Eks::AllocatorBase *allocator)
+template <typename Result> Task<Result>::Task(Eks::ThreadSafeAllocator *allocator)
     : _token(Impl::create(allocator))
   {
   }
@@ -155,14 +162,14 @@ template <typename ResultType>
     Task<void> Task<ResultType>::whenBoth(const Task<OthResult> &oth)
   {
   typedef Task<void> TaskT;
-  TaskT res;
+  TaskT res(oth.token()->_allocator);
 
   TaskT::Token resToken = res.token();
 
   oth.token()->addDependent(resToken);
   token()->addDependent(resToken);
 
-  resToken->setUserData<std::atomic<int>>(2);
+  resToken->createUserData<std::atomic<int>>() = 2;
 
   resToken->_onDependencyComplete = [](Impl *ths, Impl *, const void *)
     {

@@ -201,7 +201,7 @@ public:
 
   void destroyBucket(Bucket *b)
     {
-    xDestroyAndFree(_allocator, Bucket, b);
+    _allocator->destroy(b);
     }
 
   void *alloc()
@@ -339,7 +339,7 @@ public:
     HashType::iterator e = _internal.end();
     while (i != e)
       {
-      xDestroyAndFree(_allocator, FixedSizeBucketAllocator, i.value());
+      _allocator->destroy(i.value());
       ++i;
       }
     }
@@ -352,7 +352,7 @@ public:
     FixedSizeBucketAllocator *b = _internal.value(size, 0);
     if(!b)
       {
-      b = xAllocateAndConstruct(_allocator, FixedSizeBucketAllocator, size, _defaultSize, _expandSize, _allocator);
+      b = _allocator->create<FixedSizeBucketAllocator>(size, _defaultSize, _expandSize, _allocator);
       _internal.insert(size, b);
       }
 

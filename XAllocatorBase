@@ -16,7 +16,7 @@ public:
   virtual void free(void *mem) = 0;
 
   // todo, variadic template args here...
-  template <typename T> T *create(xsize alignment=0)
+  template <typename T> T *create(xsize alignment=1)
     {
     void *d = alloc(sizeof(T), alignment);
     return new(d) T();
@@ -24,8 +24,18 @@ public:
 
   template <typename T, typename A> T *create(A a, xsize alignment=0)
     {
-    void *d = alloc(sizeof(T), alignment);
-    return new(d) T(a);
+    void *mem = alloc(sizeof(T), alignment);
+    return new(mem) T(a);
+    }
+
+  template <typename T,
+            typename A,
+            typename B,
+            typename C,
+            typename D> T *create(A a, B b, C c, D d, xsize alignment=0)
+    {
+    void *mem = alloc(sizeof(T), alignment);
+    return new(mem) T(a, b, c, d);
     }
 
   template <typename T> void destroy(T *t)
@@ -36,19 +46,6 @@ public:
     }
   };
 
-class EKSCORE_EXPORT GlobalAllocator : public AllocatorBase
-  {
-public:
-  virtual void *alloc(xsize size, xsize alignment=0);
-  virtual void free(void *mem);
-
-  static GlobalAllocator *instance();
-  };
-
 }
-
-
-#define xAllocateAndConstruct(a, t, ...) new(a->alloc(sizeof(t))) t(__VA_ARGS__)
-#define xDestroyAndFree(a, t, m) m-> ~t(); a->free(m)
 
 #endif // XALLOCATORBASE_H

@@ -580,7 +580,7 @@ public:
 
 namespace detail
 {
-typedef StaticTypedAllocator<GlobalAllocator, int> testIntGSA;
+typedef StaticTypedAllocator<AllocatorBase, int> testIntGSA;
 typedef VectorStorage <int, 0, testIntGSA> testVectorStorage;
 
 // this is important - a simple vector should only be three pointers

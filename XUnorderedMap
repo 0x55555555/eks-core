@@ -46,7 +46,7 @@
 
 #include "XGlobal"
 #include "XAssert"
-#include "XAllocatorBase"
+#include "XGlobalAllocator"
 #include "XVector"
 #include <atomic>
 

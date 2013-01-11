@@ -159,7 +159,7 @@ public:
   };
 
 // should be minimally sized.
-xCompileTimeAssert(sizeof(StaticTypedAllocator<GlobalAllocator, void>) == 1);
+xCompileTimeAssert(sizeof(StaticTypedAllocator<AllocatorBase, void>) == 1);
 
 }
 

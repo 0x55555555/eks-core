@@ -2,7 +2,7 @@
 #define XSTRING_H
 
 #include "XGlobal"
-#include "XAllocatorBase"
+#include "XGlobalAllocator"
 #include "XVector"
 
 namespace Eks
@@ -50,11 +50,13 @@ public:
     xAssert(at(size()) == '\0');
     }
 
+#if X_STL_INTEROP
   StringBase(const std::string &s, AllocatorBase *alloc=GlobalAllocator::instance())
     : String(alloc)
     {
     resizeAndCopy(s.length(), s.data());
     }
+#endif
 
 #if X_QT_INTEROP
   StringBase(const QString &s, AllocatorBase *alloc=GlobalAllocator::instance())
@@ -355,11 +357,13 @@ public:
     {
     }
 
+#if X_STL_INTEROP
   String(const std::string &s, AllocatorBase *alloc=GlobalAllocator::instance())
     : BaseType(alloc)
     {
     resizeAndCopy(s.length(), s.data());
     }
+#endif
 
 #if X_QT_INTEROP
   String(const QString &s, AllocatorBase *alloc=GlobalAllocator::instance())
