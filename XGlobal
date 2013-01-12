@@ -126,7 +126,7 @@ typedef unsigned long long xuint64; /* 64 bit unsigned */
 
 inline void xNoop() { }
 
-#define X_CONST_EXPR Q_DECL_CONSTEXPR
+#define X_CONST_EXPR //Q_DECL_CONSTEXPR
 
 #define X_ARRAY_COUNT(x) (sizeof(x)/sizeof(x[0]))
 
