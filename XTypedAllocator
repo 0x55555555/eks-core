@@ -13,7 +13,9 @@ template <typename Derived, typename T> class TypedAllocatorBase
 public:
   typedef T value_type;
   typedef value_type* pointer;
-  typedef size_t size_type;
+  typedef const value_type* const_pointer;
+  typedef xsize size_type;
+  typedef xptrdiff difference_type;
 
   template <class O> struct rebind
     {
