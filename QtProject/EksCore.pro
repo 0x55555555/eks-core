@@ -24,7 +24,8 @@ SOURCES += \
     ../src/XAsyncTask.cpp \
     ../src/XMathHelpers.cpp \
     ../src/XStringSimple.cpp \
-    ../src/XGlobalAllocator.cpp
+    ../src/XGlobalAllocator.cpp \
+    ../src/XTemporaryAllocator.cpp
 
 HEADERS += \
     ../XGlobal \
@@ -151,7 +152,8 @@ HEADERS += \
     ../XMathCurve \
     ../XResourceDescription \
     ../XThreadSafeAllocator \
-    ../XGlobalAllocator
+    ../XGlobalAllocator \
+    ../XTemporaryAllocator
 
 
 
