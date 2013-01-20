@@ -5,7 +5,7 @@
 #include "XAssert"
 #include "XMathVector"
 #if X_QCOLOUR_COMPATIBILITY
-# include "QColor"
+# include "QtGui/QColor"
 #endif
 
 namespace Eks

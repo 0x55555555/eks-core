@@ -7,7 +7,7 @@
 #include "XCodeLocation"
 
 #if X_ASSERT_VALUE_HANDLING
-# include "QVariant"
+# include "QtCore/QVariant"
 #endif
 
 namespace Eks

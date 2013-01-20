@@ -30,7 +30,6 @@ SOURCES += \
 HEADERS += \
     ../XGlobal \
     ../XVector \
-    ../XSet \
     ../XProperty \
     ../XColour \
     ../XQuaternion \

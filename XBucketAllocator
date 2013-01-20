@@ -5,7 +5,6 @@
 #include "XMacroHelpers"
 #include "XAssert"
 #include "XProperty"
-#include "QHash"
 #include "XUnorderedMap"
 #include "XAllocatorBase"
 #include "XEventLogger"

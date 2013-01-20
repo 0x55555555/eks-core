@@ -3,7 +3,7 @@
 
 #include "XGlobal"
 #include "XMathHelpers"
-#include "QDebug"
+#include "QtCore/QDebug"
 
 namespace Eks
 {

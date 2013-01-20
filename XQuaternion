@@ -3,14 +3,27 @@
 
 #include "XMathHelpers"
 #include "Eigen/Geometry"
-#include "QTextStream"
-#include "QDataStream"
 
 namespace Eks
 {
 typedef Eigen::Quaternion<Real> Quaternion;
 }
 
+
+inline bool operator==(const Eks::Quaternion &a, const Eks::Quaternion& b)
+  {
+  return a.coeffs() == b.coeffs();
+  }
+
+inline bool operator!=(const Eks::Quaternion &a, const Eks::Quaternion& b)
+  {
+  return a.coeffs() != b.coeffs();
+  }
+
+#if X_QT_INTEROP
+
+#include "QtCore/QTextStream"
+#include "QtCore/QDataStream"
 
 inline QTextStream &operator<<(QTextStream &str, const Eks::Quaternion &quat)
   {
@@ -33,17 +46,6 @@ inline QDataStream &operator>>(QDataStream &str, Eks::Quaternion &quat)
   return str >> quat.x() >> quat.y() >> quat.z() >> quat.w();
   }
 
-inline bool operator==(const Eks::Quaternion &a, const Eks::Quaternion& b)
-  {
-  return a.coeffs() == b.coeffs();
-  }
-
-inline bool operator!=(const Eks::Quaternion &a, const Eks::Quaternion& b)
-  {
-  return a.coeffs() != b.coeffs();
-  }
-
-#if X_QT_INTEROP
 
 Q_DECLARE_METATYPE(Eks::Quaternion);
 

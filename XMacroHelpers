@@ -1,7 +1,7 @@
 #ifndef XMACROHELPERS_H
 #define XMACROHELPERS_H
 
-#include "QtGlobal"
+#include "QtCore/QtGlobal"
 
 #define xMax qMax
 #define xMin qMin

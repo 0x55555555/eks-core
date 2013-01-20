@@ -5,9 +5,6 @@
 #include "XAssert"
 #include "XMathHelpers"
 #include "Eigen/Core"
-#include "QMetaType"
-#include "QTextStream"
-#include "QDataStream"
 
 namespace Eks
 {
@@ -28,10 +25,11 @@ xCompileTimeAssert(sizeof(Vector2DTight) == sizeof(float) * 2);
 
 }
 
-class QTextStream;
-class QDataStream;
+#if X_QT_INTEROP
 
-// static size
+#include "QtCore/QMetaType"
+#include "QtCore/QTextStream"
+#include "QtCore/QDataStream"
 
 template <typename Derived> QTextStream &operator>>(QTextStream &str, Eigen::PlainObjectBase<Derived> &vec)
   {
@@ -148,11 +146,9 @@ template <typename Derived> QDataStream &operator<<(QDataStream &str, const Eige
   return str;
   }
 
-#if X_QT_INTEROP
-
-#include "QVector2D"
-#include "QVector3D"
-#include "QVector4D"
+#include "QtGui/QVector2D"
+#include "QtGui/QVector3D"
+#include "QtGui/QVector4D"
 
 inline QVector2D toQt(const Eks::Vector2D &vec)
   {

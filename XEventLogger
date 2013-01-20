@@ -8,7 +8,7 @@
 #include "XTime"
 #include "XAssert"
 #include "XStringSimple"
-#include "QMetaType"
+#include "QtCore/QMetaType"
 
 template <typename T> struct EKSCORE_EXPORT XEventLoggerPair
   {

@@ -2,11 +2,10 @@
 #define XPROFILER_H
 
 #include "XTime"
-#include "QString"
 #include "XUnorderedMap"
 #include "XVector"
 #include "XBucketAllocator"
-#include "QMutex"
+#include "QtCore/QMutex"
 
 namespace Eks
 {
