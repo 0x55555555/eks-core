@@ -50,6 +50,12 @@ public:
     xAssert(at(size()) == '\0');
     }
 
+  template <typename C, xsize S, typename A> StringBase(const StringBase<C, S, A>& n, AllocatorBase *alloc=GlobalAllocator::instance())
+    : String(n, Alloc(alloc))
+    {
+    xAssert(at(size()) == '\0');
+    }
+
 #if X_STL_INTEROP
   StringBase(const std::string &s, AllocatorBase *alloc=GlobalAllocator::instance())
     : String(alloc)

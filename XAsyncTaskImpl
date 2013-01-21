@@ -120,7 +120,7 @@ public:
     arg.token()->addDependent(token);
 
     // set the userdata of the token so we can get it in complete
-    token->setUserData<Fn>(fn);
+    token->setUserData(fn);
 
     // setup the complete callback for the token
     token->_onDependencyComplete = complete;

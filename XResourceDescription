@@ -8,7 +8,6 @@ namespace Eks
 {
 
 #define X_ALIGN_BYTE_COUNT 16
-#define X_ALIGNED_OPERATOR_NEW EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 #define xAssertIsSpecificAligned(ptr, alignment) xAssert(Eks::isAligned(ptr, alignment), (xsize)ptr, alignment, ((xsize)(ptr)&(alignment-1)))
 #define xAssertIsAligned(ptr) xAssertIsSpecificAligned(ptr, X_ALIGN_BYTE_COUNT)
