@@ -94,7 +94,12 @@ typedef long long xint64;           /* 64 bit signed */
 typedef unsigned long long xuint64; /* 64 bit unsigned */
 #endif
 
-#define X_SIZEOF_ARRAY(x) (sizeof(x)/sizeof(x[0]))
+#define X_SIZE_SENTINEL ((xsize)-1)
+#define X_UINT64_SENTINEL ((xuint64)-1)
+#define X_UINT32_SENTINEL ((xuint32)-1)
+#define X_UINT16_SENTINEL ((xuint16)-1)
+#define X_INT16_MAX (32767)
+#define X_INT16_MIN (-32768)
 
 #ifdef X_CPPOX_OVERRIDE_SUPPORT
 # define X_OVERRIDE override
@@ -109,15 +114,6 @@ typedef unsigned long long xuint64; /* 64 bit unsigned */
 #endif
 
 #define X_CONST_EXPR Q_DECL_CONSTEXPR
-
-inline void xNoop() { }
-
-#define X_SIZE_SENTINEL ((xsize)-1)
-#define X_UINT64_SENTINEL ((xuint64)-1)
-#define X_UINT32_SENTINEL ((xuint32)-1)
-#define X_UINT16_SENTINEL ((xuint16)-1)
-#define X_INT16_MAX (32767)
-#define X_INT16_MIN (-32768)
 
 #define X_ARRAY_COUNT(x) (sizeof(x)/sizeof(x[0]))
 

@@ -479,9 +479,10 @@ struct assign_impl<Derived1, Derived2, SliceVectorizedTraversal, NoUnrolling, Ve
 * Part 4 : implementation of DenseBase methods
 ***************************************************************************/
 
-namespace internal {
-template<typename Derived, typename OtherDerived>
-EIGEN_STRONG_INLINE Derived& lazyAssign(DenseBase<Derived>& ths, const DenseBase<OtherDerived>& other)
+template<typename Derived>
+template<typename OtherDerived>
+EIGEN_STRONG_INLINE Derived& DenseBase<Derived>
+  ::lazyAssign(const DenseBase<OtherDerived>& other)
 {
   enum{
     SameType = internal::is_same<typename Derived::Scalar,typename OtherDerived::Scalar>::value
@@ -494,22 +495,13 @@ EIGEN_STRONG_INLINE Derived& lazyAssign(DenseBase<Derived>& ths, const DenseBase
 #ifdef EIGEN_DEBUG_ASSIGN
   internal::assign_traits<Derived, OtherDerived>::debug();
 #endif
-  eigen_assert(ths.rows() == other.rows() && ths.cols() == other.cols());
+  eigen_assert(rows() == other.rows() && cols() == other.cols());
   internal::assign_impl<Derived, OtherDerived, int(SameType) ? int(internal::assign_traits<Derived, OtherDerived>::Traversal)
-                                                       : int(InvalidTraversal)>::run(ths.derived(),other.derived());
+                                                       : int(InvalidTraversal)>::run(derived(),other.derived());
 #ifndef EIGEN_NO_DEBUG
   checkTransposeAliasing(other.derived());
 #endif
-  return ths.derived();
-}
-}
-
-template<typename Derived>
-template<typename OtherDerived>
-EIGEN_STRONG_INLINE Derived& DenseBase<Derived>
-  ::lazyAssign(const DenseBase<OtherDerived>& other)
-{
-  return internal::lazyAssign(*this, other);
+  return derived();
 }
 
 namespace internal {

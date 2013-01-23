@@ -6,7 +6,7 @@
 #define xMax qMax
 #define xMin qMin
 
-#define X_DISABLE_COPY(x) Q_DISABLE_COPY(x)
+#define X_DISABLE_COPY(x) x(const x &); x &operator=(const x &);
 
 #ifdef Q_OS_DARWIN
 # define xCurrentFunction __PRETTY_FUNCTION__
