@@ -21,8 +21,8 @@ class EKSCORE_EXPORT XEventLoggerInternal
 public:
   XEventLoggerInternal(const char *name, int type, xsize size, xsize count, const char *units);
 
-  Eks::String name;
-  Eks::String units;
+  Eks::StringBase<Eks::Char, 32> name;
+  Eks::StringBase<Eks::Char, 32> units;
   int type;
   xsize size;
   xsize count;
