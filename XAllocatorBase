@@ -22,7 +22,33 @@ public:
     return new(d) T();
     }
 
-  template <typename T, typename A> T *create(A a, xsize alignment=1)
+  template <typename T, typename A> T *create(A a)
+    {
+    void *mem = alloc(sizeof(T), 1);
+    return new(mem) T(a);
+    }
+
+  template <typename T,
+            typename A,
+            typename B,
+            typename C> T *create(A a, B b, C c)
+    {
+    void *mem = alloc(sizeof(T), 1);
+    return new(mem) T(a, b, c);
+    }
+
+  template <typename T,
+            typename A,
+            typename B,
+            typename C,
+            typename D> T *create(A a, B b, C c, D d)
+    {
+    void *mem = alloc(sizeof(T), 1);
+    return new(mem) T(a, b, c, d);
+    }
+
+
+  template <typename T, typename A> T *createWithAlignment(A a, xsize alignment)
     {
     void *mem = alloc(sizeof(T), alignment);
     return new(mem) T(a);
@@ -31,8 +57,17 @@ public:
   template <typename T,
             typename A,
             typename B,
+            typename C> T *createWithAlignment(A a, B b, C c, xsize alignment)
+    {
+    void *mem = alloc(sizeof(T), alignment);
+    return new(mem) T(a, b, c);
+    }
+
+  template <typename T,
+            typename A,
+            typename B,
             typename C,
-            typename D> T *create(A a, B b, C c, D d, xsize alignment=1)
+            typename D> T *createWithAlignment(A a, B b, C c, D d, xsize alignment)
     {
     void *mem = alloc(sizeof(T), alignment);
     return new(mem) T(a, b, c, d);
