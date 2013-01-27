@@ -84,6 +84,12 @@ public:
     resizeAndCopy(v.size(), v.begin());
     }
 
+  Vector(const ThisType& cpy)
+      : ThisBase(cpy.allocator())
+    {
+    resizeAndCopy(cpy.size(), cpy.begin());
+    }
+
   template <typename X, xsize Pre, typename AllocX>
     Vector(Vector<X, Pre, AllocX> &&v, const Alloc &alloc=Alloc())
       : ThisBase(alloc)
@@ -95,6 +101,19 @@ public:
       : ThisBase(alloc)
     {
     resize(size, t);
+    }
+
+  ThisType& operator=(const ThisType& oth)
+    {
+    clear();
+    resizeAndCopy(oth.size(), oth.begin());
+    return *this;
+    }
+
+  ThisType& operator=(ThisType&& oth)
+    {
+    swap(oth);
+    return *this;
     }
 
   ~Vector()
@@ -517,6 +536,11 @@ public:
     }
 
   Alloc &allocator()
+    {
+    return *this;
+    }
+
+  const Alloc &allocator() const
     {
     return *this;
     }

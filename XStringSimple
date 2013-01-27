@@ -78,7 +78,23 @@ public:
     return QString::fromUtf8(String::data(), size());
     }
 
+  ThisType& operator=(const QString& s)
+    {
+    clear();
+    QByteArray arr = s.toUtf8();
+    resizeAndCopy(arr.length(), arr.data());
+    return *this;
+    }
+
 #endif
+
+  using String::operator=;
+  ThisType& operator=(const Char* oth)
+    {
+    clear();
+    append(oth);
+    return *this;
+    }
 
   using String::operator==;
   bool operator==(const Char *c) const
@@ -87,7 +103,6 @@ public:
     return s == Traits::length(c) &&
         compare(c, s);
     }
-
 
   using String::operator!=;
   bool operator!=(const Char *c) const
@@ -386,7 +401,11 @@ public:
 
 #if X_QT_INTEROP
 
-EKSCORE_EXPORT uint qHash(const Eks::String &a);
+template <typename C, xsize P, typename A> uint qHash(const Eks::StringBase<C, P, A> &a)
+  {
+  return qHash(a.data());
+  }
+
 EKSCORE_EXPORT QDataStream &operator>>(QDataStream &str, Eks::Char &vec);
 EKSCORE_EXPORT QDataStream &operator<<(QDataStream &str, Eks::Char vec);
 

@@ -14,6 +14,16 @@ namespace Eks
 
 GlobalAllocator g_allocator;
 
+GlobalAllocator::GlobalAllocator()
+  {
+  _allocationCount = 0;
+  }
+
+GlobalAllocator::~GlobalAllocator()
+  {
+  xAssert(_allocationCount == 0);
+  }
+
 GlobalAllocator *GlobalAllocator::instance()
   {
   return &g_allocator;
@@ -55,13 +65,18 @@ void *GlobalAllocator::alloc(xsize size, xsize alignment)
 
   xAssertIsSpecificAligned(m, alignment);
 
-#ifdef MemoryHandleHeader
+#ifdef X_ENABLE_EVENT_LOGGING
   MemoryHandleHeader *handle = (MemoryHandleHeader*)m;
 
+  memset(handle->padding, 0, sizeof(handle->padding));
   handle->allocSize = size;
 #endif
 
-  return (void*)(((xuint8*)m) + MemoryHandleHeaderSize);
+  const xsize handleSize = MemoryHandleHeaderSize;
+
+  ++_allocationCount;
+
+  return (void*)(((xuint8*)m) + handleSize);
   }
 
 void GlobalAllocator::free(void *m)
@@ -71,7 +86,7 @@ void GlobalAllocator::free(void *m)
     return;
     }
 
-#ifdef MemoryHandleHeader
+#ifdef X_ENABLE_EVENT_LOGGING
   MemoryHandleHeader *h = (MemoryHandleHeader*)m;
   h = h-1;
 
@@ -80,9 +95,11 @@ void GlobalAllocator::free(void *m)
   X_MEMORY_LOGGER_FREE(xTotalGlobalAllocatorSize, allocSize);
 #endif
 
-  void *mem = (((xuint8*)m) - MemoryHandleHeaderSize);
-  
+  const xsize handleSize = MemoryHandleHeaderSize;
 
+  void *mem = (((xuint8*)m) - handleSize);
+
+  --_allocationCount;
 
 #ifndef Q_CC_MSVC
   qFreeAligned(mem);

@@ -17,8 +17,3 @@ QDataStream &operator<<(QDataStream &str, Eks::Char vec)
   str << (xuint8)vec;
   return str;
   }
-
-uint qHash(const Eks::String &a)
-  {
-  return qHash(a.data());
-  }

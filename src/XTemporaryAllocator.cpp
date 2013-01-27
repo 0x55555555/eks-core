@@ -55,7 +55,8 @@ void TemporaryAllocatorCore::releaseBlock(Block *b)
   {
   xAssert(b);
   xAssert(b->next == 0);
-
+  
+  b->current = b->data;
   b->next = _freeBlock;
   _freeBlock = b;
   }
@@ -80,8 +81,13 @@ TemporaryAllocator::TemporaryAllocator(TemporaryAllocatorCore *core)
 
 TemporaryAllocator::~TemporaryAllocator()
   {
-  xAssert(_allocationCount == 0);
-  _core->releaseBlock(_current);
+  xAssert(_allocationCount == 0);  
+  xAssert(!_used || _current);
+
+  if(_current)
+    {
+    _core->releaseBlock(_current);
+    }
 
   TemporaryAllocatorCore::Block *b = _used;
   while(b)
@@ -97,7 +103,7 @@ TemporaryAllocator::~TemporaryAllocator()
 
 void *TemporaryAllocator::alloc(xsize size, xsize alignment)
   {
-  --_allocationCount;
+  ++_allocationCount;
 
   if(_current)
     {
