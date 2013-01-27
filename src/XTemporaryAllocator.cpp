@@ -107,9 +107,12 @@ void *TemporaryAllocator::alloc(xsize size, xsize alignment)
       return d;
       }
     }
-
+  
   // move to the used list
-  _current->next = _used;
+  if(_current)
+    {
+    _current->next = _used;
+    }
   _used = _current;
 
   // get a new current
@@ -123,7 +126,10 @@ void *TemporaryAllocator::alloc(xsize size, xsize alignment)
 
 void TemporaryAllocator::free(void *mem)
   {
-  xAssert(mem);
-  --_allocationCount;
+  if(mem)
+    {
+    xAssert(_allocationCount > 0);
+    --_allocationCount;
+    }
   }
 }

@@ -75,10 +75,14 @@ void GlobalAllocator::free(void *m)
   MemoryHandleHeader *h = (MemoryHandleHeader*)m;
   h = h-1;
 
-  X_MEMORY_LOGGER_FREE(xTotalGlobalAllocatorSize, h->allocSize);
+  xsize allocSize = h->allocSize;
+
+  X_MEMORY_LOGGER_FREE(xTotalGlobalAllocatorSize, allocSize);
 #endif
 
   void *mem = (((xuint8*)m) - MemoryHandleHeaderSize);
+  
+
 
 #ifndef Q_CC_MSVC
   qFreeAligned(mem);
