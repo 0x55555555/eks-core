@@ -165,7 +165,7 @@ public:
     xuint8 _alloc[1];
     };
 
-  FixedSizeBucketAllocator(xsize s, xsize d=128, xsize e=1024, AllocatorBase *allocator=GlobalAllocator::instance())
+  FixedSizeBucketAllocator(AllocatorBase *allocator, xsize s, xsize d=128, xsize e=1024)
       : _freePtr(0), _size(s), _defaultSize(d), _expandSize(e), _first(0), _allocator(allocator)
     {
     xAssert(_allocator);
@@ -326,7 +326,7 @@ private:
 class EKSCORE_EXPORT BucketAllocator : public AllocatorBase
   {
 public:
-  BucketAllocator(xsize d=128, xsize e=1024, AllocatorBase *alloc=GlobalAllocator::instance())
+  BucketAllocator(AllocatorBase *alloc, xsize d=128, xsize e=1024)
       : _defaultSize(d), _expandSize(e), _internal(alloc), _allocator(alloc)
     {
     xAssert(_allocator);
@@ -351,7 +351,7 @@ public:
     FixedSizeBucketAllocator *b = _internal.value(size, 0);
     if(!b)
       {
-      b = _allocator->create<FixedSizeBucketAllocator>(size, _defaultSize, _expandSize, _allocator);
+      b = _allocator->create<FixedSizeBucketAllocator>(_allocator, size, _defaultSize, _expandSize);
       _internal.insert(size, b);
       }
 

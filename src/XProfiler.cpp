@@ -116,7 +116,7 @@ void Profiler::clearResults()
     {
     g_instance->_currentContexts.clear();
     g_instance->_contextAllocator.~FixedSizeBucketAllocator();
-    new(&g_instance->_contextAllocator) FixedSizeBucketAllocator(sizeof(ProfilingContext), 256, 1024);
+    new(&g_instance->_contextAllocator) FixedSizeBucketAllocator(GlobalAllocator::instance(), sizeof(ProfilingContext), 256, 1024);
 
     g_instance->_rootContext = (ProfilingContext *)g_instance->_contextAllocator.alloc();
     new(g_instance->_rootContext) ProfilingContext(0, X_UINT32_SENTINEL, "");
@@ -152,7 +152,7 @@ void Profiler::setStringForContext(xuint32 t, const QString &str)
   }
 
 Profiler::Profiler(AllocatorBase *allocator)
-    : _contextAllocator(sizeof(ProfilingContext), 256, 1024, allocator)
+    : _contextAllocator(allocator, sizeof(ProfilingContext), 256, 1024)
   {
   _rootContext = (ProfilingContext *)_contextAllocator.alloc();
   new(_rootContext) ProfilingContext(0, X_UINT32_SENTINEL, "");
