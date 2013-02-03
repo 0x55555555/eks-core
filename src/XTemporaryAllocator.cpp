@@ -36,7 +36,7 @@ void *TemporaryAllocatorCore::Block::alloc(xsize s, xsize alignment)
   return 0;
   }
 
-TemporaryAllocatorCore::Block *TemporaryAllocatorCore::findBlock()
+TemporaryAllocatorCore::Block *TemporaryAllocatorCore::findBlock(xsize expectedSize)
   {
   if(_freeBlock)
     {
@@ -48,7 +48,7 @@ TemporaryAllocatorCore::Block *TemporaryAllocatorCore::findBlock()
     return b;
     }
 
-  return createBlock();
+  return createBlock(expectedSize);
   }
 
 void TemporaryAllocatorCore::releaseBlock(Block *b)
@@ -61,12 +61,14 @@ void TemporaryAllocatorCore::releaseBlock(Block *b)
   _freeBlock = b;
   }
 
-TemporaryAllocatorCore::Block *TemporaryAllocatorCore::createBlock()
+TemporaryAllocatorCore::Block *TemporaryAllocatorCore::createBlock(xsize expected)
   {
-  Block *b = (Block *)_allocator->alloc(sizeof(Block) + _blockSize);
+  xsize newSize = xMax(expected, _blockSize);
+
+  Block *b = (Block *)_allocator->alloc(sizeof(Block) + newSize);
   b->current = b->data;
   b->next = 0;
-  b->end = b->data + _blockSize;
+  b->end = b->data + newSize;
 
   return b;
   }
@@ -121,9 +123,11 @@ void *TemporaryAllocator::alloc(xsize size, xsize alignment)
     }
   _used = _current;
 
+  static float ExpandFactor = 2.0f;
+
   // get a new current
   _current = 0;
-  _current = _core->findBlock();
+  _current = _core->findBlock(size * ExpandFactor);
 
   void *d = _current->alloc(size, alignment);
   xAssert(d);

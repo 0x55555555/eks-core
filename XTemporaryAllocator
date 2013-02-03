@@ -22,12 +22,12 @@ public:
     xuint8 data[1];
     };
 
-  Block *findBlock();
+  Block *findBlock(xsize expectedSize);
   void releaseBlock(Block *);
 
 private:
 
-  Block *createBlock();
+  Block *createBlock(xsize expected);
 
   Block *_freeBlock;
   xsize _blockSize;
