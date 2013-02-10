@@ -28,6 +28,11 @@ public:
     return (pointer)allocator()->alloc(sizeof(value_type) * n);
     }
 
+  pointer allocate(xsize n, xsize align)
+    {
+    return (pointer)allocator()->alloc(sizeof(value_type) * n, align);
+    }
+
   void deallocate(pointer p, size_type n)
     {
     (void)n;
@@ -82,7 +87,11 @@ public:
     p->~U();
     }
 
-  AllocatorBase *allocator() const { return _alloc; }
+  AllocatorBase *allocator() const
+	{
+	xAssert(_alloc);
+	return _alloc;
+	}
 
 protected:
   AllocatorBase *_alloc;

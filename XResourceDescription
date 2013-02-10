@@ -12,6 +12,14 @@ namespace Eks
 #define xAssertIsSpecificAligned(ptr, alignment) xAssert(Eks::isAligned(ptr, alignment), (xsize)ptr, alignment, ((xsize)(ptr)&(alignment-1)))
 #define xAssertIsAligned(ptr) xAssertIsSpecificAligned(ptr, X_ALIGN_BYTE_COUNT)
 
+template <typename T> struct AlignmentOf
+  {
+  enum
+    {
+    Alignment = std::alignment_of<T>::value
+    };
+  };
+
 template <typename T> bool isAligned(T ptr, xsize alignment = X_ALIGN_BYTE_COUNT)
   {
   const xptrdiff bitmask = (xptrdiff)alignment - 1;
@@ -20,22 +28,32 @@ template <typename T> bool isAligned(T ptr, xsize alignment = X_ALIGN_BYTE_COUNT
   return (ptrD&bitmask) == 0;
   }
 
+template <typename T> T offsetBy(T d, xptrdiff by)
+  {
+  return (T)((xuint8*)d + by);
+  }
+
 template <typename T> inline T roundToAlignment(T exp, xsize alignment = X_ALIGN_BYTE_COUNT)
   {
+  if(alignment <= 1)
+    {
+    return exp;
+    }
+
   const xptrdiff bitmask = (xptrdiff)alignment - 1;
   const xptrdiff bits = ((xptrdiff)exp)&bitmask;
 
   const xptrdiff offset = (xptrdiff)alignment - bits;
 
-  xuint8 *aligned = (xuint8*)exp + offset;
+  T aligned = offsetBy(exp, offset);
 
-  return (T)aligned;
+  return aligned;
   }
 
 
 class ResourceDescription;
 
-template <typename T> class ResourceDescriptionTypeHelper
+template <typename T> struct ResourceDescriptionTypeHelper
   {
   static ResourceDescription createFor();
   };
@@ -52,12 +70,23 @@ public:
       _alignment(0)
     {
     }
+
+  ResourceDescription(xsize s, xsize a)
+    : _size(s),
+      _alignment(a)
+    {
+    }
+
+  xsize allocatedSize() const
+    {
+    return _size + _alignment;
+    }
   };
 
 template <typename T>
     ResourceDescription ResourceDescriptionTypeHelper<T>::createFor()
   {
-  return ResourceDescription(sizeof(T), std::alignment_of<T>::value);
+  return ResourceDescription(sizeof(T), AlignmentOf<T>::Alignment);
   }
 }
 

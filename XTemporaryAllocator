@@ -9,7 +9,13 @@ namespace Eks
 class EKSCORE_EXPORT TemporaryAllocatorCore
   {
 public:
-  TemporaryAllocatorCore(AllocatorBase *allocator, xsize blockSize=4096);
+  enum
+    {
+    SmallBlockSize = 1 << 12,
+    LargeBlockSize = 1 << 14,
+    HugeBlockSize = 1 << 16
+    };
+  TemporaryAllocatorCore(AllocatorBase *allocator, xsize blockSize=HugeBlockSize);
   ~TemporaryAllocatorCore();
 
   struct Block

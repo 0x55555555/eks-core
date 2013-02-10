@@ -12,11 +12,16 @@ class AllocatorBase
   {
 public:
   virtual ~AllocatorBase() {}
-  virtual void *alloc(xsize size, xsize alignment=X_ALIGN_BYTE_COUNT) = 0;
+  virtual void *alloc(xsize size, xsize alignment=1) = 0;
   virtual void free(void *mem) = 0;
 
+  void *alloc(const ResourceDescription &fmt)
+    {
+    return alloc(fmt.size(), fmt.alignment());
+    }
+
   // todo, variadic template args here...
-  template <typename T> T *create(xsize alignment=1)
+  template <typename T> T *create(xsize alignment=AlignmentOf<T>::Alignment)
     {
     void *d = alloc(sizeof(T), alignment);
     return new(d) T();
@@ -24,7 +29,7 @@ public:
 
   template <typename T, typename A> T *create(A a)
     {
-    void *mem = alloc(sizeof(T), 1);
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
     return new(mem) T(a);
     }
 
@@ -33,7 +38,7 @@ public:
             typename B,
             typename C> T *create(A a, B b, C c)
     {
-    void *mem = alloc(sizeof(T), 1);
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
     return new(mem) T(a, b, c);
     }
 
@@ -43,7 +48,7 @@ public:
             typename C,
             typename D> T *create(A a, B b, C c, D d)
     {
-    void *mem = alloc(sizeof(T), 1);
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
     return new(mem) T(a, b, c, d);
     }
 

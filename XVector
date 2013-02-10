@@ -233,7 +233,7 @@ public:
 
     const size_type newBestCapacity = bestCapacity(newCapacity);
 
-    T *newData = ThisBase::allocate(newBestCapacity);
+    T *newData = ThisBase::allocate(newBestCapacity, AlignmentOf<T>::Alignment);
 
     move(newData, newData+s, ThisBase::_first);
 

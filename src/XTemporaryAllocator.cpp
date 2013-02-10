@@ -38,10 +38,17 @@ void *TemporaryAllocatorCore::Block::alloc(xsize s, xsize alignment)
 
 TemporaryAllocatorCore::Block *TemporaryAllocatorCore::findBlock(xsize expectedSize)
   {
-  if(_freeBlock)
+  Block **prevB = &_freeBlock;
+  Block *b = _freeBlock;
+  while(b && (xsize)(b->end - b->data) < expectedSize)
     {
-    Block *b = _freeBlock;
-    _freeBlock = b->next;
+    prevB = &b->next;
+    b = b->next;
+    }
+
+  if(b)
+    {
+    *prevB = b->next;
 
     b->next = 0;
 
