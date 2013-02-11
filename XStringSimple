@@ -75,7 +75,7 @@ public:
 
   QString toQString() const
     {
-    return QString::fromUtf8(String::data(), size());
+    return QString::fromUtf8(String::data(), (int)size());
     }
 
   ThisType& operator=(const QString& s)

@@ -37,5 +37,5 @@ uint qHash(const Eks::CodeLocation &a)
   {
   uint hash = qHash(QPair<const char *, const char *>(a.file(), a.function()));
 
-  return qHash(QPair<xsize, uint>(hash, a.line()));
+  return qHash(QPair<uint, xsize>(hash, a.line()));
   }

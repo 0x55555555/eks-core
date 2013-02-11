@@ -61,6 +61,14 @@ public:
 
   template <typename T,
             typename A,
+            typename B> T *createWithAlignment(A a, B b, xsize alignment)
+    {
+    void *mem = alloc(sizeof(T), alignment);
+    return new(mem) T(a, b);
+    }
+
+  template <typename T,
+            typename A,
             typename B,
             typename C> T *createWithAlignment(A a, B b, C c, xsize alignment)
     {

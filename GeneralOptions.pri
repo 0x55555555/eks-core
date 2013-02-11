@@ -40,8 +40,9 @@ win32-msvc2012 {
                 "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\um" \
                 "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\shared" \
                 "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\winrt"
-  LIBS += -L"C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\lib" \
-          -L"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib"
+  LIBS += -L"C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\lib\\amd64"
+
+  QMAKE_CXXFLAGS += /WX
 
   release {
     QMAKE_CFLAGS += /Zi
