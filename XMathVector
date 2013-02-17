@@ -17,6 +17,10 @@ typedef Eigen::Matrix<xint32, 2, 1> VectorI2D;
 typedef Eigen::Matrix<xint32, 3, 1> VectorI3D;
 typedef Eigen::Matrix<xint32, 4, 1> VectorI4D;
 
+typedef Eigen::Matrix<xuint32, 2, 1> VectorUI2D;
+typedef Eigen::Matrix<xuint32, 3, 1> VectorUI3D;
+typedef Eigen::Matrix<xuint32, 4, 1> VectorUI4D;
+
 // types for integration with d3d gl, tightly packed for uniform blocks etc.
 typedef Eigen::Matrix<float, 3, 1, Eigen::DontAlign> Vector3DTight;
 typedef Eigen::Matrix<float, 2, 1, Eigen::DontAlign> Vector2DTight;
