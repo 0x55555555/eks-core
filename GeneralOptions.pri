@@ -27,13 +27,7 @@ win32-msvc2010 {
 }
 
 win32-msvc2012 {
-  INCLUDEPATH += "C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\include" \
-                "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\um" \
-                "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\shared" \
-                "C:\\Program Files (x86)\\Windows Kits\\8.0\\Include\\winrt"
   LIBS += -L"C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\lib"
-#  LIBS += -L"C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\lib\\amd64"
-#          -L"C:\\Program Files (x86)\\Windows Kits\\8.0\\Lib\\win8\\um\x64"
 
   QMAKE_CXXFLAGS += /WX
 
