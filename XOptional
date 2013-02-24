@@ -28,6 +28,11 @@ public:
     return *this;
     }
 
+  T *operator&()
+    {
+    return _val;
+    }
+
 private:
   T _myCopy;
   T *_val;
