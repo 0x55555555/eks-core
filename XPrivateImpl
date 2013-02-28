@@ -31,7 +31,7 @@ public:
     sizeCheck<T>();
     xAssert(!_valid);
 
-    T *res = new(_data) T();
+    T *res = new(_data) T;
     _valid = true;
 
     return res;
