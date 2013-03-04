@@ -71,6 +71,8 @@
 # define X_STL_INTEROP 1
 #endif
 
+#define X_ASSERT_VALUE_HANDLING (X_QT_INTEROP && X_ADVANCED_ASSERT)
+
 typedef signed char xint8;         /* 8 bit signed */
 typedef unsigned char xuint8;      /* 8 bit unsigned */
 typedef short xint16;              /* 16 bit signed */

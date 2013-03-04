@@ -77,7 +77,7 @@ bool Assert::defaultFire(const Assert &a)
     text += "Arguments:\n";
     for(xsize i = 0; i < a._argCount; ++i)
       {
-      const Assert::Argument &arg = a._arguments[a._argCount];
+      const Assert::Argument &arg = a._arguments[i];
 
       text + "  ";
       text += arg.name;
