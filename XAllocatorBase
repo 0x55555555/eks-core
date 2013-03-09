@@ -20,11 +20,12 @@ public:
     return alloc(fmt.size(), fmt.alignment());
     }
 
+
   // todo, variadic template args here...
-  template <typename T> T *create(xsize alignment=AlignmentOf<T>::Alignment)
+  template <typename T> T *create()
     {
-    void *d = alloc(sizeof(T), alignment);
-    return new(d) T();
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+    return new(mem) T();
     }
 
   template <typename T, typename A> T *create(A a)
@@ -52,6 +53,13 @@ public:
     return new(mem) T(a, b, c, d);
     }
 
+
+  // todo, variadic template args here...
+  template <typename T> T *createWithAlignment(xsize alignment)
+    {
+    void *d = alloc(sizeof(T), alignment);
+    return new(d) T();
+    }
 
   template <typename T, typename A> T *createWithAlignment(A a, xsize alignment)
     {
