@@ -152,7 +152,8 @@ void Profiler::setStringForContext(xuint32 t, const QString &str)
   }
 
 Profiler::Profiler(AllocatorBase *allocator)
-    : _contextAllocator(allocator, sizeof(ProfilingContext), 256, 1024)
+    : _contextAllocator(allocator, sizeof(ProfilingContext), 256, 1024),
+      _allocator(allocator)
   {
   _rootContext = (ProfilingContext *)_contextAllocator.alloc();
   new(_rootContext) ProfilingContext(0, X_UINT32_SENTINEL, "");
