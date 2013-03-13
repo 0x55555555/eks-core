@@ -1,0 +1,26 @@
+#ifndef XLOGGINGALLOCATOR
+#define XLOGGINGALLOCATOR
+
+#include "XAllocatorBase"
+#include "XProperty"
+
+namespace Eks
+{
+
+class EKSCORE_EXPORT LoggingAllocator : public AllocatorBase
+  {
+public:
+  LoggingAllocator(Eks::AllocatorBase* allocator);
+  ~LoggingAllocator();
+
+  void *alloc(xsize size, xsize alignment=0) X_OVERRIDE;
+  void free(void *mem) X_OVERRIDE;
+
+private:
+  class Impl;
+  Impl *_impl;
+  };
+
+}
+
+#endif // XLOGGINGALLOCATOR

@@ -25,6 +25,19 @@ public:
   bool operator==(const CodeLocation &a) const;
   };
 
+class EKSCORE_EXPORT StackWalker
+  {
+public:
+  class Visitor
+    {
+  public:
+    virtual void visit(xsize level, const char* name, xsize offset) = 0;
+    };
+
+  static void intialise();
+  static void walk(xsize skip, Visitor *visit);
+  };
+
 }
 
 uint qHash(const Eks::CodeLocation &a);

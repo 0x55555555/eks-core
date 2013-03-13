@@ -69,7 +69,15 @@
 # define X_QCOLOUR_COMPATIBILITY 1
 # define X_QT_INTEROP 1
 # define X_STL_INTEROP 1
+# define X_ENABLE_STACK_WALKING 1
 #endif
+
+#ifdef X_DEBUG
+# define X_ENABLE_STACK_WALKING 1
+#else
+# define X_ENABLE_STACK_WALKING 0
+#endif
+
 
 #define X_ASSERT_VALUE_HANDLING (X_QT_INTEROP && X_ADVANCED_ASSERT)
 

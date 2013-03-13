@@ -13,10 +13,10 @@ public:
   GlobalAllocator();
   ~GlobalAllocator();
 
-  virtual void *alloc(xsize size, xsize alignment=0);
-  virtual void free(void *mem);
+  void *alloc(xsize size, xsize alignment=0) X_OVERRIDE;
+  void free(void *mem) X_OVERRIDE;
 
-  static GlobalAllocator *instance();
+  static AllocatorBase *instance();
 
 private:
   xsize _allocationCount;

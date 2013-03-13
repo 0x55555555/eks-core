@@ -10,6 +10,10 @@ INCLUDEPATH += ../
 
 include("../GeneralOptions.pri")
 
+CONFIG(debug) {
+  LIBS += -lDbghelp
+}
+
 SOURCES += \
     ../src/XFileSequence.cpp \
     ../src/XTime.cpp \
@@ -20,12 +24,12 @@ SOURCES += \
     ../src/XAssert.cpp \
     ../src/XCodeLocation.cpp \
     ../src/XArrayMath.cpp \
-    ../src/XMemoryTracker.cpp \
     ../src/XAsyncTask.cpp \
     ../src/XMathHelpers.cpp \
     ../src/XStringSimple.cpp \
     ../src/XGlobalAllocator.cpp \
-    ../src/XTemporaryAllocator.cpp
+    ../src/XTemporaryAllocator.cpp \
+    ../src/XLoggingAllocator.cpp
 
 HEADERS += \
     ../XGlobal \
@@ -125,7 +129,6 @@ HEADERS += \
     ../XCodeLocation \
     ../XArrayMath \
     ../XTemplateHelpers \
-    ../XMemoryTracker \
     ../XOptional \
     ../Eigen/src/Core/util/XprHelper.h \
     ../Eigen/src/Core/util/StaticAssert.h \
@@ -152,7 +155,8 @@ HEADERS += \
     ../XResourceDescription \
     ../XThreadSafeAllocator \
     ../XGlobalAllocator \
-    ../XTemporaryAllocator
+    ../XTemporaryAllocator \
+    ../XLoggingAllocator
 
 
 

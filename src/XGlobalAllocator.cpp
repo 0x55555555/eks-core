@@ -1,6 +1,7 @@
 #include "XGlobalAllocator"
 #include "XEventLogger"
 #include "XAssert"
+#include "XLoggingAllocator"
 
 #ifndef Q_CC_MSVC
 # include <malloc.h>
@@ -24,9 +25,14 @@ GlobalAllocator::~GlobalAllocator()
   xAssert(_allocationCount == 0);
   }
 
-GlobalAllocator *GlobalAllocator::instance()
+AllocatorBase *GlobalAllocator::instance()
   {
+#ifdef X_ENABLE_EVENT_LOGGING
+  static LoggingAllocator alloc(&g_allocator);
+  return &alloc;
+#else
   return &g_allocator;
+#endif
   }
 
 #ifdef X_ENABLE_EVENT_LOGGING
