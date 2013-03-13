@@ -1,5 +1,6 @@
 #include "XLoggingAllocator"
 #include "XAssert"
+#include "QDebug"
 #include "unordered_map"
 
 namespace Eks
@@ -27,7 +28,31 @@ LoggingAllocator::LoggingAllocator(Eks::AllocatorBase *parent)
 
 LoggingAllocator::~LoggingAllocator()
   {
+  if(!_impl->_allocations.empty())
+    {
+    logAllocations();
+    }
+
   delete _impl;
+  }
+
+void LoggingAllocator::setAllocator(Eks::AllocatorBase *alloc)
+  {
+  _impl->_parent = alloc;
+  }
+
+xsize LoggingAllocator::allocationCount() const
+  {
+  return _impl->_allocations.size();
+  }
+
+void LoggingAllocator::logAllocations() const
+  {
+  qDebug() << "Logging live allocations:";
+  xForeach(auto &a, _impl->_allocations)
+    {
+    qDebug() << "Allocation\n" << a.second._stack.data();
+    }
   }
 
 void *LoggingAllocator::alloc(xsize size, xsize alignment)
@@ -39,10 +64,13 @@ void *LoggingAllocator::alloc(xsize size, xsize alignment)
     std::string *location;
     void visit(xsize level, const char* name, xsize offset) X_OVERRIDE
       {
-      (void)level;
-      (void)offset;
-      *location += name;
-      *location += "\n";
+      if(strlen(name))
+        {
+        (void)level;
+        (void)offset;
+        *location += name;
+        *location += "\n";
+        }
       }
     } visitor;
 
@@ -51,6 +79,7 @@ void *LoggingAllocator::alloc(xsize size, xsize alignment)
 
   StackWalker::walk(1, &visitor);
 
+  xAssert(_impl->_allocations.find(result) == _impl->_allocations.end());
   _impl->_allocations[result]._stack = _impl->_walkCache;
 
   return result;
@@ -58,7 +87,13 @@ void *LoggingAllocator::alloc(xsize size, xsize alignment)
 
 void LoggingAllocator::free(void *mem)
   {
-  _impl->_allocations.erase(mem);
+  if(mem)
+    {
+    std::unordered_map<void *, Allocation>::iterator it = _impl->_allocations.find(mem);
+
+    xAssert(it != _impl->_allocations.end());
+    _impl->_allocations.erase(mem);
+    }
 
   return _impl->_parent->free(mem);
   }

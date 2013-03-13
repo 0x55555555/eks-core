@@ -116,7 +116,7 @@ void Profiler::clearResults()
     {
     g_instance->_currentContexts.clear();
     g_instance->_contextAllocator.~FixedSizeBucketAllocator();
-    new(&g_instance->_contextAllocator) FixedSizeBucketAllocator(GlobalAllocator::instance(), sizeof(ProfilingContext), 256, 1024);
+    new(&g_instance->_contextAllocator) FixedSizeBucketAllocator(Core::globalAllocator(), sizeof(ProfilingContext), 256, 1024);
 
     g_instance->_rootContext = (ProfilingContext *)g_instance->_contextAllocator.alloc();
     new(g_instance->_rootContext) ProfilingContext(0, X_UINT32_SENTINEL, "");

@@ -1,8 +1,6 @@
 #include "XBucketAllocator"
 #include "QDebug"
 
-X_IMPLEMENT_MEMORY_LOGGER(xTotalBucketAllocatorSize);
-
 namespace Eks
 {
 

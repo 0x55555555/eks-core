@@ -1,5 +1,6 @@
 #include "XAssert"
 #include "XUnorderedMap"
+#include "XCore"
 #include "XStringSimple"
 
 #if X_ADVANCED_ASSERT
@@ -27,10 +28,10 @@ Assert::Assert(const CodeLocation &location, const char *condition, const char* 
   {
   }
 
-UnorderedMap<CodeLocation, bool> g_disabledAsserts;
 bool Assert::defaultFire(const Assert &a)
   {
-  if(g_disabledAsserts.contains(a.location()))
+  UnorderedMap<CodeLocation, bool> *disabled = Core::disabledAsserts();
+  if(disabled->contains(a.location()))
     {
     return false;
     }
@@ -99,7 +100,7 @@ bool Assert::defaultFire(const Assert &a)
 
   if (msgBox.clickedButton() == neverBreakButton)
     {
-    g_disabledAsserts.insert(a.location(), true);
+    disabled->insert(a.location(), true);
     }
 #else
 # ifdef Q_OS_WIN

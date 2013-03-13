@@ -2,6 +2,7 @@
 #include "XStringSimple"
 #include "XStringBuffer"
 #include "QHash"
+#include "QDebug"
 
 #if defined(Q_CC_MSVC) && X_ENABLE_STACK_WALKING
 # include <Windows.h>
@@ -115,6 +116,7 @@ void StackWalker::walk(xsize skip, Visitor *visit)
           {
           if (::GetLastError())
             {
+            qDebug() << "Error getting call stack " << ::GetLastError();
             xAssertFail();
             }
 

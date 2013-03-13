@@ -16,8 +16,6 @@
 #define Bits25To32 0xFF000000
 #define FullMask (Bits1To8|Bits9To16|Bits17To24|Bits25To32)
 
-X_DECLARE_MEMORY_LOGGER(EKSCORE_EXPORT, xTotalBucketAllocatorSize);
-
 namespace Eks
 {
 
@@ -103,6 +101,7 @@ public:
         {
         // always positive
         xsize index = ( (char*)ptr - (char*)_memory ) / _size;
+        xAssert((( (char*)ptr - (char*)_memory ) % _size) == 0);
         xsize block = index / 32;
         xsize blockIndex = index % 32;
 
@@ -346,8 +345,7 @@ public:
   void *alloc(xsize size, xsize alignment=X_ALIGN_BYTE_COUNT)
     {
     size = Eks::roundToAlignment(size, alignment);
-    X_MEMORY_LOGGER_ALLOC(xTotalBucketAllocatorSize, size);
-      
+
     FixedSizeBucketAllocator *b = _internal.value(size, 0);
     if(!b)
       {
@@ -368,7 +366,6 @@ public:
       {
       if(i.value()->contains(ptr))
         {
-        X_MEMORY_LOGGER_FREE(xTotalBucketAllocatorSize, i.value()->size());
         xVerify(i.value()->free(ptr));
         return;
         }

@@ -122,6 +122,8 @@ typedef unsigned long long xuint64; /* 64 bit unsigned */
 # define X_FINAL
 #endif
 
+#define X_HACK(X)
+
 #define X_CONST_EXPR Q_DECL_CONSTEXPR
 
 #define X_ARRAY_COUNT(x) (sizeof(x)/sizeof(x[0]))

@@ -2,7 +2,7 @@
 #define XSTRING_H
 
 #include "XGlobal"
-#include "XGlobalAllocator"
+#include "XCore"
 #include "XVector"
 
 namespace Eks
@@ -28,36 +28,38 @@ public:
   typedef typename String::iterator iterator;
   typedef typename String::const_iterator const_iterator;
 
-  StringBase(AllocatorBase *alloc=GlobalAllocator::instance())
+  StringBase(AllocatorBase *alloc=Eks::Core::defaultAllocator())
       : String(Alloc(alloc))
     {
     }
-  StringBase(const Char *n, AllocatorBase *alloc=GlobalAllocator::instance())
+  StringBase(const Char *n, AllocatorBase *alloc=Eks::Core::defaultAllocator())
       : String(Alloc(alloc))
     {
     const size_type s = strlen(n);
     resizeAndCopy(s, n);
     xAssert(at(size()) == '\0');
     }
-  StringBase(const String &n, AllocatorBase *alloc=GlobalAllocator::instance())
+  StringBase(const String &n, AllocatorBase *alloc=Eks::Core::defaultAllocator())
       : String(n, Alloc(alloc))
     {
     xAssert(at(size()) == '\0');
     }
-  StringBase(String &&n, AllocatorBase *alloc=GlobalAllocator::instance())
+  StringBase(String &&n, AllocatorBase *alloc=Eks::Core::defaultAllocator())
       : String(n, Alloc(alloc))
     {
     xAssert(at(size()) == '\0');
     }
 
-  template <typename C, xsize S, typename A> StringBase(const StringBase<C, S, A>& n, AllocatorBase *alloc=GlobalAllocator::instance())
+  template <typename C, xsize S, typename A> StringBase(
+      const StringBase<C, S, A>& n,
+      AllocatorBase *alloc=Eks::Core::defaultAllocator())
     : String(n, Alloc(alloc))
     {
     xAssert(at(size()) == '\0');
     }
 
 #if X_STL_INTEROP
-  StringBase(const std::string &s, AllocatorBase *alloc=GlobalAllocator::instance())
+  StringBase(const std::string &s, AllocatorBase *alloc=Eks::Core::defaultAllocator())
     : String(alloc)
     {
     resizeAndCopy(s.length(), s.data());
@@ -65,7 +67,7 @@ public:
 #endif
 
 #if X_QT_INTEROP
-  StringBase(const QString &s, AllocatorBase *alloc=GlobalAllocator::instance())
+  StringBase(const QString &s, AllocatorBase *alloc=Eks::Core::defaultAllocator())
     : String(alloc)
     {
     QByteArray arr = s.toUtf8();
@@ -358,28 +360,28 @@ class String : public StringBase<Char>
 public:
   typedef StringBase<Char> BaseType;
 
-  String(AllocatorBase *alloc=GlobalAllocator::instance())
+  String(AllocatorBase *alloc=Core::defaultAllocator())
       : BaseType(alloc)
     {
     }
-  String(const Char *n, AllocatorBase *alloc=GlobalAllocator::instance())
+  String(const Char *n, AllocatorBase *alloc=Core::defaultAllocator())
       : BaseType(n, alloc)
     {
     }
   template<xsize Prealloc, typename Alloc>
   String(
     const StringBase<Char, Prealloc, Alloc> &n,
-    AllocatorBase *alloc=GlobalAllocator::instance())
+    AllocatorBase *alloc=Core::defaultAllocator())
       : BaseType(n, alloc)
     {
     }
-  String(String &&n, AllocatorBase *alloc=GlobalAllocator::instance())
+  String(String &&n, AllocatorBase *alloc=Core::defaultAllocator())
       : BaseType(n, alloc)
     {
     }
 
 #if X_STL_INTEROP
-  String(const std::string &s, AllocatorBase *alloc=GlobalAllocator::instance())
+  String(const std::string &s, AllocatorBase *alloc=Core::defaultAllocator())
     : BaseType(alloc)
     {
     resizeAndCopy(s.length(), s.data());
@@ -387,7 +389,7 @@ public:
 #endif
 
 #if X_QT_INTEROP
-  String(const QString &s, AllocatorBase *alloc=GlobalAllocator::instance())
+  String(const QString &s, AllocatorBase *alloc=Core::defaultAllocator())
     : BaseType(alloc)
     {
     QByteArray arr = s.toUtf8();

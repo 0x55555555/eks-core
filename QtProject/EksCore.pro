@@ -29,7 +29,8 @@ SOURCES += \
     ../src/XStringSimple.cpp \
     ../src/XGlobalAllocator.cpp \
     ../src/XTemporaryAllocator.cpp \
-    ../src/XLoggingAllocator.cpp
+    ../src/XLoggingAllocator.cpp \
+    ../src/XCore.cpp
 
 HEADERS += \
     ../XGlobal \
@@ -156,7 +157,8 @@ HEADERS += \
     ../XThreadSafeAllocator \
     ../XGlobalAllocator \
     ../XTemporaryAllocator \
-    ../XLoggingAllocator
+    ../XLoggingAllocator \
+    ../XCore
 
 
 

@@ -15,11 +15,6 @@ public:
 
   void *alloc(xsize size, xsize alignment=0) X_OVERRIDE;
   void free(void *mem) X_OVERRIDE;
-
-  static AllocatorBase *instance();
-
-private:
-  xsize _allocationCount;
   };
 
 }

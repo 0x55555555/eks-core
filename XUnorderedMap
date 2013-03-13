@@ -46,7 +46,7 @@
 
 #include "XGlobal"
 #include "XAssert"
-#include "XGlobalAllocator"
+#include "XCore"
 #include "XVector"
 #include <atomic>
 
@@ -241,7 +241,7 @@ class UnorderedMap
 #endif
 
 public:
-    inline UnorderedMap(AllocatorBase *a=GlobalAllocator::instance()) : d(&UnorderedMapData::shared_null), allocator(a)
+    inline UnorderedMap(AllocatorBase *a=Core::defaultAllocator()) : d(&UnorderedMapData::shared_null), allocator(a)
       {
 #if X_UNORDERED_MAP_THREAD_SAFE
       d->ref.ref();
