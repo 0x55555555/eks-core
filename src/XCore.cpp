@@ -34,8 +34,6 @@ Core::Core()
   g_core->allocLogger.setAllocator(&g_core->alloc);
 #endif
 
-  Eks::StackWalker::intialise();
-
   g_core->defaultLogger = globalAllocator();
   }
 

@@ -50,9 +50,9 @@
 
 
 #ifdef X_ENABLE_HEAP_CHECK
-#define X_HEAP_CHECK { xAssert(_heapchk() == _HEAPOK); xAssert(_CrtCheckMemory()); }
+# define X_HEAP_CHECK { xAssert(_heapchk() == _HEAPOK); xAssert(_CrtCheckMemory()); }
 #else
-#define X_HEAP_CHECK
+# define X_HEAP_CHECK
 #endif
 
 #ifdef X_ARCH_ARM

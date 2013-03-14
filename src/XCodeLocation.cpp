@@ -37,7 +37,7 @@ bool CodeLocation::operator==(const CodeLocation &a) const
     strcmp(function(), a.function()) == 0;
   }
 
-void StackWalker::intialise()
+void StackWalker::intialiseSymbolNames()
   {
 #if X_ENABLE_STACK_WALKING
 #ifdef Q_CC_MSVC
@@ -46,34 +46,50 @@ void StackWalker::intialise()
 #endif
   }
 
+void StackWalker::terminateSymbolNames()
+  {
+#if X_ENABLE_STACK_WALKING
+#ifdef Q_CC_MSVC
+  SymCleanup(::GetCurrentProcess());
+#endif
+#endif
+  }
+
+void StackWalker::getSymbolName(void *symbolLocation, Eks::String &symbolName, xsize maxSize)
+  {
+  BYTE *buffer = (BYTE *)alloca(sizeof(SYMBOL_INFO) + maxSize);
+  memset(buffer, 0, sizeof(buffer));
+
+  PSYMBOL_INFO symbol = (PSYMBOL_INFO)buffer;
+  symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
+  symbol->MaxNameLen = maxSize;
+
+  DWORD64 symDisplacement = 0;
+  if (!SymFromAddr(::GetCurrentProcess(),
+                   reinterpret_cast<xsize>(symbolLocation),
+                   &symDisplacement,
+                   symbol))
+    {
+    symbol->Name[0] = 0;
+    symDisplacement = 0;
+    }
+
+  symbolName.clear();
+  symbolName.resizeAndCopy(strlen(symbol->Name), symbol->Name);
+  }
+
 void StackWalker::walk(xsize skip, Visitor *visit)
   {
 #if X_ENABLE_STACK_WALKING
 #ifdef Q_CC_MSVC
+
+#if 0
   struct Utils
     {
     static void doVisit(Visitor *visit, xsize i, void *pcOffset, xsize frameOffset)
       {
-      static const size_t MAX_NAME_LEN = 1024;
-      BYTE buffer[sizeof(SYMBOL_INFO) + MAX_NAME_LEN];
-      memset(buffer, 0, sizeof(buffer));
-
-      PSYMBOL_INFO symbol = (PSYMBOL_INFO)buffer;
-      symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-      symbol->MaxNameLen = MAX_NAME_LEN;
-
-      DWORD64 symDisplacement = 0;
-      if (!SymFromAddr(::GetCurrentProcess(),
-                       reinterpret_cast<xsize>(pcOffset),
-                       &symDisplacement,
-                       symbol))
-        {
-        symbol->Name[0] = 0;
-        symDisplacement = 0;
-        }
-
       (void)frameOffset;
-      visit->visit(i, symbol->Name, symDisplacement);
+      visit->visit(i, pcOffset);
       }
 
     static void walk(CONTEXT *ctxIn, xsize skip, Visitor *visit)
@@ -140,6 +156,38 @@ void StackWalker::walk(xsize skip, Visitor *visit)
     {
     // not reached
     }
+#else
+
+  struct Utils
+    {
+    static void doVisit(Visitor *visit, xsize i, void *pcOffset)
+      {
+      visit->visit(i, pcOffset);
+      }
+    };
+
+  enum
+    {
+    BlockCaptureSize = 16
+    };
+
+  xsize position = skip + 1;
+  void *frames[BlockCaptureSize];
+
+  xuint16 captured = 0;
+  do
+    {
+    captured = CaptureStackBackTrace(position, BlockCaptureSize, frames, 0);
+
+    for(xsize i = 0; i < captured; ++i)
+      {
+      Utils::doVisit(visit, position + i, frames[i]);
+      }
+
+    position += captured;
+    } while(captured == BlockCaptureSize);
+
+#endif
 #endif
 #endif
   }

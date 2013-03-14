@@ -2,20 +2,26 @@
 #include "XAssert"
 #include "QDebug"
 #include "unordered_map"
+#include "XStringSimple"
+#include "XGlobalAllocator"
 
 namespace Eks
 {
 
 struct Allocation
   {
-  std::string _stack;
+  enum
+    {
+    kMaxStackSize = 15
+    };
+  void *_symbol[kMaxStackSize];
+  xsize _size;
   };
 
 class LoggingAllocator::Impl
   {
 public:
   // deliberately dont use Eks types here - no memory monitoring!
-  std::string _walkCache;
   std::unordered_map<void *, Allocation> _allocations;
   Eks::AllocatorBase *_parent;
   };
@@ -47,12 +53,24 @@ xsize LoggingAllocator::allocationCount() const
   }
 
 void LoggingAllocator::logAllocations() const
-  {
+  {  
+  Eks::StackWalker::intialiseSymbolNames();
+
+  GlobalAllocator alloc;
+  Eks::String symString(&alloc);
+
   qDebug() << "Logging live allocations:";
   xForeach(auto &a, _impl->_allocations)
     {
-    qDebug() << "Allocation\n" << a.second._stack.data();
+    qDebug() << "Allocation:";
+    for(xsize i = 0; i < a.second._size; ++i)
+      {
+      StackWalker::getSymbolName(a.second._symbol[i], symString, 1024);
+      qDebug() << symString;
+      }
     }
+
+  Eks::StackWalker::terminateSymbolNames();
   }
 
 void *LoggingAllocator::alloc(xsize size, xsize alignment)
@@ -61,26 +79,22 @@ void *LoggingAllocator::alloc(xsize size, xsize alignment)
   class Visitor : public StackWalker::Visitor
     {
   public:
-    std::string *location;
-    void visit(xsize level, const char* name, xsize offset) X_OVERRIDE
+    Allocation *allocation;
+    void visit(xsize level, void *symbol) X_OVERRIDE
       {
-      if(strlen(name))
+      if(level < Allocation::kMaxStackSize)
         {
-        (void)level;
-        (void)offset;
-        *location += name;
-        *location += "\n";
+        allocation->_symbol[level] = symbol;
+        allocation->_size = xMax(level+1, allocation->_size);
         }
       }
     } visitor;
 
-  _impl->_walkCache.clear();
-  visitor.location = &_impl->_walkCache;
+  xAssert(_impl->_allocations.find(result) == _impl->_allocations.end());
+  visitor.allocation = &(_impl->_allocations[result]);
+  memset(visitor.allocation, 0, sizeof(Allocation));
 
   StackWalker::walk(1, &visitor);
-
-  xAssert(_impl->_allocations.find(result) == _impl->_allocations.end());
-  _impl->_allocations[result]._stack = _impl->_walkCache;
 
   return result;
   }

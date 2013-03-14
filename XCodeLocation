@@ -31,10 +31,13 @@ public:
   class Visitor
     {
   public:
-    virtual void visit(xsize level, const char* name, xsize offset) = 0;
+    virtual void visit(xsize level, void *symbol) = 0;
     };
 
-  static void intialise();
+  static void getSymbolName(void *symbol, Eks::String &symbolName, xsize maxSize);
+
+  static void intialiseSymbolNames();
+  static void terminateSymbolNames();
   static void walk(xsize skip, Visitor *visit);
   };
 

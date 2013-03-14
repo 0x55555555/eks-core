@@ -413,6 +413,15 @@ EKSCORE_EXPORT QDataStream &operator<<(QDataStream &str, Eks::Char vec);
 
 Q_DECLARE_METATYPE(Eks::String);
 
+#include "QtCore/QDebug"
+
+template <typename C, xsize P, typename A> QDebug operator<<(
+    QDebug& dbg,
+    const Eks::StringBase<C, P, A> &str)
+  {
+  return dbg << str.data();
+  }
+
 #endif
 
 
