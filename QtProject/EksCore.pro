@@ -158,6 +158,7 @@ HEADERS += \
     ../XGlobalAllocator \
     ../XTemporaryAllocator \
     ../XLoggingAllocator \
+    ../XCore \
     ../XCore
 
 

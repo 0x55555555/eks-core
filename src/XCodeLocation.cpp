@@ -172,6 +172,7 @@ void StackWalker::walk(xsize skip, Visitor *visit)
     };
 
   xsize position = skip + 1;
+  const xsize start = position;
   void *frames[BlockCaptureSize];
 
   xuint16 captured = 0;
@@ -181,7 +182,7 @@ void StackWalker::walk(xsize skip, Visitor *visit)
 
     for(xsize i = 0; i < captured; ++i)
       {
-      Utils::doVisit(visit, position + i, frames[i]);
+      Utils::doVisit(visit, position + i - start, frames[i]);
       }
 
     position += captured;

@@ -1,0 +1,30 @@
+#ifndef XCORE_H
+#define XCORE_H
+
+#include "XGlobal"
+
+namespace Eks
+{
+
+class AllocatorBase;
+class CodeLocation;
+template <typename K, typename V> class UnorderedMap;
+
+class EKSCORE_EXPORT Core
+  {
+public:
+  Core();
+  ~Core();
+
+  static AllocatorBase *defaultAllocator();
+  static AllocatorBase *globalAllocator();
+
+  static UnorderedMap<CodeLocation, bool> *disabledAsserts();
+
+private:
+  struct Impl;
+  Impl *_impl;
+  };
+}
+
+#endif // XCORE_H

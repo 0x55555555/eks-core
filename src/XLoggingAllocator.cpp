@@ -15,15 +15,26 @@ struct Allocation
     kMaxStackSize = 15
     };
   void *_symbol[kMaxStackSize];
-  xsize _size;
+  xsize _symbolSize;
+  xsize _allocSize;
   };
 
 class LoggingAllocator::Impl
   {
 public:
+  Impl()
+    {
+    _maxSize = 0;
+    _maxAllocs = 0;
+    _size = 0;
+    }
+
   // deliberately dont use Eks types here - no memory monitoring!
   std::unordered_map<void *, Allocation> _allocations;
   Eks::AllocatorBase *_parent;
+  xsize _maxSize;
+  xsize _size;
+  xsize _maxAllocs;
   };
 
 LoggingAllocator::LoggingAllocator(Eks::AllocatorBase *parent)
@@ -53,21 +64,22 @@ xsize LoggingAllocator::allocationCount() const
   }
 
 void LoggingAllocator::logAllocations() const
-  {  
+  {
   Eks::StackWalker::intialiseSymbolNames();
 
   GlobalAllocator alloc;
   Eks::String symString(&alloc);
 
-  qDebug() << "Logging live allocations:";
+  qDebug() << "Logging live allocations: [" << _impl->_allocations.size() << "/" << _impl->_maxAllocs << "] [" << _impl->_size << "/" << _impl->_maxSize << "] bytes";
   xForeach(auto &a, _impl->_allocations)
     {
     qDebug() << "Allocation:";
-    for(xsize i = 0; i < a.second._size; ++i)
+    for(xsize i = 0; i < a.second._symbolSize; ++i)
       {
       StackWalker::getSymbolName(a.second._symbol[i], symString, 1024);
       qDebug() << symString;
       }
+    qDebug() << "";
     }
 
   Eks::StackWalker::terminateSymbolNames();
@@ -85,7 +97,7 @@ void *LoggingAllocator::alloc(xsize size, xsize alignment)
       if(level < Allocation::kMaxStackSize)
         {
         allocation->_symbol[level] = symbol;
-        allocation->_size = xMax(level+1, allocation->_size);
+        allocation->_symbolSize = xMax(level+1, allocation->_symbolSize);
         }
       }
     } visitor;
@@ -93,8 +105,13 @@ void *LoggingAllocator::alloc(xsize size, xsize alignment)
   xAssert(_impl->_allocations.find(result) == _impl->_allocations.end());
   visitor.allocation = &(_impl->_allocations[result]);
   memset(visitor.allocation, 0, sizeof(Allocation));
+  visitor.allocation->_allocSize = size;
 
   StackWalker::walk(1, &visitor);
+
+  _impl->_maxAllocs = xMax(_impl->_allocations.size(), _impl->_maxAllocs);
+  _impl->_size += size;
+  _impl->_maxSize = xMax(_impl->_maxSize, _impl->_size);
 
   return result;
   }
@@ -104,10 +121,13 @@ void LoggingAllocator::free(void *mem)
   if(mem)
     {
     std::unordered_map<void *, Allocation>::iterator it = _impl->_allocations.find(mem);
-
     xAssert(it != _impl->_allocations.end());
+    
+    _impl->_size -= it->second._allocSize;
+
     _impl->_allocations.erase(mem);
     }
+
 
   return _impl->_parent->free(mem);
   }
