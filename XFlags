@@ -130,6 +130,11 @@ public:
     _internal |= 1<<index;
     }
 
+  bool hasIndex(xuint8 index) const
+    {
+    return hasAny(1<<index);
+    }
+
 private:
   CONTAINER _internal;
   };
