@@ -3,18 +3,25 @@
 
 #include "XGlobal"
 #include "XMacroHelpers"
+#include "XTypedAllocator"
 #include "XProperty"
 #include "XAllocatorBase"
 
 namespace Eks
 {
 
+namespace detail
+{
+template <typename T> class AllocatorDelete : Eks::TypedAllocator<T>
+  {
+  };
+}
+
 template <typename T,
-          typename Deleter=std::default_delete<T> > class UniquePointer
+          typename Deleter=detail::AllocatorDelete<T> > class UniquePointer : Deleter
   {
 XProperties:
   XROProperty(T *, pointer);
-  XRORefProperty(Deleter, deleter);
 
 public:
   explicit UniquePointer(T *value=0, Deleter d=Deleter())
@@ -56,10 +63,10 @@ public:
     {
     _pointer = data;
     }
-    
+
   T *operator->() { return _pointer; }
   const T *operator->() const { return _pointer; }
-  
+
   operator T*() { return _pointer; }
   operator const T*() const { return _pointer; }
 
