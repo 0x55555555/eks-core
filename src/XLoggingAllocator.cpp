@@ -85,9 +85,15 @@ void LoggingAllocator::logAllocations() const
   Eks::StackWalker::terminateSymbolNames();
   }
 
+#define UNINITIALISED 0xCDCDCDCD
+#define DELETED 0xDDDDDDDD
+
 void *LoggingAllocator::alloc(xsize size, xsize alignment)
   {
   void *result = _impl->_parent->alloc(size, alignment);
+
+  memset(result, UNINITIALISED, size);
+
   class Visitor : public StackWalker::Visitor
     {
   public:
@@ -122,7 +128,9 @@ void LoggingAllocator::free(void *mem)
     {
     std::unordered_map<void *, Allocation>::iterator it = _impl->_allocations.find(mem);
     xAssert(it != _impl->_allocations.end());
-    
+
+    memset(mem, DELETED, it->second._allocSize);
+
     _impl->_size -= it->second._allocSize;
 
     _impl->_allocations.erase(mem);
