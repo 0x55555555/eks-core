@@ -28,23 +28,23 @@ public:
   typedef typename String::iterator iterator;
   typedef typename String::const_iterator const_iterator;
 
-  StringBase(AllocatorBase *alloc=Eks::Core::defaultAllocator())
+  StringBase(AllocatorBase *alloc=0)
       : String(Alloc(alloc))
     {
     }
-  StringBase(const Char *n, AllocatorBase *alloc=Eks::Core::defaultAllocator())
+  StringBase(const Char *n, AllocatorBase *alloc=0)
       : String(Alloc(alloc))
     {
     const size_type s = strlen(n);
     resizeAndCopy(s, n);
     xAssert(at(size()) == '\0');
     }
-  StringBase(const String &n, AllocatorBase *alloc=Eks::Core::defaultAllocator())
+  StringBase(const String &n, AllocatorBase *alloc=0)
       : String(n, Alloc(alloc))
     {
     xAssert(at(size()) == '\0');
     }
-  StringBase(String &&n, AllocatorBase *alloc=Eks::Core::defaultAllocator())
+  StringBase(String &&n, AllocatorBase *alloc=0)
       : String(n, Alloc(alloc))
     {
     xAssert(at(size()) == '\0');
@@ -52,7 +52,7 @@ public:
 
   template <typename C, xsize S, typename A> StringBase(
       const StringBase<C, S, A>& n,
-      AllocatorBase *alloc=Eks::Core::defaultAllocator())
+      AllocatorBase *alloc=0)
     : String(n, Alloc(alloc))
     {
     xAssert(at(size()) == '\0');

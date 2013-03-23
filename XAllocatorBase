@@ -36,6 +36,14 @@ public:
 
   template <typename T,
             typename A,
+            typename B> T *create(A a, B b)
+    {
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+    return new(mem) T(a, b);
+    }
+
+  template <typename T,
+            typename A,
             typename B,
             typename C> T *create(A a, B b, C c)
     {

@@ -24,17 +24,20 @@ public:
 
   pointer allocate(xsize n, void *hint=0)
     {
+    xAssert(allocator());
     (void)hint;
     return (pointer)allocator()->alloc(sizeof(value_type) * n);
     }
 
   pointer allocate(xsize n, xsize align)
     {
+    xAssert(allocator());
     return (pointer)allocator()->alloc(sizeof(value_type) * n, align);
     }
 
   void deallocate(pointer p, size_type n)
     {
+    xAssert(allocator());
     (void)n;
     allocator()->free(p);
     }
@@ -89,7 +92,6 @@ public:
 
   AllocatorBase *allocator() const
 	{
-	xAssert(_alloc);
 	return _alloc;
 	}
 
