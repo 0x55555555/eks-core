@@ -8,6 +8,38 @@ namespace Eks
 {
 namespace detail
 {
+
+template <typename T> class Atomic
+  {
+public:
+  Atomic(const T &t=0)
+    {
+    _data = t;
+    }
+
+  Atomic(const Atomic &t)
+    {
+    _data = (T)t._data;
+    }
+
+  void operator=(const Atomic &t)
+    {
+    _data = (T)t._data;
+    }
+
+  operator T() const
+    {
+    return _data;
+    }
+
+  void operator=(const T &t)
+    {
+    _data = t;
+    }
+
+  std::atomic<T> _data;
+  };
+
 template <xsize size> class BitHelpers
   {
   // M1: binary: 0101...
@@ -27,7 +59,7 @@ public:
     H01 = 0x01
     };
 
-  static xuint8 numberOfSetBits(xuint8 x) 
+  static xuint8 numberOfSetBits(xuint8 x)
     {
     x -= (x >> 1) & (xuint8)Fields::M1;                               // put count of each 2 bits into those 2 bits
     x = (x & (xuint8)Fields::M2) + ((x >> 2) & (xuint8)Fields::M2);   // put count of each 4 bits into those 4 bits
@@ -47,7 +79,7 @@ public:
     H01 = 0x01010101
     };
 
-  static xuint8 numberOfSetBits(xuint32 x) 
+  static xuint8 numberOfSetBits(xuint32 x)
     {
     x -= (x >> 1) & (xuint32)Fields::M1;                                // put count of each 2 bits into those 2 bits
     x = (x & (xuint32)Fields::M2) + ((x >> 2) & (xuint32)Fields::M2);   // put count of each 4 bits into those 4 bits
@@ -138,29 +170,31 @@ public:
 private:
   CONTAINER _internal;
   };
-}
 
-template <typename ENUM, typename CONTAINER=xuint32> class XFlags : Eks::BitField<CONTAINER>
+template <typename ENUM, typename CONTAINER=xuint32> class Flags : Eks::BitField<CONTAINER>
   {
 public:
-  XFlags(CONTAINER c) : _internal(c) { }
+  Flags(CONTAINER c) { _internal = c; }
+  Flags(ENUM c) { _internal = (CONTAINER)c; }
 
-  bool hasFlag(ENUM c) const { return (_internal & c ) == (CONTAINER)c; }
-  bool hasAllFlags(CONTAINER c) const { return (_internal & c ) == (CONTAINER)c; }
-  bool hasAnyFlags(CONTAINER c) const { return (_internal & c ) != 0; }
+  typedef decltype(std::declval<CONTAINER>() | std::declval<ENUM>()) OrResult;
+
+  bool hasFlag(ENUM c) const { return (_internal & c) == c; }
+  bool hasAllFlags(OrResult c) const { return (_internal & c ) == (CONTAINER)c; }
+  bool hasAnyFlags(OrResult c) const { return (_internal & c ) != 0; }
   void clearFlag(ENUM c) { _internal = ~(~_internal | c); }
   void setFlag(ENUM c) { _internal = _internal|c; }
   void setFlag(ENUM c, bool val) { if(val) { setFlag(c); } else { clearFlag(c); } }
   bool hasAnyFlags() const { return _internal != 0; }
 
-  XFlags<ENUM, CONTAINER> operator~() const
+  Flags<ENUM, CONTAINER> operator~() const
     {
-    return XFlags(~_internal);
+    return Flags(~_internal);
     }
 
-  XFlags<ENUM, CONTAINER> operator&(const XFlags<ENUM, CONTAINER> &f) const
+  Flags<ENUM, CONTAINER> operator&(const Flags<ENUM, CONTAINER> &f) const
     {
-    return XFlags(_internal&f._internal);
+    return Flags(_internal&f._internal);
     }
 
   bool operator==(CONTAINER c)
@@ -173,7 +207,7 @@ public:
     return _internal != c;
     }
 
-  XFlags<ENUM, CONTAINER> &operator |=(CONTAINER c)
+  Flags<ENUM, CONTAINER> &operator |=(CONTAINER c)
     {
     _internal |= c;
     return *this;
@@ -193,5 +227,7 @@ public:
 private:
   CONTAINER _internal;
   };
+
+}
 
 #endif // XFLAGS_
