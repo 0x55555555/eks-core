@@ -120,12 +120,13 @@ public:
 
   size_type length() const
     {
-    return String::length() - 1;
+    return size();
     }
 
   size_type size() const
     {
-    return String::size() - 1;
+    size_type s = String::size();
+    return s > 0 ? s - 1 : 0;
     }
 
   bool isEmpty() const
