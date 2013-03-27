@@ -243,7 +243,7 @@ public:
   template <typename Other>
   ThisType operator+(Other oth) const
     {
-    ThisType res(allocator());
+    ThisType res(String::allocator());
 
     res.append(*this);
     res.append(oth);

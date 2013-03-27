@@ -446,7 +446,7 @@ public:
       reserve(s + 1);
       }
 
-    xAssert(ThisBase::_end < _last);
+    xAssert(ThisBase::_end < ThisBase::_last);
     construct(ThisBase::_end, t);
     ThisBase::_end++;
     }
