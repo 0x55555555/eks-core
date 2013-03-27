@@ -12,7 +12,7 @@ namespace Eks
 
 namespace detail
 {
-template <typename T> class AllocatorDelete : Eks::TypedAllocator<T>
+template <typename T> class AllocatorDelete : public Eks::TypedAllocator<T>
   {
   };
 }
@@ -25,8 +25,7 @@ XProperties:
 
 public:
   explicit UniquePointer(T *value=0, Deleter d=Deleter())
-      : _pointer(value),
-        _deleter(d)
+      : Deleter(d), _pointer(value)
     {
     }
 
@@ -55,7 +54,7 @@ public:
 
   void clear()
     {
-    _deleter(_pointer);
+    destroy(_pointer);
     _pointer = 0;
     }
 
@@ -63,6 +62,16 @@ public:
     {
     _pointer = data;
     }
+
+  void create(const Deleter &d)
+    {
+    clear();
+    *this = d;
+    _pointer = create<T>();
+    }
+
+  T *value() { return _pointer; }
+  const T *value() const { return _pointer; }
 
   T *operator->() { return _pointer; }
   const T *operator->() const { return _pointer; }
