@@ -124,8 +124,6 @@ typedef unsigned long long xuint64; /* 64 bit unsigned */
 
 #define X_HACK(level, why, suggestion)
 
-#define X_CONST_EXPR //Q_DECL_CONSTEXPR
-
 inline void xNoop() { }
 
 #define X_CONST_EXPR Q_DECL_CONSTEXPR
