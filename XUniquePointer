@@ -18,6 +18,11 @@ public:
   AllocatorDelete(Eks::AllocatorBase *base) : Eks::TypedAllocator<T>(base)
     {
     }
+
+  T *create()
+    {
+    return allocator()->create<T>();
+    }
   };
 }
 
@@ -69,9 +74,10 @@ public:
 
   void create(const Deleter &d)
     {
+    Deleter &thisD = *this;
     clear();
-    *this = d;
-    _pointer = create<T>();
+    thisD = d;
+    _pointer = thisD.create();
     }
 
   T *value() { return _pointer; }

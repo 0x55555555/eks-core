@@ -4,9 +4,9 @@
 #include "XStringSimple"
 
 #if X_ADVANCED_ASSERT
-# include "QtWidgets/QMessageBox"
-# include "QtWidgets/QPushButton"
-# include "QtWidgets/QApplication"
+# include X_QT_WIDGET_DIR "QMessageBox"
+# include X_QT_WIDGET_DIR "QPushButton"
+# include X_QT_WIDGET_DIR "QApplication"
 #endif
 
 #if defined(Q_CC_MSVC)
