@@ -567,7 +567,7 @@ public:
     xAssertFail(); // test this fn.
     xAssert(b >= ThisBase::_first && b <= ThisBase::_end);
     xAssert(e >= ThisBase::_first && e <= ThisBase::_end);
-    xAssert(b <= _end);
+    xAssert(b <= ThisBase::_end);
 
     const size_type elementsToRemove = (e - b);
     const size_type newSize = size() - elementsToRemove;
