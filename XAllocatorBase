@@ -2,28 +2,114 @@
 #define XALLOCATORBASE_H
 
 #include "XGlobal"
-#include "XEventLogger"
+#include "XAssert"
+#include "XResourceDescription"
 
-class XAllocatorBase
+namespace Eks
+{
+
+class AllocatorBase
   {
 public:
-  virtual ~XAllocatorBase() {}
-  virtual void *alloc(xsize size, xsize alignment=X_ALIGN_BYTE_COUNT) = 0;
+  virtual ~AllocatorBase() {}
+  virtual void *alloc(xsize size, xsize alignment=1) = 0;
   virtual void free(void *mem) = 0;
+
+  void *alloc(const ResourceDescription &fmt)
+    {
+    return alloc(fmt.size(), fmt.alignment());
+    }
+
+
+  // todo, variadic template args here...
+  template <typename T> T *create()
+    {
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+    return new(mem) T();
+    }
+
+  template <typename T, typename A> T *create(A a)
+    {
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+    return new(mem) T(a);
+    }
+
+  template <typename T,
+            typename A,
+            typename B> T *create(A a, B b)
+    {
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+    return new(mem) T(a, b);
+    }
+
+  template <typename T,
+            typename A,
+            typename B,
+            typename C> T *create(A a, B b, C c)
+    {
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+    return new(mem) T(a, b, c);
+    }
+
+  template <typename T,
+            typename A,
+            typename B,
+            typename C,
+            typename D> T *create(A a, B b, C c, D d)
+    {
+    void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+    return new(mem) T(a, b, c, d);
+    }
+
+
+  // todo, variadic template args here...
+  template <typename T> T *createWithAlignment(xsize alignment)
+    {
+    void *d = alloc(sizeof(T), alignment);
+    return new(d) T();
+    }
+
+  template <typename T, typename A> T *createWithAlignment(A a, xsize alignment)
+    {
+    void *mem = alloc(sizeof(T), alignment);
+    return new(mem) T(a);
+    }
+
+  template <typename T,
+            typename A,
+            typename B> T *createWithAlignment(A a, B b, xsize alignment)
+    {
+    void *mem = alloc(sizeof(T), alignment);
+    return new(mem) T(a, b);
+    }
+
+  template <typename T,
+            typename A,
+            typename B,
+            typename C> T *createWithAlignment(A a, B b, C c, xsize alignment)
+    {
+    void *mem = alloc(sizeof(T), alignment);
+    return new(mem) T(a, b, c);
+    }
+
+  template <typename T,
+            typename A,
+            typename B,
+            typename C,
+            typename D> T *createWithAlignment(A a, B b, C c, D d, xsize alignment)
+    {
+    void *mem = alloc(sizeof(T), alignment);
+    return new(mem) T(a, b, c, d);
+    }
+
+  template <typename T> void destroy(T *t)
+    {
+    (void)t;
+    t->~T();
+    free(t);
+    }
   };
 
-class EKSCORE_EXPORT XGlobalAllocator : public XAllocatorBase
-  {
-public:
-  virtual void *alloc(xsize size, xsize alignment=0);
-  virtual void free(void *mem);
-
-  static XGlobalAllocator *instance();
-  };
-
-#define xAllocateAndConstruct(a, t, ...) new(a->alloc(sizeof(t))) t(__VA_ARGS__)
-#define xDestroyAndFree(a, t, m) m-> ~t(); a->free(m)
-
-X_DECLARE_MEMORY_LOGGER(EKSCORE_EXPORT, xTotalGlobalAllocatorSize);
+}
 
 #endif // XALLOCATORBASE_H

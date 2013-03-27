@@ -1,0 +1,13 @@
+#ifndef XTHREADSAFEALLOCATOR_H
+#define XTHREADSAFEALLOCATOR_H
+
+#include "XAllocatorBase"
+
+namespace Eks
+{
+class ThreadSafeAllocator : public AllocatorBase
+  {
+  };
+}
+
+#endif // XTHREADSAFEALLOCATOR_H

@@ -1,8 +1,0 @@
-#ifndef XSET_H
-#define XSET_H
-
-#include "QSet"
-
-#define XSet QSet
-
-#endif

@@ -4,57 +4,42 @@
 TARGET = EksCore
 TEMPLATE = lib
 
+QT += widgets
+
 INCLUDEPATH += ../
 
 include("../GeneralOptions.pri")
 
-SOURCES += ../src/XObject.cpp \
-    ../src/XMessageRouter.cpp \
-    ../src/XMessageHandler.cpp \
-    ../src/XVariant.cpp \
+CONFIG(debug) {
+  LIBS += -lDbghelp
+}
+
+SOURCES += \
     ../src/XFileSequence.cpp \
-    ../src/XChildEvent.cpp \
-    ../src/XBaseObject.cpp \
-    ../src/XSize.cpp \
-    ../src/XCurve.cpp \
-    ../src/XMetaType.cpp \
     ../src/XTime.cpp \
     ../src/XProfiler.cpp \
-    ../src/XAllocatorBase.cpp \
     ../src/XUnorderedMap.cpp \
     ../src/XEventLogger.cpp \
     ../src/XBucketAllocator.cpp \
     ../src/XAssert.cpp \
     ../src/XCodeLocation.cpp \
     ../src/XArrayMath.cpp \
-    ../src/XMemoryTracker.cpp \
-    ../src/XProfileWidget.cpp
+    ../src/XAsyncTask.cpp \
+    ../src/XMathHelpers.cpp \
+    ../src/XStringSimple.cpp \
+    ../src/XGlobalAllocator.cpp \
+    ../src/XTemporaryAllocator.cpp \
+    ../src/XLoggingAllocator.cpp \
+    ../src/XCore.cpp
 
-HEADERS += ../XObject \
+HEADERS += \
     ../XGlobal \
     ../XVector \
-    ../XVariant \
-    ../XSet \
-    ../XList \
-    ../XMessageRouter \
-    ../XMessageHandler \
     ../XProperty \
-    ../XVector2D \
-    ../XVector3D \
-    ../XVector4D \
     ../XColour \
     ../XQuaternion \
-    ../XMatrix4x4 \
-    ../XMatrix3x3 \
-    ../XGenericMatrix \
     ../XFileSequence \
-    ../XChildEvent \
-    ../XSignal \
-    ../XBaseObject \
-    ../XSize \
-    ../XCurve \
     ../XShared \
-    ../XMetaType \
     ../XFlags \
     ../XWeakShared \
     ../XTime \
@@ -145,9 +130,36 @@ HEADERS += ../XObject \
     ../XCodeLocation \
     ../XArrayMath \
     ../XTemplateHelpers \
-    ../XMemoryTracker \
-    ../XProfileWidget \
-    ../XOptional
+    ../XOptional \
+    ../Eigen/src/Core/util/XprHelper.h \
+    ../Eigen/src/Core/util/StaticAssert.h \
+    ../Eigen/src/Core/util/ReenableStupidWarnings.h \
+    ../Eigen/src/Core/util/NonMPL2.h \
+    ../Eigen/src/Core/util/MKL_support.h \
+    ../Eigen/src/Core/util/Meta.h \
+    ../Eigen/src/Core/util/Memory.h \
+    ../Eigen/src/Core/util/Macros.h \
+    ../Eigen/src/Core/util/ForwardDeclarations.h \
+    ../Eigen/src/Core/util/DisableStupidWarnings.h \
+    ../Eigen/src/Core/util/Constants.h \
+    ../Eigen/src/Core/util/BlasUtil.h \
+    ../XPrivateImpl \
+    ../XAsyncTask \
+    ../XAsyncTaskImpl \
+    ../XUniquePointer \
+    ../XTypedAllocator \
+    ../XStringBuffer \
+    ../XMathVector \
+    ../XMathMatrix \
+    ../XStringSimple \
+    ../XMathCurve \
+    ../XResourceDescription \
+    ../XThreadSafeAllocator \
+    ../XGlobalAllocator \
+    ../XTemporaryAllocator \
+    ../XLoggingAllocator \
+    ../XCore \
+    ../XCore
 
 
 

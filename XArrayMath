@@ -1,9 +1,11 @@
 #ifndef XARRAYMATH_H
 #define XARRAYMATH_H
 
-#include "XMatrix3x3"
-#include "XVector4D"
-#include "QRectF"
+#if X_COMPILE_ARRAY_MATH
+
+#include "XMathMatrix"
+#include "XMathVector"
+#include "QtCore/QRectF"
 #include "XProperty"
 #include "XAssert"
 
@@ -27,7 +29,7 @@ XProperties:
   XROProperty(OperationType, operation);
   XROProperty(const XMathsOperation *, inputA);
   XROProperty(const XMathsOperation *, inputB);
-  XROProperty(XVector4D, vectorData);
+  XROProperty(Eks::Vector4D, vectorData);
   XROProperty(xuint32, integerData);
   XROProperty(void *, userData);
 
@@ -58,13 +60,13 @@ public:
     };
 
   void copy(const XMathsOperation &op);
-  void load(DataType, void* data, xsize stride, xsize dataWidth, xsize dataHeight, xsize dataChannels, const XVectorI2D &);
+  void load(DataType, void* data, xsize stride, xsize dataWidth, xsize dataHeight, xsize dataChannels, const Eks::VectorI2D &);
 
   void add(const XMathsOperation &, const XMathsOperation &);
-  void add(const XMathsOperation &, const XVector4D &);
+  void add(const XMathsOperation &, const Eks::Vector4D &);
 
   void multiply(const XMathsOperation &, const XMathsOperation &);
-  void multiply(const XMathsOperation &, const XVector4D &);
+  void multiply(const XMathsOperation &, const Eks::Vector4D &);
 
   enum ShuffleSpecialTypes
     {
@@ -76,7 +78,7 @@ public:
   void shuffle(const XMathsOperation &, xuint32 mask);
   void splice(const XMathsOperation &, const XMathsOperation &, xuint32 mask);
 
-  void transform(const XMathsOperation &, const XMatrix3x3 &);
+  void transform(const XMathsOperation &, const Eks::Matrix3x3 &);
 
   static inline xuint32 shuffleMask(xuint8 c0, xuint8 c1, xuint8 c2, xuint8 c3)
     {
@@ -107,7 +109,7 @@ private:
   void setOperationDirty();
   void setValueDirty();
 
-  void setValue(const XVector4D &);
+  void setValue(const Eks::Vector4D &);
   void setValue(xuint32 );
   void setOperation(OperationType t);
   void setInput(const XMathsOperation **inp, const XMathsOperation *in);
@@ -122,8 +124,8 @@ private:
 class EKSCORE_EXPORT XMathsEngine
   {
 public:
-  virtual void evaluateData(const XMathsOperation *, void **userData, const XVectorI2D &sampleOffset, xuint32 invSampleDensity, XMathsOperation::DataType type, void *data) = 0;
-  virtual void *loadData(XMathsOperation::DataType type, void* data, xsize stride, xsize width, xsize height, xuint8 channels, const XVectorI2D &) = 0;
+  virtual void evaluateData(const XMathsOperation *, void **userData, const Eks::VectorI2D &sampleOffset, xuint32 invSampleDensity, XMathsOperation::DataType type, void *data) = 0;
+  virtual void *loadData(XMathsOperation::DataType type, void* data, xsize stride, xsize width, xsize height, xuint8 channels, const Eks::VectorI2D &) = 0;
   virtual void onOperationDirty(const XMathsOperation *, void **userData) = 0;
   virtual void onValueDirty(const XMathsOperation *, void **userData) = 0;
   virtual void onInputDirty(const XMathsOperation *, void **userData) = 0;
@@ -137,7 +139,7 @@ class EKSCORE_EXPORT XReferenceMathsEngine : public XMathsEngine
   {
   virtual void evaluateData(const XMathsOperation *,
                             void **userData,
-                            const XVectorI2D &sampleOffset,
+                            const Eks::VectorI2D &sampleOffset,
                             xuint32 invSampleDensity,
                             XMathsOperation::DataType type,
                             void *data);
@@ -148,7 +150,7 @@ class EKSCORE_EXPORT XReferenceMathsEngine : public XMathsEngine
                          xsize width,
                          xsize height,
                          xuint8 channels,
-                         const XVectorI2D &);
+                         const Eks::VectorI2D &);
 
   virtual void onOperationDirty(const XMathsOperation *, void **userData);
   virtual void onValueDirty(const XMathsOperation *, void **userData);
@@ -159,11 +161,13 @@ class EKSCORE_EXPORT XReferenceMathsEngine : public XMathsEngine
 class EKSCORE_EXPORT XMathsResult
   {
 public:
-  XMathsResult(const XMathsOperation &, XVectorI2D tl, xuint32 invSampleDensity, XMathsOperation::DataType type, void *arr);
+  XMathsResult(const XMathsOperation &, Eks::VectorI2D tl, xuint32 invSampleDensity, XMathsOperation::DataType type, void *arr);
 
 private:
   XMathsResult(const XMathsResult &);
   XMathsResult& operator=(const XMathsResult &);
   };
+
+#endif
 
 #endif // XARRAYMATH_H

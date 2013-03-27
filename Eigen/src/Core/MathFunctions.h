@@ -3,27 +3,14 @@
 //
 // Copyright (C) 2006-2010 Benoit Jacob <jacob.benoit.1@gmail.com>
 //
-// Eigen is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 3 of the License, or (at your option) any later version.
-//
-// Alternatively, you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as
-// published by the Free Software Foundation; either version 2 of
-// the License, or (at your option) any later version.
-//
-// Eigen is distributed in the hope that it will be useful, but WITHOUT ANY
-// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-// FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License or the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License and a copy of the GNU General Public License along with
-// Eigen. If not, see <http://www.gnu.org/licenses/>.
+// This Source Code Form is subject to the terms of the Mozilla
+// Public License v. 2.0. If a copy of the MPL was not distributed
+// with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef EIGEN_MATHFUNCTIONS_H
 #define EIGEN_MATHFUNCTIONS_H
+
+namespace Eigen {
 
 namespace internal {
 
@@ -309,8 +296,7 @@ struct abs2_impl<std::complex<RealScalar> >
 {
   static inline RealScalar run(const std::complex<RealScalar>& x)
   {
-    using std::norm;
-    return norm(x);
+    return real(x)*real(x) + imag(x)*imag(x);
   }
 };
 
@@ -378,8 +364,8 @@ struct hypot_impl
     using std::min;
     RealScalar _x = abs(x);
     RealScalar _y = abs(y);
-    RealScalar p = max(_x, _y);
-    RealScalar q = min(_x, _y);
+    RealScalar p = (max)(_x, _y);
+    RealScalar q = (min)(_x, _y);
     RealScalar qp = q/p;
     return p * sqrt(RealScalar(1) + qp*qp);
   }
@@ -553,7 +539,7 @@ struct pow_default_impl<Scalar, true>
 {
   static inline Scalar run(Scalar x, Scalar y)
   {
-    Scalar res = 1;
+    Scalar res(1);
     eigen_assert(!NumTraits<Scalar>::IsSigned || y >= 0);
     if(y & 1) res *= x;
     y >>= 1;
@@ -737,7 +723,7 @@ struct scalar_fuzzy_default_impl<Scalar, false, false>
   static inline bool isApprox(const Scalar& x, const Scalar& y, const RealScalar& prec)
   {
     using std::min;
-    return abs(x - y) <= min(abs(x), abs(y)) * prec;
+    return abs(x - y) <= (min)(abs(x), abs(y)) * prec;
   }
   static inline bool isApproxOrLessThan(const Scalar& x, const Scalar& y, const RealScalar& prec)
   {
@@ -776,7 +762,7 @@ struct scalar_fuzzy_default_impl<Scalar, true, false>
   static inline bool isApprox(const Scalar& x, const Scalar& y, const RealScalar& prec)
   {
     using std::min;
-    return abs2(x - y) <= min(abs2(x), abs2(y)) * prec * prec;
+    return abs2(x - y) <= (min)(abs2(x), abs2(y)) * prec * prec;
   }
 };
 
@@ -838,6 +824,19 @@ template<> struct scalar_fuzzy_impl<bool>
   
 };
 
+/****************************************************************************
+* Special functions                                                          *
+****************************************************************************/
+
+// std::isfinite is non standard, so let's define our own version,
+// even though it is not very efficient.
+template<typename T> bool (isfinite)(const T& x)
+{
+  return x<NumTraits<T>::highest() && x>NumTraits<T>::lowest();
+}
+
 } // end namespace internal
+
+} // end namespace Eigen
 
 #endif // EIGEN_MATHFUNCTIONS_H

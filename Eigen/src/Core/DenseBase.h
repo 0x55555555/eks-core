@@ -4,27 +4,14 @@
 // Copyright (C) 2007-2010 Benoit Jacob <jacob.benoit.1@gmail.com>
 // Copyright (C) 2008-2010 Gael Guennebaud <gael.guennebaud@inria.fr>
 //
-// Eigen is free software; you can redistribute it and/or
-// modify it under the terms of the GNU Lesser General Public
-// License as published by the Free Software Foundation; either
-// version 3 of the License, or (at your option) any later version.
-//
-// Alternatively, you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as
-// published by the Free Software Foundation; either version 2 of
-// the License, or (at your option) any later version.
-//
-// Eigen is distributed in the hope that it will be useful, but WITHOUT ANY
-// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-// FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License or the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public
-// License and a copy of the GNU General Public License along with
-// Eigen. If not, see <http://www.gnu.org/licenses/>.
+// This Source Code Form is subject to the terms of the Mozilla
+// Public License v. 2.0. If a copy of the MPL was not distributed
+// with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #ifndef EIGEN_DENSEBASE_H
 #define EIGEN_DENSEBASE_H
+
+namespace Eigen {
 
 /** \class DenseBase
   * \ingroup Core_Module
@@ -50,8 +37,6 @@ template<typename Derived> class DenseBase
 #endif // not EIGEN_PARSED_BY_DOXYGEN
 {
   public:
-    enum { CanBeRefCountCopied = false };
-
     using internal::special_scalar_op_base<Derived,typename internal::traits<Derived>::Scalar,
                 typename NumTraits<typename internal::traits<Derived>::Scalar>::Real>::operator*;
 
@@ -59,11 +44,11 @@ template<typename Derived> class DenseBase
 
     typedef typename internal::traits<Derived>::StorageKind StorageKind;
 
-    /** \brief The type of indices
+    /** \brief The type of indices 
       * \details To change this, \c \#define the preprocessor symbol \c EIGEN_DEFAULT_DENSE_INDEX_TYPE.
       * \sa \ref TopicPreprocessorDirectives.
       */
-    typedef typename internal::traits<Derived>::Index Index;
+    typedef typename internal::traits<Derived>::Index Index; 
 
     typedef typename internal::traits<Derived>::Scalar Scalar;
     typedef typename internal::packet_traits<Scalar>::type PacketScalar;
@@ -171,8 +156,8 @@ template<typename Derived> class DenseBase
 
       IsRowMajor = int(Flags) & RowMajorBit, /**< True if this expression has row-major storage order. */
 
-      InnerSizeAtCompileTime = int(IsVectorAtCompileTime) ? SizeAtCompileTime
-                             : int(IsRowMajor) ? ColsAtCompileTime : RowsAtCompileTime,
+      InnerSizeAtCompileTime = int(IsVectorAtCompileTime) ? int(SizeAtCompileTime)
+                             : int(IsRowMajor) ? int(ColsAtCompileTime) : int(RowsAtCompileTime),
 
       CoeffReadCost = internal::traits<Derived>::CoeffReadCost,
         /**< This is a rough measure of how expensive it is to read one coefficient from
@@ -207,7 +192,7 @@ template<typename Derived> class DenseBase
     /** \returns the inner size.
       *
       * \note For a vector, this is just the size. For a matrix (non-vector), this is the minor dimension
-      * with respect to the \ref TopicStorageOrders "storage order", i.e., the number of rows for a
+      * with respect to the \ref TopicStorageOrders "storage order", i.e., the number of rows for a 
       * column-major matrix, and the number of columns for a row-major matrix. */
     Index innerSize() const
     {
@@ -275,10 +260,6 @@ template<typename Derived> class DenseBase
     /** Copies \a other into *this without evaluating other. \returns a reference to *this. */
     template<typename OtherDerived>
     Derived& lazyAssign(const DenseBase<OtherDerived>& other);
-
-    /** Copies \a other into *this by reference counting dynamic storage. \returns a reference to *this. */
-    template<typename OtherDerived>
-    Derived& lazyDynamicAssign(const DenseBase<OtherDerived>& other);
 #endif // not EIGEN_PARSED_BY_DOXYGEN
 
     CommaInitializer<Derived> operator<< (const Scalar& s);
@@ -304,7 +285,7 @@ template<typename Derived> class DenseBase
     typedef const VectorBlock<const Derived> ConstSegmentReturnType;
     template<int Size> struct FixedSegmentReturnType { typedef VectorBlock<Derived, Size> Type; };
     template<int Size> struct ConstFixedSegmentReturnType { typedef const VectorBlock<const Derived, Size> Type; };
-
+    
     // Note: The "DenseBase::" prefixes are added to help MSVC9 to match these declarations with the later implementations.
     SegmentReturnType segment(Index start, Index size);
     typename DenseBase::ConstSegmentReturnType segment(Index start, Index size) const;
@@ -367,27 +348,28 @@ template<typename Derived> class DenseBase
 
     template<typename OtherDerived>
     bool isApprox(const DenseBase<OtherDerived>& other,
-                  const RealScalar &prec = NumTraits<Scalar>::dummy_precision()) const;
+                  const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
     bool isMuchSmallerThan(const RealScalar& other,
-                           const RealScalar &prec = NumTraits<Scalar>::dummy_precision()) const;
+                           const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
     template<typename OtherDerived>
     bool isMuchSmallerThan(const DenseBase<OtherDerived>& other,
-                           const RealScalar &prec = NumTraits<Scalar>::dummy_precision()) const;
+                           const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
 
-    bool isApproxToConstant(const Scalar& value, const RealScalar &prec = NumTraits<Scalar>::dummy_precision()) const;
-    bool isConstant(const Scalar& value, const RealScalar &prec = NumTraits<Scalar>::dummy_precision()) const;
-    bool isZero(const RealScalar &prec = NumTraits<Scalar>::dummy_precision()) const;
-    bool isOnes(const RealScalar &prec = NumTraits<Scalar>::dummy_precision()) const;
+    bool isApproxToConstant(const Scalar& value, const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
+    bool isConstant(const Scalar& value, const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
+    bool isZero(const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
+    bool isOnes(const RealScalar& prec = NumTraits<Scalar>::dummy_precision()) const;
 
     inline Derived& operator*=(const Scalar& other);
     inline Derived& operator/=(const Scalar& other);
 
+    typedef typename internal::add_const_on_value_type<typename internal::eval<Derived>::type>::type EvalReturnType;
     /** \returns the matrix or vector obtained by evaluating this expression.
       *
       * Notice that in the case of a plain matrix or vector (not an expression) this function just returns
       * a const reference, in order to avoid a useless copy.
       */
-    EIGEN_STRONG_INLINE const typename internal::eval<Derived>::type eval() const
+    EIGEN_STRONG_INLINE EvalReturnType eval() const
     {
       // Even though MSVC does not honor strong inlining when the return type
       // is a dynamic matrix, we desperately need strong inlining for fixed
@@ -545,5 +527,7 @@ template<typename Derived> class DenseBase
     DenseBase(int,int);
     template<typename OtherDerived> explicit DenseBase(const DenseBase<OtherDerived>&);
 };
+
+} // end namespace Eigen
 
 #endif // EIGEN_DENSEBASE_H

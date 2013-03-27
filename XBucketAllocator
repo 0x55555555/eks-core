@@ -5,9 +5,9 @@
 #include "XMacroHelpers"
 #include "XAssert"
 #include "XProperty"
-#include "QHash"
 #include "XUnorderedMap"
 #include "XAllocatorBase"
+#include "XEventLogger"
 
 #define Bit(index) 1 << index
 #define Bits1To8   0x000000FF
@@ -16,9 +16,10 @@
 #define Bits25To32 0xFF000000
 #define FullMask (Bits1To8|Bits9To16|Bits17To24|Bits25To32)
 
-X_DECLARE_MEMORY_LOGGER(EKSCORE_EXPORT, xTotalBucketAllocatorSize);
+namespace Eks
+{
 
-class EKSCORE_EXPORT XFixedSizeBucketAllocator
+class EKSCORE_EXPORT FixedSizeBucketAllocator
   {
 public:
 
@@ -33,7 +34,7 @@ public:
       {
       xAssertIsAligned(objectSize);
       xAssert((count % 32) == 0);
-      _memory = X_ROUND_TO_ALIGNMENT(xuint8 *, _alloc);
+      _memory = Eks::roundToAlignment(_alloc);
       xAssertIsAligned(_memory);
       _masks = (xuint32*)((xuint8*)_memory + (_count*_size));
 
@@ -100,6 +101,7 @@ public:
         {
         // always positive
         xsize index = ( (char*)ptr - (char*)_memory ) / _size;
+        xAssert((( (char*)ptr - (char*)_memory ) % _size) == 0);
         xsize block = index / 32;
         xsize blockIndex = index % 32;
 
@@ -162,7 +164,7 @@ public:
     xuint8 _alloc[1];
     };
 
-  XFixedSizeBucketAllocator(xsize s, xsize d=128, xsize e=1024, XAllocatorBase *allocator=XGlobalAllocator::instance())
+  FixedSizeBucketAllocator(AllocatorBase *allocator, xsize s, xsize d=128, xsize e=1024)
       : _freePtr(0), _size(s), _defaultSize(d), _expandSize(e), _first(0), _allocator(allocator)
     {
     xAssert(_allocator);
@@ -173,7 +175,7 @@ public:
       }
     }
 
-  ~XFixedSizeBucketAllocator()
+  ~FixedSizeBucketAllocator()
     {
     Bucket *b = _first;
     while(b)
@@ -197,7 +199,7 @@ public:
 
   void destroyBucket(Bucket *b)
     {
-    xDestroyAndFree(_allocator, Bucket, b);
+    _allocator->destroy(b);
     }
 
   void *alloc()
@@ -311,44 +313,43 @@ public:
   void debugDump() const;
 
 private:
-  X_DISABLE_COPY(XFixedSizeBucketAllocator);
+  X_DISABLE_COPY(FixedSizeBucketAllocator);
   Bucket *_freePtr;
   xsize _size;
   xsize _defaultSize;
   xsize _expandSize;
   Bucket * _first;
-  XAllocatorBase *_allocator;
+  AllocatorBase *_allocator;
   };
 
-class EKSCORE_EXPORT XBucketAllocator : public XAllocatorBase
+class EKSCORE_EXPORT BucketAllocator : public AllocatorBase
   {
 public:
-  XBucketAllocator(xsize d=128, xsize e=1024, XAllocatorBase *alloc=XGlobalAllocator::instance())
+  BucketAllocator(AllocatorBase *alloc, xsize d=128, xsize e=1024)
       : _defaultSize(d), _expandSize(e), _internal(alloc), _allocator(alloc)
     {
     xAssert(_allocator);
     }
 
-  virtual ~XBucketAllocator()
+  virtual ~BucketAllocator()
     {
     HashType::iterator i = _internal.begin();
     HashType::iterator e = _internal.end();
     while (i != e)
       {
-      xDestroyAndFree(_allocator, XFixedSizeBucketAllocator, i.value());
+      _allocator->destroy(i.value());
       ++i;
       }
     }
 
   void *alloc(xsize size, xsize alignment=X_ALIGN_BYTE_COUNT)
     {
-    size = X_ROUND_TO_SPECIFIC_ALIGNMENT(xsize, size, alignment);
-    X_MEMORY_LOGGER_ALLOC(xTotalBucketAllocatorSize, size);
-      
-    XFixedSizeBucketAllocator *b = _internal.value(size, 0);
+    size = Eks::roundToAlignment(size, alignment);
+
+    FixedSizeBucketAllocator *b = _internal.value(size, 0);
     if(!b)
       {
-      b = xAllocateAndConstruct(_allocator, XFixedSizeBucketAllocator, size, _defaultSize, _expandSize, _allocator);
+      b = _allocator->create<FixedSizeBucketAllocator>(_allocator, size, _defaultSize, _expandSize);
       _internal.insert(size, b);
       }
 
@@ -365,7 +366,6 @@ public:
       {
       if(i.value()->contains(ptr))
         {
-        X_MEMORY_LOGGER_FREE(xTotalBucketAllocatorSize, i.value()->size());
         xVerify(i.value()->free(ptr));
         return;
         }
@@ -392,14 +392,16 @@ public:
   void debugDump() const;
 
 private:
-  X_DISABLE_COPY(XBucketAllocator);
+  X_DISABLE_COPY(BucketAllocator);
   xsize _defaultSize;
   xsize _expandSize;
 
-  typedef XUnorderedMap <xsize, XFixedSizeBucketAllocator *> HashType;
+  typedef UnorderedMap <xsize, FixedSizeBucketAllocator *> HashType;
   HashType _internal;
 
-  XAllocatorBase *_allocator;
+  AllocatorBase *_allocator;
   };
+
+}
 
 #endif // XRANDOMACCESSBLOCKALLOCATOR_H

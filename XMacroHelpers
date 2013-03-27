@@ -1,15 +1,12 @@
 #ifndef XMACROHELPERS_H
 #define XMACROHELPERS_H
 
-#include "QtGlobal"
+#include "QtCore/QtGlobal"
 
 #define xMax qMax
 #define xMin qMin
 
-#define X_DEGTORAD(ang) ((ang/360.0f)*2.0f*M_PI)
-#define X_RADTODEG(ang) ((ang/2.0f*M_PI)*360.0f)
-
-#define X_DISABLE_COPY(x) Q_DISABLE_COPY(x)
+#define X_DISABLE_COPY(x) x(const x &); x &operator=(const x &);
 
 #ifdef Q_OS_DARWIN
 # define xCurrentFunction __PRETTY_FUNCTION__

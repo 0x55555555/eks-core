@@ -1,44 +1,130 @@
 #ifndef XSHARED_H
 #define XSHARED_H
 
-#include "QAtomicInt"
-#include "QSharedPointer"
+#include <atomic>
+#include "XTypedAllocator"
 
-class XSharedData
-  {
-  mutable QAtomicInt _ref;
-  template <typename T> friend class XSharedPointer;
-  template <typename T> friend class XConstSharedPointer;
-  };
+namespace Eks
+{
 
-template <typename T> class XSharedPointer
+namespace detail
+{
+class SharedData
   {
 public:
-  XSharedPointer() : _ptr(0) { }
-  explicit XSharedPointer( XSharedData *ptr ) : _ptr(ptr) { xAssert(_ptr); _ptr->_ref.ref(); }
-  XSharedPointer( const XSharedPointer<T> &cpy ) : _ptr(cpy._ptr) { if(_ptr) { _ptr->_ref.ref(); } }
-  ~XSharedPointer()
+  SharedData() : _ref(0) { }
+
+private:
+  mutable std::atomic<xuint32> _ref;
+
+  template <typename T> friend class SharedPointer;
+  template <typename T> friend class ConstSharedPointer;
+  };
+}
+
+template <typename T,
+          typename Alloc=TypedAllocator<T> > class ConstSharedPointer
+    : Alloc
+  {
+public:
+  ConstSharedPointer()
+    : _ptr(0)
     {
-    if(_ptr && !_ptr->_ref.deref())
+    }
+
+  explicit ConstSharedPointer( const detail::SharedData *ptr )
+      : _ptr(const_cast<detail::SharedData*>(ptr))
+    {
+    xAssert(_ptr);
+    ++_ptr->_ref;
+    }
+
+  ConstSharedPointer( const ConstSharedPointer<T> &cpy )
+      : _ptr(cpy._ptr)
+    {
+    if(_ptr)
       {
-      delete _ptr;
+      ++_ptr->_ref;
+      }
+    }
+
+  ~ConstSharedPointer()
+    {
+    clear();
+    }
+
+  ConstSharedPointer<T> &operator=( const ConstSharedPointer<T> &cpy )
+    {
+    asign(cpy.ptr());
+    }
+
+  void clear()
+    {
+    if(_ptr && !(--_ptr->_ref))
+      {
+      allocator()->destroy(_ptr);
       _ptr = 0;
       }
     }
 
-  XSharedPointer<T> &operator=( const XSharedPointer<T> &cpy )
+  void assign(const T *data)
     {
-    if(_ptr && !_ptr->_ref.deref())
-      {
-      delete _ptr;
-      }
+    clear();
 
     _ptr = cpy._ptr;
     if(_ptr)
       {
-      _ptr->_ref.ref();
+      ++_ptr->_ref;
       }
-    return *this;
+    }
+
+  const T &operator *() const { return *ptr(); }
+
+  const T *operator->() const { return ptr(); }
+
+  const T *ptr() const { return static_cast<const T*>(_ptr); }
+  const T *constPtr() const { return static_cast<const T*>(_ptr); }
+
+protected:
+  void dedtach()
+    {
+    if(_ptr && _ptr->_ref > 1)
+      {
+      Eks::AllocatorBase *alloc = allocator();
+      _ptr = alloc->create<T>(*constPtr());
+      }
+    }
+
+  AllocatorBase *allocator()
+    {
+    return this;
+    }
+
+  detail::SharedData *_ptr;
+  };
+
+template <typename T,
+          typename Alloc=TypedAllocator<T> > class SharedPointer
+    : public ConstSharedPointer<T, Alloc>
+  {
+public:
+  SharedPointer()
+    {
+    }
+
+  explicit SharedPointer(detail::SharedData *ptr)
+    : ConstSharedPointer<T, Alloc>(ptr)
+    {
+    }
+
+  SharedPointer(const SharedPointer<T> &cpy)
+    : ConstSharedPointer(cpy)
+    {
+    }
+
+  SharedPointer<T> &operator=(const SharedPointer<T> &cpy)
+    {
+    assign(cpy.ptr());
     }
 
   T &operator *() { detach(); return *ptr(); }
@@ -52,66 +138,8 @@ public:
   const T *constPtr() const { return static_cast<T*>(_ptr); }
 
 private:
-  void detach()
-    {
-    if(_ptr && _ptr->_ref > 1)
-      {
-      _ptr = new T(*constPtr());
-      }
-    }
-
-  XSharedData *_ptr;
-  };
-
-template <typename T> class XConstSharedPointer
-  {
-public:
-  XConstSharedPointer() : _ptr(0) { }
-  explicit XConstSharedPointer( const XSharedData *ptr ) : _ptr(ptr) { xAssert(_ptr); _ptr->_ref.ref(); }
-  XConstSharedPointer( const XConstSharedPointer<T> &cpy ) : _ptr(cpy._ptr) { if(_ptr) { _ptr->_ref.ref(); } }
-  ~XConstSharedPointer()
-    {
-    if(_ptr && !_ptr->_ref.deref())
-      {
-      delete _ptr;
-      _ptr = 0;
-      }
-    }
-
-  XConstSharedPointer<T> &operator=( const XConstSharedPointer<T> &cpy )
-    {
-    if(_ptr && !_ptr->_ref.deref())
-      {
-      delete _ptr;
-      }
-
-    _ptr = cpy._ptr;
-    if(_ptr)
-      {
-      _ptr->_ref.ref();
-      }
-    return *this;
-    }
-
-  T &operator *() { detach(); return *ptr(); }
-  const T &operator *() const { return *ptr(); }
-
-  T *operator->() { detach(); return ptr(); }
-  const T *operator->() const { return ptr(); }
-
-  const T *ptr() const { return static_cast<const T*>(_ptr); }
-  const T *constPtr() const { return static_cast<const T*>(_ptr); }
-
-private:
-  void detach()
-    {
-    if(_ptr && _ptr->_ref > 1)
-      {
-      _ptr = new T(*constPtr());
-      }
-    }
-
-  const XSharedData *_ptr;
+  SharedPointer(const ConstSharedPointer<T, Alloc> &cpy);
+  SharedPointer &operator=(const ConstSharedPointer<T, Alloc> &);
   };
 
 #endif // XSHARED_H

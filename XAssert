@@ -2,43 +2,55 @@
 #define XASSERT_H
 
 #include "XGlobal"
+
 #include "XProperty"
 #include "XCodeLocation"
-#include "QVariant"
-#include "QVector"
 
-class EKSCORE_EXPORT XAssert
+#if X_ASSERT_VALUE_HANDLING
+# include "QtCore/QVariant"
+#endif
+
+namespace Eks
+{
+
+namespace detail
+{
+
+class EKSCORE_EXPORT Assert
   {
 public:
   class Argument
     {
   public:
     const char *name;
+#if X_ASSERT_VALUE_HANDLING
     QVariant value;
+#endif
     };
 
 XProperties:
-  XRORefProperty(XCodeLocation, location);
+  XRORefProperty(CodeLocation, location);
   XROProperty(const char *, condition);
   XROProperty(const char *, message);
 
-  XRefProperty(QVector<Argument>, arguments);
-
 public:
-  XAssert(const XCodeLocation &location, const char *condition, const char *message);
+  Assert(const CodeLocation &location, const char *condition, const char *message);
 
-  template <typename T> XAssert &arg(const char *name, const T &val)
+  template <typename T> Assert &arg(const char *name, const T &val)
     {
-    arguments() << Argument();
-    Argument &arg = arguments().back();
+    Argument &arg = _arguments[_argCount++];
 
     arg.name = name;
+#if X_ASSERT_VALUE_HANDLING
     arg.value = val;
+#else
+    (void)val;
+#endif
 
     return *this;
     }
 
-  typedef bool FireFunction(const XAssert &assert);
+  typedef bool FireFunction(const Assert &assert);
   static FireFunction *currentFireFunction();
   static void setCurrentFireFunction(FireFunction *f);
 
@@ -49,18 +61,32 @@ public:
 #endif
   static BreakFunction *currentBreakFunction();
   static void setCurrentBreakFunction(BreakFunction *f);
+
+private:
+  static bool defaultFire(const Assert &a);
+
+  enum
+    {
+    MaxArgs = 16
+    };
+  Argument _arguments[MaxArgs];
+  xsize _argCount;
   };
+
+}
+
+}
 
 #define X_ASSERT_VARIABLE(variable, aa, n) .arg(#variable, variable)
 
 #ifdef Q_CC_MSVC
-# define X_CONSTRUCT_ASSERT(condition, message, ...) XAssert ass(X_CURRENT_CODE_LOCATION, #condition, message); ass X_EXPAND_ARGS(X_ASSERT_VARIABLE, 0, __VA_ARGS__)
+# define X_CONSTRUCT_ASSERT(condition, message, ...) Eks::detail::Assert ass(X_CURRENT_CODE_LOCATION, #condition, message); ass X_EXPAND_ARGS(X_ASSERT_VARIABLE, 0, __VA_ARGS__)
 #else
-# define X_CONSTRUCT_ASSERT(condition, message, ...) XAssert ass(X_CURRENT_CODE_LOCATION, #condition, message)
+# define X_CONSTRUCT_ASSERT(condition, message, ...) Eks::detail::Assert ass(X_CURRENT_CODE_LOCATION, #condition, message)
 #endif
 
 #if X_ASSERTS_ENABLED
-# define xAssertMessage(condition, message, ...) if(!(condition) && XAssert::currentFireFunction()) { X_CONSTRUCT_ASSERT(condition, message, __VA_ARGS__); if( XAssert::currentFireFunction()(ass) && XAssert::currentBreakFunction() ) { XAssert::currentBreakFunction()(); } }
+# define xAssertMessage(condition, message, ...) if(!(condition) && Eks::detail::Assert::currentFireFunction()) { X_CONSTRUCT_ASSERT(condition, message, __VA_ARGS__); if( Eks::detail::Assert::currentFireFunction()(ass) && Eks::detail::Assert::currentBreakFunction() ) { Eks::detail::Assert::currentBreakFunction()(); } }
 # define xVerify xAssert
 
 #else
@@ -75,6 +101,10 @@ struct xCompileTimeAssertDef
 #endif
 
 #ifndef X_CPPOX_SUPPORT
+namespace Eks
+{
+namespace detail
+{
 template <bool Condition>
 struct xCompileTimeAssertDef
 {
@@ -82,9 +112,11 @@ struct xCompileTimeAssertDef
 };
 /** Unimplemented - causes a compile-time error if used. */
 template <> struct xCompileTimeAssertDef<false>;
-#define xCompileTimeAssert(x) typedef xCompileTimeAssertDef<x> CTA_##__LINE__
+}
+}
+# define xCompileTimeAssert(x) typedef Eks::detail::xCompileTimeAssertDef<x> CTA_ ## __LINE__
 #else
-#define xCompileTimeAssert(x) static_assert(x, "Static Assert: " #x)
+# define xCompileTimeAssert(x) static_assert(x, "Static Assert: " #x)
 #endif
 
 #define xAssert(condition, ...) xAssertMessage(condition, "", __VA_ARGS__)

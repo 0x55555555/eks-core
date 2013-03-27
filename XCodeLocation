@@ -5,22 +5,46 @@
 #include "XProperty"
 #include "XMacroHelpers"
 
-class EKSCORE_EXPORT XCodeLocation
+namespace Eks
+{
+
+class String;
+
+class EKSCORE_EXPORT CodeLocation
   {
 XProperties:
   XROProperty(const char *, file);
   XROProperty(xsize, line);
   XROProperty(const char *, function);
 
-  XCodeLocation(const char *file, xsize line, const char *function);
+public:
+  CodeLocation(const char *file, xsize line, const char *function);
 
-  QString toString() const;
+  String toString() const;
 
-  bool operator==(const XCodeLocation &a) const;
+  bool operator==(const CodeLocation &a) const;
   };
 
-uint qHash(const XCodeLocation &a);
+class EKSCORE_EXPORT StackWalker
+  {
+public:
+  class Visitor
+    {
+  public:
+    virtual void visit(xsize level, void *symbol) = 0;
+    };
 
-#define X_CURRENT_CODE_LOCATION XCodeLocation(__FILE__, __LINE__, xCurrentFunction)
+  static void getSymbolName(void *symbol, Eks::String &symbolName, xsize maxSize);
+
+  static void intialiseSymbolNames();
+  static void terminateSymbolNames();
+  static void walk(xsize skip, Visitor *visit);
+  };
+
+}
+
+uint qHash(const Eks::CodeLocation &a);
+
+#define X_CURRENT_CODE_LOCATION Eks::CodeLocation(__FILE__, __LINE__, xCurrentFunction)
 
 #endif // XCODELOCATION_H

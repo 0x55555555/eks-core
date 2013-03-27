@@ -2,9 +2,13 @@
 #define XEVENTLOGGER_H
 
 #include "XGlobal"
-#include "XAssert"
+
+#ifdef X_ENABLE_EVENT_LOGGING
+
 #include "XTime"
-#include "QMetaType"
+#include "XAssert"
+#include "XStringSimple"
+#include "QtCore/QMetaType"
 
 template <typename T> struct EKSCORE_EXPORT XEventLoggerPair
   {
@@ -17,8 +21,8 @@ class EKSCORE_EXPORT XEventLoggerInternal
 public:
   XEventLoggerInternal(const char *name, int type, xsize size, xsize count, const char *units);
 
-  QString name;
-  QString units;
+  Eks::StringBase<Eks::Char, 32> name;
+  Eks::StringBase<Eks::Char, 32> units;
   int type;
   xsize size;
   xsize count;
@@ -43,14 +47,6 @@ public:
     return ev;
     }
   };
-
-#define X_IMPLEMENT_LOGGER(name, type, size, units) XEventLoggerInternal *name = XEventLoggerInternal::init<type>(#name, size, units)
-#define X_DECLARE_LOGGER(exp, name) exp extern XEventLoggerInternal *name
-
-#define X_IMPLEMENT_MEMORY_LOGGER(name) X_IMPLEMENT_LOGGER(name, xsize, XEventLogger<xsize>::Large, "bytes")
-#define X_DECLARE_MEMORY_LOGGER X_DECLARE_LOGGER
-#define X_MEMORY_LOGGER_ALLOC(name, s) { XEventLogger<xsize> l(name); if(l.size()) { l.logNow(s + l.last().value); } else { l.logNow(s); } }
-#define X_MEMORY_LOGGER_FREE(name, s) { XEventLogger<xsize> l(name); xAssert(l.size()); l.logNow(l.last().value - s); }
 
 template <typename T> class XEventLogger
   {
@@ -123,5 +119,24 @@ public:
   static XEventLoggerInternal *firstEvent();
   static void addEvent(XEventLoggerInternal *);
   };
+
+#define X_IMPLEMENT_LOGGER(name, type, size, units) XEventLoggerInternal *name = XEventLoggerInternal::init<type>(#name, size, units)
+#define X_DECLARE_LOGGER(exp, name) exp extern XEventLoggerInternal *name
+#define X_MEMORY_LOGGER_ALLOC(name, s) { XEventLogger<xsize> l(name); if(l.size()) { l.logNow(s + l.last().value); } else { l.logNow(s); } }
+#define X_MEMORY_LOGGER_FREE(name, s) { XEventLogger<xsize> l(name); xAssert(l.size()); l.logNow(l.last().value - s); }
+
+#else
+#define X_IMPLEMENT_LOGGER(name, type, size, units)
+#define X_DECLARE_LOGGER(exp, name)
+
+#define X_MEMORY_LOGGER_ALLOC(name, s)
+#define X_MEMORY_LOGGER_FREE(name, s)
+
+#endif
+
+#define X_IMPLEMENT_MEMORY_LOGGER(name) X_IMPLEMENT_LOGGER(name, xsize, XEventLogger<xsize>::Large, "bytes")
+#define X_DECLARE_MEMORY_LOGGER(exp, name) X_DECLARE_LOGGER(exp, name)
+
+X_DECLARE_MEMORY_LOGGER(EKSCORE_EXPORT, xTotalGlobalAllocatorSize);
 
 #endif // XEVENTLOGGER_H

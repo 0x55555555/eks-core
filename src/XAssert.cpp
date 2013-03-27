@@ -1,7 +1,13 @@
 #include "XAssert"
-#include "QMessageBox"
-#include "QPushButton"
-#include "QApplication"
+#include "XUnorderedMap"
+#include "XCore"
+#include "XStringSimple"
+
+#if X_ADVANCED_ASSERT
+# include "QtWidgets/QMessageBox"
+# include "QtWidgets/QPushButton"
+# include "QtWidgets/QApplication"
+#endif
 
 #if defined(Q_CC_MSVC)
 # define WIN32_LEAN_AND_MEAN
@@ -11,21 +17,32 @@
 # include <signal.h>
 #endif
 
-XAssert::XAssert(const XCodeLocation &location, const char *condition, const char* message)
-    : _location(location), _condition(condition), _message(message)
+namespace Eks
+{
+
+namespace detail
+{
+
+Assert::Assert(const CodeLocation &location, const char *condition, const char* message)
+    : _location(location), _condition(condition), _message(message), _argCount(0)
   {
   }
 
-QHash<XCodeLocation, bool> g_disabledAsserts;
-bool defaultFire(const XAssert &a)
+bool Assert::defaultFire(const Assert &a)
   {
-  if(g_disabledAsserts.contains(a.location()))
+  UnorderedMap<CodeLocation, bool> *disabled = Core::disabledAsserts();
+  if(disabled->contains(a.location()))
     {
     return false;
     }
 
   static bool recursion = false;
-  if(recursion || !QCoreApplication::instance() || !dynamic_cast<QApplication*>(QCoreApplication::instance()))
+  if(recursion
+#if X_ADVANCED_ASSERT
+     || !QCoreApplication::instance()
+     || !dynamic_cast<QApplication*>(QCoreApplication::instance())
+#endif
+     )
     {
     // crap. just break
     return true;
@@ -33,6 +50,7 @@ bool defaultFire(const XAssert &a)
 
   recursion = true;
 
+#if X_ADVANCED_ASSERT
   QMessageBox msgBox;
   msgBox.setWindowModality(Qt::ApplicationModal);
   QPushButton *breakButton = msgBox.addButton("Break Now", QMessageBox::YesRole);
@@ -46,21 +64,27 @@ bool defaultFire(const XAssert &a)
 
   msgBox.setWindowTitle(text);
 
-  text += " in " + a.location().toString() + "\n\n";
+  QString location = QString::fromUtf8(a.location().toString().data());
+
+  text += " in " + location + "\n\n";
 
   if(!qstrcmp(a.message(), "") == 0)
     {
     text = QString(a.message()) + ":\n\n" + text;
     }
 
-  if(a.arguments().size())
+  if(a._argCount)
     {
     text += "Arguments:\n";
-    Q_FOREACH(const XAssert::Argument &arg, a.arguments())
+    for(xsize i = 0; i < a._argCount; ++i)
       {
+      const Assert::Argument &arg = a._arguments[i];
+
       text + "  ";
       text += arg.name;
+# if X_ASSERT_VALUE_HANDLING
       text += ": " + arg.value.toString() + "\n";
+# endif
       }
     }
 
@@ -76,19 +100,26 @@ bool defaultFire(const XAssert &a)
 
   if (msgBox.clickedButton() == neverBreakButton)
     {
-    g_disabledAsserts.insert(a.location(), true);
+    disabled->insert(a.location(), true);
     }
+#else
+# ifdef Q_OS_WIN
+  _ASSERT(0);
+# else
+#  error No simple assert defined
+# endif
+#endif
 
   return false;
   }
 
-XAssert::FireFunction *g_currentFireFunction = 0;
-XAssert::FireFunction *XAssert::currentFireFunction()
+Assert::FireFunction *g_currentFireFunction = 0;
+Assert::FireFunction *Assert::currentFireFunction()
   {
   return g_currentFireFunction ? g_currentFireFunction : defaultFire;
   }
 
-void XAssert::setCurrentFireFunction(FireFunction *f)
+void Assert::setCurrentFireFunction(FireFunction *f)
   {
   g_currentFireFunction = f;
   }
@@ -100,26 +131,36 @@ void interuptBreak()
   }
 #endif
 
-XAssert::BreakFunction *g_currentBreakFunction = 0;
-XAssert::BreakFunction *XAssert::currentBreakFunction()
+#ifdef X_ARCH_ARM
+void __stdcall interuptBreak()
   {
-  XAssert::BreakFunction *f = g_currentBreakFunction;
+  int *i = 0;
+  *i = 1;
+  }
+#endif
+
+Assert::BreakFunction *g_currentBreakFunction = 0;
+Assert::BreakFunction *Assert::currentBreakFunction()
+  {
+  Assert::BreakFunction *f = g_currentBreakFunction;
 
   if(!f)
     {
-#if defined(Q_CC_MSVC)
+#if defined(Q_CC_MSVC) && !defined(X_ARCH_ARM)
     f = DebugBreak;
-#elif defined(Q_CC_GNU)
-    f = interuptBreak;
 #else
-# error define a break type macro for this platform
+    f = interuptBreak;
 #endif
     }
 
   return f;
   }
 
-void XAssert::setCurrentBreakFunction(BreakFunction *f)
+void Assert::setCurrentBreakFunction(BreakFunction *f)
   {
   g_currentBreakFunction = f;
   }
+
+}
+
+}

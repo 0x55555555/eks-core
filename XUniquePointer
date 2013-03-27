@@ -1,0 +1,88 @@
+#ifndef XUNIQUEPOINTER_H
+#define XUNIQUEPOINTER_H
+
+#include "XGlobal"
+#include "XMacroHelpers"
+#include "XTypedAllocator"
+#include "XProperty"
+#include "XAllocatorBase"
+
+namespace Eks
+{
+
+namespace detail
+{
+template <typename T> class AllocatorDelete : public Eks::TypedAllocator<T>
+  {
+  };
+}
+
+template <typename T,
+          typename Deleter=detail::AllocatorDelete<T> > class UniquePointer : Deleter
+  {
+XProperties:
+  XROProperty(T *, pointer);
+
+public:
+  explicit UniquePointer(T *value=0, Deleter d=Deleter())
+      : Deleter(d), _pointer(value)
+    {
+    }
+
+  explicit UniquePointer(T &&oth)
+      : _deleter(d)
+    {
+    std::swap(_pointer, oth._pointer);
+    }
+
+  ~UniquePointer()
+    {
+    clear();
+    }
+
+  UniquePointer<T>& operator=(UniquePointer<T> &&oth)
+    {
+    std::swap(_pointer, oth._pointer);
+    return *this;
+    }
+
+  UniquePointer<T>& operator=(T *oth)
+    {
+    _pointer = oth;
+    return *this;
+    }
+
+  void clear()
+    {
+    destroy(_pointer);
+    _pointer = 0;
+    }
+
+  void assign(T *data)
+    {
+    _pointer = data;
+    }
+
+  void create(const Deleter &d)
+    {
+    clear();
+    *this = d;
+    _pointer = create<T>();
+    }
+
+  T *value() { return _pointer; }
+  const T *value() const { return _pointer; }
+
+  T *operator->() { return _pointer; }
+  const T *operator->() const { return _pointer; }
+
+  operator T*() { return _pointer; }
+  operator const T*() const { return _pointer; }
+
+private:
+  X_DISABLE_COPY(UniquePointer);
+  };
+
+}
+
+#endif // XUNIQUEPOINTER_H
