@@ -15,6 +15,10 @@ namespace detail
 template <typename T> class AllocatorDelete : public Eks::TypedAllocator<T>
   {
 public:
+  AllocatorDelete()
+    {
+    }
+
   AllocatorDelete(Eks::AllocatorBase *base) : Eks::TypedAllocator<T>(base)
     {
     }
