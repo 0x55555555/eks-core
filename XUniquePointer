@@ -67,8 +67,11 @@ public:
 
   void clear()
     {
-    destroy(_pointer);
-    _pointer = 0;
+	if(_pointer)
+	  {
+	  destroy(_pointer);
+	  _pointer = 0;
+	  }
     }
 
   void assign(T *data)

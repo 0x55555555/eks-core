@@ -10,8 +10,10 @@ INCLUDEPATH += ../
 
 include("../GeneralOptions.pri")
 
-CONFIG(debug) {
-  LIBS += -lDbghelp
+win32 {
+  CONFIG(debug) {
+    LIBS += -lDbghelp
+  }
 }
 
 SOURCES += \
