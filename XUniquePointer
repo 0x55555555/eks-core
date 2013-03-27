@@ -72,12 +72,14 @@ public:
     _pointer = data;
     }
 
-  template <typename X> void create(const Deleter &d)
+  template <typename X> X *create(const Deleter &d)
     {
     Deleter &thisD = *this;
     clear();
     thisD = d;
-    _pointer = thisD.create<X>();
+    X *x = thisD.create<X>();
+    _pointer = x;
+    return x;
     }
 
   T *value() { return _pointer; }

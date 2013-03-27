@@ -57,6 +57,8 @@ void StackWalker::terminateSymbolNames()
 
 void StackWalker::getSymbolName(void *symbolLocation, Eks::String &symbolName, xsize maxSize)
   {
+#if X_ENABLE_STACK_WALKING
+#ifdef Q_CC_MSVC
   BYTE *buffer = (BYTE *)alloca(sizeof(SYMBOL_INFO) + maxSize);
   memset(buffer, 0, sizeof(buffer));
 
@@ -76,87 +78,14 @@ void StackWalker::getSymbolName(void *symbolLocation, Eks::String &symbolName, x
 
   symbolName.clear();
   symbolName.resizeAndCopy(strlen(symbol->Name), symbol->Name);
+#endif
+#endif
   }
 
 void StackWalker::walk(xsize skip, Visitor *visit)
   {
 #if X_ENABLE_STACK_WALKING
 #ifdef Q_CC_MSVC
-
-#if 0
-  struct Utils
-    {
-    static void doVisit(Visitor *visit, xsize i, void *pcOffset, xsize frameOffset)
-      {
-      (void)frameOffset;
-      visit->visit(i, pcOffset);
-      }
-
-    static void walk(CONTEXT *ctxIn, xsize skip, Visitor *visit)
-      {
-      const HANDLE hProcess = ::GetCurrentProcess();
-      CONTEXT ctx = *ctxIn;
-
-      DWORD dwMachineType;
-
-      // set the initial frame
-      STACKFRAME sf;
-      memset(&sf, 0, sizeof(sf));
-
-#ifdef _M_IX86
-      sf.AddrPC.Offset       = ctx.Eip;
-      sf.AddrPC.Mode         = AddrModeFlat;
-      sf.AddrStack.Offset    = ctx.Esp;
-      sf.AddrStack.Mode      = AddrModeFlat;
-      sf.AddrFrame.Offset    = ctx.Ebp;
-      sf.AddrFrame.Mode      = AddrModeFlat;
-
-      dwMachineType = IMAGE_FILE_MACHINE_I386;
-#else
-#error "Need to initialize STACKFRAME on non x86 windows"
-#endif
-
-      // Iterate over all stack frames
-      xsize level = 0;
-      while(true)
-        {
-        if(!StackWalk(dwMachineType,
-                      hProcess,
-                      ::GetCurrentThread(),
-                      &sf,
-                      &ctx,
-                      NULL,
-                      SymFunctionTableAccess,
-                      SymGetModuleBase,
-                      NULL))
-          {
-          if (::GetLastError())
-            {
-            qDebug() << "Error getting call stack " << ::GetLastError();
-            xAssertFail();
-            }
-
-          break;
-          }
-
-          if(level >= skip)
-            {
-            doVisit(visit, level - skip, (void *)sf.AddrPC.Offset, sf.AddrFrame.Offset);
-            }
-          ++level;
-        }
-      }
-    };
-
-  __try
-    {
-    RaiseException(0x1976, 0, 0, NULL);
-    }
-  __except(Utils::walk(((EXCEPTION_POINTERS *)GetExceptionInformation())->ContextRecord, skip + 2, visit), EXCEPTION_CONTINUE_EXECUTION)
-    {
-    // not reached
-    }
-#else
 
   struct Utils
     {
@@ -188,7 +117,6 @@ void StackWalker::walk(xsize skip, Visitor *visit)
     position += captured;
     } while(captured == BlockCaptureSize);
 
-#endif
 #endif
 #endif
   }
