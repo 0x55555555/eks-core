@@ -423,9 +423,7 @@ template <typename C, xsize P, typename A> QDebug operator<<(
   return dbg << str.data();
   }
 
-template <typename C, xsize P, typename A> QDebug operator<<(
-    QDebug& dbg,
-    const Eks::String &str)
+QDebug operator<<(QDebug& dbg, const Eks::String &str)
   {
   return dbg << str.data();
   }
