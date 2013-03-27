@@ -161,7 +161,9 @@ HEADERS += \
     ../XTemporaryAllocator \
     ../XLoggingAllocator \
     ../XCore \
-    ../XCore
+    ../QtHelper/XQWidget \
+    ../QtHelper/XQApplication \
+    ../QtHelper/XQWidgets
 
 
 

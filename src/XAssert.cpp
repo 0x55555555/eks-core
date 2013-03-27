@@ -7,12 +7,12 @@
 #if QT_VERSION >= 0x050000
 # include "QtWidgets/QMessageBox"
 # include "QtWidgets/QPushButton"
-# include "QtWidgets/QApplication"
 #else
 # include "QtGui/QMessageBox"
 # include "QtGui/QPushButton"
-# include "QtGui/QApplication"
 #endif
+
+#include "QtHelper/XQApplication"
 #endif
 
 #if defined(Q_CC_MSVC)
