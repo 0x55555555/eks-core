@@ -19,9 +19,9 @@ public:
     {
     }
 
-  T *create()
+  template <typename X> X *create()
     {
-    return allocator()->create<T>();
+    return allocator()->create<X>();
     }
   };
 }
@@ -72,12 +72,12 @@ public:
     _pointer = data;
     }
 
-  void create(const Deleter &d)
+  template <typename X> void create(const Deleter &d)
     {
     Deleter &thisD = *this;
     clear();
     thisD = d;
-    _pointer = thisD.create();
+    _pointer = thisD.create<X>();
     }
 
   T *value() { return _pointer; }
