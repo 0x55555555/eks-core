@@ -78,6 +78,11 @@ void StackWalker::getSymbolName(void *symbolLocation, Eks::String &symbolName, x
 
   symbolName.clear();
   symbolName.resizeAndCopy(strlen(symbol->Name), symbol->Name);
+
+#else
+  (void)symbolLocation;
+  (void)symbolName;
+  (void)maxSize;
 #endif
 #endif
   }
@@ -117,6 +122,9 @@ void StackWalker::walk(xsize skip, Visitor *visit)
     position += captured;
     } while(captured == BlockCaptureSize);
 
+#else
+  (void)skip;
+  (void)visit;
 #endif
 #endif
   }

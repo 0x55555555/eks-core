@@ -23,7 +23,7 @@ GlobalAllocator::~GlobalAllocator()
 void *GlobalAllocator::alloc(xsize size, xsize alignment)
   {
 #ifndef Q_CC_MSVC
-  void *m = qMallocAligned(MemoryHandleHeaderSize + size, alignment);
+  void *m = qMallocAligned(size, alignment);
 
 #else
   // msvc malloc should always be 16 byte aligned
