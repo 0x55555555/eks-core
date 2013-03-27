@@ -55,12 +55,6 @@
 # define X_HEAP_CHECK
 #endif
 
-#if QT_VERSION < 0x050000
-# define X_QT_WIDGET_DIR "QtWidgets/"
-#else
-# define X_QT_WIDGET_DIR "QtGui/"
-#endif
-
 #ifdef X_ARCH_ARM
 # define X_ADVANCED_ASSERT 0
 # define X_COMPILE_ARRAY_MATH 0
