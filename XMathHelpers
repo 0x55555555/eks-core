@@ -12,6 +12,8 @@
 namespace Eks
 {
 
+#define xFuzzyCompare qFuzzyCompare
+
 typedef float Real;
 #define EKS_REAL_IS_DOUBLE 0
 
