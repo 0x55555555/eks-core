@@ -53,6 +53,10 @@ public:
     {
     }
 
+  Colour( const Vector3D &vec, float a = 1.0f ) : Vector4D( vec.x(), vec.y(), vec.z(), a )
+    {
+    }
+
   Colour( const Vector4D &vec ) : Vector4D( vec.x(), vec.y(), vec.z(), vec.w() )
     {
     }
@@ -64,7 +68,7 @@ public:
 #endif
 
   template <typename Derived>
-      Colour(const Eigen::EigenBase<Derived> &oth) : Vector4D(oth)
+  Colour(const Eigen::EigenBase<Derived> &oth) : Vector4D(oth)
     {
     }
 
