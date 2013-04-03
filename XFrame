@@ -17,14 +17,14 @@ XProperties:
 public:
   Frame(const Vector3D &facing, const Vector3D &upIn = Eks::Vector3D(0.0f, 1.0f, 0.0f), const Vector3D &alternativeUp = Eks::Vector3D(1.0f, 0.0f, 0.0f))
     {
-    _facing = facing;
+    _facing = facing.normalized();
     _up = upIn;
     if(_up.dot(_facing) > 0.8f)
       {
       _up = alternativeUp;
       }
-    _across = _up.cross(_facing);
-    _up = _facing.cross(_across);
+    _across = _up.cross(_facing).normalized();
+    _up = _facing.cross(_across).normalized();
     }
   };
 
