@@ -64,7 +64,7 @@ void StackWalker::getSymbolName(void *symbolLocation, Eks::String &symbolName, x
 
   PSYMBOL_INFO symbol = (PSYMBOL_INFO)buffer;
   symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-  symbol->MaxNameLen = maxSize;
+  symbol->MaxNameLen = (ULONG)maxSize;
 
   DWORD64 symDisplacement = 0;
   if (!SymFromAddr(::GetCurrentProcess(),
@@ -112,7 +112,7 @@ void StackWalker::walk(xsize skip, Visitor *visit)
   xuint16 captured = 0;
   do
     {
-    captured = CaptureStackBackTrace(position, BlockCaptureSize, frames, 0);
+    captured = CaptureStackBackTrace((DWORD)position, BlockCaptureSize, frames, 0);
 
     for(xsize i = 0; i < captured; ++i)
       {

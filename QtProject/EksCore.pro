@@ -163,7 +163,8 @@ HEADERS += \
     ../XCore \
     ../QtHelper/XQWidget \
     ../QtHelper/XQApplication \
-    ../QtHelper/XQWidgets
+    ../QtHelper/XQWidgets \
+    ../XFrame
 
 
 
