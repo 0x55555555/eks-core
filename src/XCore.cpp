@@ -28,7 +28,7 @@ struct Core::Impl
 Core::Core()
   {
   xAssert(!g_core);
-  g_core = new Core::Impl;
+  _impl = g_core = new Core::Impl;
 
 #ifdef X_ENABLE_EVENT_LOGGING
   g_core->allocLogger.setAllocator(&g_core->alloc);
@@ -39,8 +39,9 @@ Core::Core()
 
 Core::~Core()
   {
-  delete g_core;
-  g_core = 0;
+  xAssert(g_core == _impl);
+  delete _impl;
+  _impl = g_core = 0;
   }
 
 AllocatorBase *Core::defaultAllocator()

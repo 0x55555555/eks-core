@@ -167,7 +167,7 @@ public:
     return hasAny(1<<index);
     }
 
-private:
+protected:
   CONTAINER _internal;
   };
 
@@ -217,9 +217,6 @@ public:
     {
     return _internal;
     }
-
-private:
-  CONTAINER _internal;
   };
 
 }
