@@ -92,18 +92,33 @@ public:
 template <typename CONTAINER> class BitField
   {
 public:
-  BitField(CONTAINER c=0) : _internal(c) { }
+  BitField(CONTAINER c=0) : _internal(c)
+    {
+    }
 
   static BitField<CONTAINER> fromIndex(xuint8 i)
     {
-    return BitField<CONTAINER>(1<<i);
+    BitField<CONTAINER> b;
+    b.setBitAtIndex(i);
+    return b;
     }
 
   typedef detail::BitHelpers<sizeof(CONTAINER)> Helpers;
 
-  bool hasAll(const BitField<CONTAINER> &c) const { return (_internal & c._internal ) == (CONTAINER)c; }
-  bool hasAny(const BitField<CONTAINER> &c) const { return (_internal & c._internal ) != 0; }
-  bool hasAny() const { return _internal != 0; }
+  bool hasAll(const BitField<CONTAINER> &c) const
+    {
+    return (_internal&c._internal) == (CONTAINER)c;
+    }
+
+  bool hasAny(const BitField<CONTAINER> &c) const
+    {
+    return (_internal&c._internal) != 0;
+    }
+
+  bool hasAny() const
+    {
+    return _internal != 0;
+    }
 
   BitField<CONTAINER> operator~() const
     {
@@ -159,7 +174,7 @@ public:
 
   void setBitAtIndex(xuint8 index)
     {
-    _internal |= 1<<index;
+    *this |= 1<<index;
     }
 
   bool hasIndex(xuint8 index) const
@@ -179,13 +194,14 @@ public:
 
   typedef decltype(std::declval<CONTAINER>() | std::declval<ENUM>()) OrResult;
 
-  bool hasFlag(ENUM c) const { return (_internal & c) == c; }
-  bool hasAllFlags(OrResult c) const { return (_internal & c ) == (CONTAINER)c; }
-  bool hasAnyFlags(OrResult c) const { return (_internal & c ) != 0; }
+  bool hasFlag(ENUM c) const { return (_internal&c) != 0; }
+  bool hasAnyFlags(OrResult c) const { return (_internal&c) != 0; }
+  bool hasAnyFlags() const { return _internal != 0; }
+  bool hasAllFlags(OrResult c) const { return (_internal&c) == (CONTAINER)c; }
+
   void clearFlag(ENUM c) { _internal = ~(~_internal | c); }
   void setFlag(ENUM c) { _internal = _internal|c; }
   void setFlag(ENUM c, bool val) { if(val) { setFlag(c); } else { clearFlag(c); } }
-  bool hasAnyFlags() const { return _internal != 0; }
 
   Flags<ENUM, CONTAINER> operator~() const
     {
