@@ -2,6 +2,7 @@
 #include "XGlobalAllocator"
 #include "XLoggingAllocator"
 #include "XUnorderedMap"
+#include "XProfiler"
 
 namespace Eks
 {
@@ -35,10 +36,18 @@ Core::Core()
 #endif
 
   g_core->defaultLogger = globalAllocator();
+
+#ifdef X_PROFILING_ENABLED
+  Eks::Profiler::initialise(g_core->defaultLogger);
+#endif
   }
 
 Core::~Core()
   {
+#ifdef X_PROFILING_ENABLED
+  Eks::Profiler::terminate();
+#endif
+
   xAssert(g_core == _impl);
   delete _impl;
   _impl = g_core = 0;
