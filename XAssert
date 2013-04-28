@@ -119,7 +119,7 @@ template <> struct xCompileTimeAssertDef<false>;
 # define xCompileTimeAssert(x) static_assert(x, "Static Assert: " #x)
 #endif
 
-#define xAssert(condition, ...) xAssertMessage(condition, "", __VA_ARGS__)
+#define xAssert(condition, ...) xAssertMessage((condition), "", __VA_ARGS__)
 #define xAssertFail(...) xAssert(0, __VA_ARGS__);
 #define xAssertFailMessage(msg, ...) xAssertMessage(0, msg, __VA_ARGS__);
 
