@@ -13,6 +13,7 @@
 #endif
 
 #include "QtHelper/XQApplication"
+#include "QtCore/QThread"
 #endif
 
 #if defined(Q_CC_MSVC)
@@ -41,6 +42,11 @@ bool Assert::defaultFire(const Assert &a)
     {
     return false;
     }
+
+  if(QThread::currentThread() != QApplication::instance()->thread())
+    {
+    return true;
+    } 
 
   static bool recursion = false;
   if(recursion
