@@ -564,7 +564,6 @@ public:
 
   iterator remove(iterator b, iterator e)
     {
-    xAssertFail(); // test this fn.
     xAssert(b >= ThisBase::_first && b <= ThisBase::_end);
     xAssert(e >= ThisBase::_first && e <= ThisBase::_end);
     xAssert(b <= ThisBase::_end);
