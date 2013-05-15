@@ -32,22 +32,26 @@ public:
       : String(Alloc(alloc))
     {
     }
+  StringBase(const Allocator &alloc)
+      : String(alloc)
+    {
+    }
   StringBase(const Char *n, AllocatorBase *alloc=0)
       : String(Alloc(alloc))
     {
     const size_type s = strlen(n);
     resizeAndCopy(s, n);
-    xAssert(at(size()) == '\0');
+    xAssert(!String::size() || at(size()) == '\0');
     }
   StringBase(const String &n, AllocatorBase *alloc=0)
       : String(n, Alloc(alloc))
     {
-    xAssert(at(size()) == '\0');
+    xAssert(!String::size() || at(size()) == '\0');
     }
-  StringBase(String &&n, AllocatorBase *alloc=0)
-      : String(n, Alloc(alloc))
+  StringBase(String &&n)
+      : String(n)
     {
-    xAssert(at(size()) == '\0');
+    xAssert(!String::size() || at(size()) == '\0');
     }
 
   template <typename C, xsize S, typename A> StringBase(
@@ -55,7 +59,7 @@ public:
       AllocatorBase *alloc=0)
     : String(n, Alloc(alloc))
     {
-    xAssert(at(size()) == '\0');
+    xAssert(!String::size() || at(size()) == '\0');
     }
 
 #if X_STL_INTEROP
@@ -216,7 +220,8 @@ public:
       String::popBack();
       }
     String::append(data);
-    xAssert(at(size()) == '\0');
+    pushBack('\0');
+    xAssert(!String::size() || at(size()) == '\0');
     }
 
   void append(const Char *data)
@@ -339,6 +344,8 @@ public:
         destVec->pushBack(old[i]);
         }
       }
+
+    destVec->pushBack('\0');
     }
   };
 
