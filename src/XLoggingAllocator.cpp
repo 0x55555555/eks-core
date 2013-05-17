@@ -73,7 +73,7 @@ void LoggingAllocator::logAllocations() const
   qDebug() << "Logging live allocations: [" << _impl->_allocations.size() << "/" << _impl->_maxAllocs << "] [" << _impl->_size << "/" << _impl->_maxSize << "] bytes";
   xForeach(auto &a, _impl->_allocations)
     {
-    qDebug() << "Allocation" << a.second._allocSize << "bytes";
+    qDebug() << "Allocation " << a.first << ", " << a.second._allocSize << "bytes";
     for(xsize i = 0; i < a.second._symbolSize; ++i)
       {
       StackWalker::getSymbolName(a.second._symbol[i], symString, 1024);

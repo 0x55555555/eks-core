@@ -220,7 +220,7 @@ public:
       String::popBack();
       }
     String::append(data);
-    pushBack('\0');
+    String::pushBack('\0');
     xAssert(!String::size() || at(size()) == '\0');
     }
 
