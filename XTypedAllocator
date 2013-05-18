@@ -76,7 +76,7 @@ public:
   template <class U>
       TypedAllocator(const TypedAllocator<U>& alloc)
     {
-    _alloc = alloc._alloc;
+    _alloc = alloc.allocator();
     }
 
   void construct(typename Base::pointer p, const_reference val)
