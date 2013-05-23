@@ -100,24 +100,7 @@ struct xCompileTimeAssertDef
 };
 #endif
 
-#ifndef X_CPPOX_SUPPORT
-namespace Eks
-{
-namespace detail
-{
-template <bool Condition>
-struct xCompileTimeAssertDef
-{
-    enum { Value = 1 };
-};
-/** Unimplemented - causes a compile-time error if used. */
-template <> struct xCompileTimeAssertDef<false>;
-}
-}
-# define xCompileTimeAssert(x) typedef Eks::detail::xCompileTimeAssertDef<x> CTA_ ## __LINE__
-#else
-# define xCompileTimeAssert(x) static_assert(x, "Static Assert: " #x)
-#endif
+#define xCompileTimeAssert(x) static_assert(x, "Static Assert: " #x)
 
 #define xAssert(condition, ...) xAssertMessage((condition), "", __VA_ARGS__)
 #define xAssertFail(...) xAssert(0, __VA_ARGS__);
