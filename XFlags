@@ -2,6 +2,7 @@
 #define XFLAGS_
 
 #include "XGlobal"
+#include <atomic>
 #include <bitset>
 
 namespace Eks

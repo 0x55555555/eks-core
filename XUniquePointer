@@ -42,8 +42,14 @@ public:
     {
     }
 
-  explicit UniquePointer(T &&oth)
-      : _deleter(d)
+  UniquePointer(T &&oth, Deleter d=Deleter())
+      : Deleter(d)
+    {
+    std::swap(_pointer, oth);
+    }
+
+  UniquePointer(UniquePointer<T> &&oth)
+      : Deleter(oth), _pointer(0)
     {
     std::swap(_pointer, oth._pointer);
     }
@@ -74,8 +80,9 @@ public:
 	  }
     }
 
-  void assign(T *data)
+  void assign(T *data, const Deleter &d)
     {
+    *this = d;
     _pointer = data;
     }
 
@@ -85,6 +92,16 @@ public:
     clear();
     thisD = d;
     X *x = thisD.create<X>();
+    _pointer = x;
+    return x;
+    }
+
+  T *create(const Deleter &d)
+    {
+    Deleter &thisD = *this;
+    clear();
+    thisD = d;
+    T *x = thisD.create<T>();
     _pointer = x;
     return x;
     }

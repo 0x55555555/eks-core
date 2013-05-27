@@ -41,13 +41,17 @@
 # define X_ASSERTS_ENABLED 1
 
 # ifndef X_ARCH_ARM
+#  define X_EVENT_LOGGING_ENABLED 1
+
 #  define X_PROFILING_ENABLED
-#  define X_ENABLE_EVENT_LOGGING
 #  define X_ENABLE_HEAP_CHECK
 # endif
 
 #endif
 
+#ifndef X_EVENT_LOGGING_ENABLED
+# define X_EVENT_LOGGING_ENABLED 0
+#endif
 
 #ifdef X_ENABLE_HEAP_CHECK
 # define X_HEAP_CHECK { xAssert(_heapchk() == _HEAPOK); xAssert(_CrtCheckMemory()); }

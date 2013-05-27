@@ -3,6 +3,7 @@
 #include "XLoggingAllocator"
 #include "XUnorderedMap"
 #include "XProfiler"
+#include "XEventLogger"
 
 namespace Eks
 {
@@ -11,6 +12,9 @@ struct Core::Impl
   {
   Impl()
     : disabledAsserts(&alloc)
+#if X_EVENT_LOGGING_ENABLED
+    , eventLogger(&alloc)
+#endif
   {
   }
 
@@ -24,6 +28,11 @@ struct Core::Impl
 #if X_ASSERTS_ENABLED
   UnorderedMap<CodeLocation, bool> disabledAsserts;
 #endif
+
+#if X_EVENT_LOGGING_ENABLED
+  EventLogger eventLogger;
+#endif
+
   } *g_core = 0;
 
 Core::Core()
@@ -37,17 +46,10 @@ Core::Core()
 
   g_core->defaultLogger = globalAllocator();
 
-#ifdef X_PROFILING_ENABLED
-  Eks::Profiler::initialise(g_core->defaultLogger);
-#endif
   }
 
 Core::~Core()
   {
-#ifdef X_PROFILING_ENABLED
-  Eks::Profiler::terminate();
-#endif
-
   xAssert(g_core == _impl);
   delete _impl;
   _impl = g_core = 0;
@@ -75,6 +77,15 @@ UnorderedMap<CodeLocation, bool> *Core::disabledAsserts()
   {
 #if X_ASSERTS_ENABLED
   return &g_core->disabledAsserts;
+#else
+  return 0;
+#endif
+  }
+
+EventLogger *Core::eventLogger()
+  {
+#if X_EVENT_LOGGING_ENABLED
+  return &g_core->eventLogger;
 #else
   return 0;
 #endif

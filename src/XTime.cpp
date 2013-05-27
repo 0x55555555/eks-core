@@ -10,22 +10,25 @@
 # include <sys/time.h>
 #endif
 
+namespace Eks
+{
+
 #define SECOND_IN_NANO_SECONDS 1000000000
 
-XTime::XTime(xint64 secs, xint64 nanosecs) : _secs(secs), _nanosecs(nanosecs)
+Time::Time(xint64 secs, xint64 nanosecs) : _secs(secs), _nanosecs(nanosecs)
   {
   }
 
-XTime XTime::fromMilliseconds(double ms)
+Time Time::fromMilliseconds(double ms)
   {
   xint64 seconds = ms / 1000.0;
   xint64 nanoseconds = ms * 1000000.0;
   nanoseconds -= seconds * SECOND_IN_NANO_SECONDS;
   xAssert(nanoseconds > 0);
-  return XTime(seconds, nanoseconds);
+  return Time(seconds, nanoseconds);
   }
 
-void XTime::beginAccurateTiming()
+void Time::beginAccurateTiming()
   {
 #if defined(Q_OS_WIN) && !defined(X_ARCH_ARM)
   HANDLE h = GetCurrentProcess();
@@ -38,7 +41,7 @@ inline LARGE_INTEGER getFrequency() { LARGE_INTEGER freq; xVerify(QueryPerforman
 LARGE_INTEGER frequency(getFrequency());
 #endif
 
-XTime XTime::now()
+Time Time::now()
   {
 #if defined(Q_OS_WIN) && !defined(X_ARCH_ARM)
   LARGE_INTEGER time;
@@ -50,28 +53,28 @@ XTime XTime::now()
   elapsedNanoseconds = (elapsedNanoseconds * SECOND_IN_NANO_SECONDS) / frequency.QuadPart;
   xAssert(elapsedNanoseconds < SECOND_IN_NANO_SECONDS);
 
-  return XTime(secs, elapsedNanoseconds);
+  return Time(secs, elapsedNanoseconds);
 #elif defined(X_ARCH_ARM)
   xAssertFail();
-  return XTime();
+  return Time();
 #else
   // find the current time from the system in floating point seconds
   struct timeval newTime;
   gettimeofday(&newTime, 0);
   xAssert(newTime.tv_usec < 1000000);
-  return XTime(newTime.tv_sec, 1000 * newTime.tv_usec);
+  return Time(newTime.tv_sec, 1000 * newTime.tv_usec);
 #endif
   }
 
-XTime::XTime() : _secs(0), _nanosecs(0)
+Time::Time() : _secs(0), _nanosecs(0)
   {
   }
 
-XTime::XTime(const XTime &t) : _secs(t._secs), _nanosecs(t._nanosecs)
+Time::Time(const Time &t) : _secs(t._secs), _nanosecs(t._nanosecs)
   {
   }
 
-XTime &XTime::operator+=(const XTime &t)
+Time &Time::operator+=(const Time &t)
   {
   _secs += t._secs;
   _nanosecs += t._nanosecs;
@@ -82,7 +85,7 @@ XTime &XTime::operator+=(const XTime &t)
   return *this;
   }
 
-XTime XTime::operator+(const XTime &t)
+Time Time::operator+(const Time &t)
   {
   xint64 s, n;
   s = _secs + t._secs;
@@ -91,10 +94,10 @@ XTime XTime::operator+(const XTime &t)
   s += n / SECOND_IN_NANO_SECONDS;
   n = n % SECOND_IN_NANO_SECONDS;
 
-  return XTime(s, n);
+  return Time(s, n);
   }
 
-XTime XTime::operator-(const XTime &t) const
+Time Time::operator-(const Time &t) const
   {
   xint64 secs = _secs - t._secs;
   xint64 nano = _nanosecs - t._nanosecs;
@@ -104,15 +107,15 @@ XTime XTime::operator-(const XTime &t) const
     nano += SECOND_IN_NANO_SECONDS;
     xAssert(nano > 0);
     }
-  return XTime(secs, nano);
+  return Time(secs, nano);
   }
 
-XTime XTime::operator/(double d) const
+Time Time::operator/(double d) const
   {
   return *this * (1.0/d);
   }
 
-XTime XTime::operator*(double d) const
+Time Time::operator*(double d) const
   {
   double secs = (double)_secs * d;
   double nanosecs = (double)_nanosecs * d;
@@ -120,10 +123,10 @@ XTime XTime::operator*(double d) const
   xint64 nanosecsInt = (xint64)(nanosecs + (secs * SECOND_IN_NANO_SECONDS));
   nanosecsInt = nanosecsInt % SECOND_IN_NANO_SECONDS;
 
-  return XTime(secs, nanosecsInt);
+  return Time(secs, nanosecsInt);
   }
 
-bool XTime::operator<(const XTime &t) const
+bool Time::operator<(const Time &t) const
   {
   if(_secs < t._secs)
     {
@@ -131,7 +134,7 @@ bool XTime::operator<(const XTime &t) const
     }
   return _nanosecs < t._nanosecs;
   }
-bool XTime::operator>(const XTime &t) const
+bool Time::operator>(const Time &t) const
   {
   if(_secs > t._secs)
     {
@@ -140,11 +143,11 @@ bool XTime::operator>(const XTime &t) const
   return _nanosecs > t._nanosecs;
   }
 
-XTimeStatistics::XTimeStatistics() : _count(0)
+TimeStatistics::TimeStatistics() : _count(0)
   {
   }
 
-void XTimeStatistics::append(XTime t)
+void TimeStatistics::append(Time t)
   {
   if(_count == 0)
     {
@@ -167,7 +170,7 @@ void XTimeStatistics::append(XTime t)
   ++_count;
   }
 
-void XTimeStatistics::append(const XTimeStatistics &o)
+void TimeStatistics::append(const TimeStatistics &o)
   {
   if(count() == 0)
     {
@@ -192,7 +195,9 @@ void XTimeStatistics::append(const XTimeStatistics &o)
     }
   }
 
-void XTimeStatistics::clear()
+void TimeStatistics::clear()
   {
   _count = 0;
   }
+
+}

@@ -6,6 +6,7 @@
 namespace Eks
 {
 
+class EventLogger;
 class AllocatorBase;
 class CodeLocation;
 template <typename K, typename V> class UnorderedMap;
@@ -20,6 +21,8 @@ public:
   static AllocatorBase *globalAllocator();
 
   static UnorderedMap<CodeLocation, bool> *disabledAsserts();
+
+  static EventLogger *eventLogger();
 
 private:
   struct Impl;

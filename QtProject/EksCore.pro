@@ -19,7 +19,6 @@ win32 {
 SOURCES += \
     ../src/XFileSequence.cpp \
     ../src/XTime.cpp \
-    ../src/XProfiler.cpp \
     ../src/XUnorderedMap.cpp \
     ../src/XEventLogger.cpp \
     ../src/XBucketAllocator.cpp \

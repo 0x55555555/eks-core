@@ -4,53 +4,58 @@
 #include "XProperty"
 #include "XGlobal"
 
-class EKSCORE_EXPORT XTime
+namespace Eks
+{
+
+class EKSCORE_EXPORT Time
   {
 public:
-  XTime();
-  XTime(const XTime &t);
-  static XTime now();
+  Time();
+  Time(const Time &t);
+  static Time now();
 
   double seconds() const { return (double)_secs + ((double)_nanosecs / 1000000000.0); }
   double milliseconds() const { return ((double)_secs * 1000.0) + ((double)_nanosecs / 1000000.0); }
   double microseconds() const { return ((double)_secs * 1000000.0) + ((double)_nanosecs / 1000.0); }
   double nanoseconds() const { return ((double)_secs * 1000000000.0) + (double)_nanosecs; }
 
-  XTime &operator+=(const XTime &t);
-  XTime operator+(const XTime &t);
+  Time &operator+=(const Time &t);
+  Time operator+(const Time &t);
 
-  XTime operator-(const XTime &t) const;
-  XTime operator/(double d) const;
-  XTime operator*(double d) const;
+  Time operator-(const Time &t) const;
+  Time operator/(double d) const;
+  Time operator*(double d) const;
 
-  bool operator<(const XTime &t) const;
-  bool operator>(const XTime &t) const;
+  bool operator<(const Time &t) const;
+  bool operator>(const Time &t) const;
 
-  static XTime fromMilliseconds(double ms);
+  static Time fromMilliseconds(double ms);
 
   static void beginAccurateTiming();
 
 private:
-  XTime(xint64, xint64);
+  Time(xint64, xint64);
   xint64 _secs;
   xint64 _nanosecs;
   };
 
-class EKSCORE_EXPORT XTimeStatistics
+class EKSCORE_EXPORT TimeStatistics
   {
 XProperties:
-  XRORefProperty(XTime, minimum);
-  XRORefProperty(XTime, maximum);
-  XRORefProperty(XTime, total);
+  XRORefProperty(Time, minimum);
+  XRORefProperty(Time, maximum);
+  XRORefProperty(Time, total);
   XRORefProperty(xsize, count);
 public:
-  XTimeStatistics();
+  TimeStatistics();
 
-  XTime average() const { if(count() == 0) { return XTime(); } return total() / (double)count(); }
+  Time average() const { if(count() == 0) { return Time(); } return total() / (double)count(); }
 
-  void append(XTime);
-  void append(const XTimeStatistics &);
+  void append(Time);
+  void append(const TimeStatistics &);
   void clear();
   };
+
+}
 
 #endif // XTIMER_H
