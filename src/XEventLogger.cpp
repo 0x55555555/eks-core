@@ -6,6 +6,70 @@
 
 namespace Eks
 {
+ThreadEventLogger::EventData::EventData()
+  {
+  _hasEmbeddedLocation = false;
+  _hasAllocatedLocation = false;
+  }
+
+ThreadEventLogger::EventData::EventData(const EventData &d)
+  : _hasEmbeddedLocation(d._hasEmbeddedLocation),
+    _hasAllocatedLocation(d._hasAllocatedLocation)
+  {
+  if(_hasEmbeddedLocation)
+    {
+    setLocation(d.location());
+    }
+  if(_hasAllocatedLocation)
+    {
+    setAllocatedLocation(d.allocatedLocation());
+    }
+  }
+
+void ThreadEventLogger::EventData::clear()
+  {
+  if(_hasEmbeddedLocation)
+    {
+    reinterpret_cast<CodeLocation*>(&_data)->~CodeLocation();
+    }
+  if(_hasAllocatedLocation)
+    {
+    const Location &l = allocatedLocation();
+    (void)l;
+    reinterpret_cast<Location*>(&_data)->~Location();
+    }
+  }
+
+ThreadEventLogger::EventData::~EventData()
+  {
+  clear();
+  }
+
+void ThreadEventLogger::EventData::setLocation(const CodeLocation &loc)
+  {
+  clear();
+  _hasEmbeddedLocation = true;
+  new(&_data) CodeLocation(loc);
+  }
+
+const CodeLocation &ThreadEventLogger::EventData::location() const
+  {
+  xAssert(_hasEmbeddedLocation);
+  return *reinterpret_cast<const CodeLocation*>(&_data);
+  }
+
+void ThreadEventLogger::EventData::setAllocatedLocation(const Location &loc)
+  {
+  clear();
+  _hasAllocatedLocation = true;
+  new(&_data) Location(loc);
+  }
+
+const ThreadEventLogger::EventData::Location &ThreadEventLogger::EventData::allocatedLocation() const
+  {
+  xAssert(_hasAllocatedLocation);
+  return *reinterpret_cast<const Location*>(&_data);
+  }
 
 ThreadEventLogger::ThreadEventLogger(QThread *t, Eks::AllocatorBase *alloc)
   {
@@ -29,7 +93,7 @@ ThreadEventLogger::EventID ThreadEventLogger::beginDurationEvent(const EventData
   EventItem *item = addAndLockItems();
 
   item->time = Time::now();
-  item->type = Begin;
+  item->type = EventType::Begin;
   item->data = *e;
   xsize id = item->id = _currentID++;
 
@@ -43,7 +107,7 @@ void ThreadEventLogger::endDurationEvent(EventID id)
   EventItem *item = addAndLockItems();
 
   item->time = Time::now();
-  item->type = End;
+  item->type = EventType::End;
   item->id = id;
 
   if(id == (_currentID - 1))
@@ -59,7 +123,7 @@ void ThreadEventLogger::momentEvent(const EventData *e)
   EventItem *item = addAndLockItems();
 
   item->time = Time::now();
-  item->type = Moment;
+  item->type = EventType::Moment;
   item->data = *e;
   item->id = _currentID++;
 
@@ -171,7 +235,9 @@ void EventLogger::syncCachedEvents()
 
 ScopedEvent::ScopedEvent(const CodeLocation &loc, const QString &dataStr)
   {
-  ThreadEventLogger::EventData data = { loc, dataStr };
+  ThreadEventLogger::EventData data;
+  data.setLocation(loc);
+  data.data = dataStr;
 
   _id = Core::eventLogger()->threadLogger()->beginDurationEvent(&data);
   }

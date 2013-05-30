@@ -5,6 +5,7 @@
 #include "XAssert"
 #include "XAllocatorBase"
 #include "XTypedAllocator"
+#include "XResourceDescription"
 #include <algorithm>
 
 namespace Eks
@@ -18,13 +19,13 @@ template <typename T, xsize Size, typename Alloc> class VectorStorage : public A
 public:
   VectorStorage(const Alloc& a)
       : Alloc(a),
-        _first(data),
-        _last(data+Size),
-        _end(data)
+        _first(reinterpret_cast<T*>(data)),
+        _last(_first+Size),
+        _end(_first)
     {
     }
 
-  bool isUsingEmbeddedStorage() const { return _first == data; }
+  bool isUsingEmbeddedStorage() const { return _first == reinterpret_cast<const T*>(data); }
 
   // the first member of the vector
   T *_first;
@@ -34,7 +35,7 @@ public:
   T *_end;
 
 private:
-  T data[Size];
+  typename ResourceDescriptionTypeHelper<T>::Storage data[Size];
   };
 
 template <typename T, typename Alloc> class VectorStorage<T, 0, Alloc> : public Alloc
@@ -625,7 +626,8 @@ xCompileTimeAssert(sizeof(Vector <int, 6, TypedAllocator<int> >)
 #include "QtCore/QTextStream"
 #include "QtCore/QDataStream"
 
-template <typename T> QTextStream &operator>>(QTextStream &str, Eks::Vector<T> &vec)
+template <typename T, xsize S, typename A>
+    QTextStream &operator>>(QTextStream &str, Eks::Vector<T, S, A> &vec)
   {
   xuint64 size = 0;
   str >> size;
@@ -638,7 +640,8 @@ template <typename T> QTextStream &operator>>(QTextStream &str, Eks::Vector<T> &
   return str;
   }
 
-template <typename T> QTextStream &operator<<(QTextStream &str, const Eks::Vector<T> &vec)
+template <typename T, xsize S, typename A>
+    QTextStream &operator<<(QTextStream &str, const Eks::Vector<T, S, A> &vec)
   {
   str << (xuint64)vec.length() << " ";
 
@@ -649,7 +652,8 @@ template <typename T> QTextStream &operator<<(QTextStream &str, const Eks::Vecto
   return str;
   }
 
-template <typename T> QDataStream &operator>>(QDataStream &str, Eks::Vector<T> &vec)
+template <typename T, xsize S, typename A>
+    QDataStream &operator>>(QDataStream &str, Eks::Vector<T, S, A> &vec)
   {
   xuint64 size = 0;
   str >> size;
@@ -664,7 +668,8 @@ template <typename T> QDataStream &operator>>(QDataStream &str, Eks::Vector<T> &
   return str;
   }
 
-template <typename T> QDataStream &operator<<(QDataStream &str, const Eks::Vector<T> &vec)
+template <typename T, xsize S, typename A>
+    QDataStream &operator<<(QDataStream &str, const Eks::Vector<T, S, A> &vec)
   {
   str << (xuint64)vec.length();
 

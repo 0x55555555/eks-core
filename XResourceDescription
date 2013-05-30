@@ -55,6 +55,7 @@ class ResourceDescription;
 
 template <typename T> struct ResourceDescriptionTypeHelper
   {
+  typedef typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type Storage;
   static ResourceDescription createFor();
   };
 

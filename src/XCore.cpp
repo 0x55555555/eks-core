@@ -1,6 +1,7 @@
 #include "XCore"
 #include "XGlobalAllocator"
 #include "XLoggingAllocator"
+#include "XTemporaryAllocator"
 #include "XUnorderedMap"
 #include "XProfiler"
 #include "XEventLogger"
@@ -11,7 +12,8 @@ namespace Eks
 struct Core::Impl
   {
   Impl()
-    : disabledAsserts(&alloc)
+    : disabledAsserts(&alloc),
+    temporaryAllocator(&alloc)
 #if X_EVENT_LOGGING_ENABLED
     , eventLogger(&alloc)
 #endif
@@ -24,6 +26,8 @@ struct Core::Impl
 #endif
 
   Eks::AllocatorBase *defaultLogger;
+
+  Eks::TemporaryAllocatorCore temporaryAllocator;
 
 #if X_ASSERTS_ENABLED
   UnorderedMap<CodeLocation, bool> disabledAsserts;
@@ -71,6 +75,12 @@ AllocatorBase *Core::globalAllocator()
 #else
   return &g_core->alloc;
 #endif
+  }
+
+TemporaryAllocatorCore *Core::temporaryAllocator()
+  {
+  xAssert(g_core);
+  return &g_core->temporaryAllocator;
   }
 
 UnorderedMap<CodeLocation, bool> *Core::disabledAsserts()

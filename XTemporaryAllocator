@@ -32,6 +32,7 @@ public:
   void releaseBlock(Block *);
 
 private:
+  X_DISABLE_COPY(TemporaryAllocatorCore)
 
   Block *createBlock(xsize expected);
 
@@ -50,6 +51,8 @@ public:
   void free(void *mem) X_OVERRIDE;
 
 private:
+  X_DISABLE_COPY(TemporaryAllocator)
+
   TemporaryAllocatorCore *_core;
 
   TemporaryAllocatorCore::Block *_current;

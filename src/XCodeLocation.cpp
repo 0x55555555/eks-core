@@ -17,6 +17,11 @@ CodeLocation::CodeLocation(const char *file, xsize line, const char *function)
   {
   }
 
+CodeLocation::CodeLocation(const CodeLocation &l)
+  : _file(l._file), _line(l._line), _function(l._function)
+  {
+  }
+
 String CodeLocation::toString() const
   {
   String out;

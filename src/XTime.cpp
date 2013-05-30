@@ -1,8 +1,8 @@
-#define builtIn
 #include "XTime"
 #include "QDebug"
 #include "XGlobal"
 #include "XAssert"
+#include "QDataStream"
 
 #if defined(Q_OS_WIN)
 # include <windows.h>
@@ -34,6 +34,12 @@ void Time::beginAccurateTiming()
   HANDLE h = GetCurrentProcess();
   SetProcessAffinityMask(h, 1);
 #endif
+  }
+
+void Time::set(xint64 seconds, xint64 nanosecs)
+  {
+  _secs = seconds;
+  _nanosecs = nanosecs;
   }
 
 #if defined(Q_OS_WIN) && !defined(X_ARCH_ARM)
@@ -198,6 +204,21 @@ void TimeStatistics::append(const TimeStatistics &o)
 void TimeStatistics::clear()
   {
   _count = 0;
+  }
+
+QDataStream &operator<<(QDataStream &str, const Time &l)
+  {
+  qint64 s, n;
+  l.get(s, n);
+  return str << s << n;
+  }
+
+QDataStream &operator>>(QDataStream &str, Time &l)
+  {
+  qint64 s, n;
+  str >> s >> n;
+  l.set(s, n);
+  return str;
   }
 
 }

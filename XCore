@@ -8,6 +8,7 @@ namespace Eks
 
 class EventLogger;
 class AllocatorBase;
+class TemporaryAllocatorCore;
 class CodeLocation;
 template <typename K, typename V> class UnorderedMap;
 
@@ -19,6 +20,7 @@ public:
 
   static AllocatorBase *defaultAllocator();
   static AllocatorBase *globalAllocator();
+  static TemporaryAllocatorCore *temporaryAllocator();
 
   static UnorderedMap<CodeLocation, bool> *disabledAsserts();
 

@@ -33,6 +33,9 @@ public:
 
   static void beginAccurateTiming();
 
+  void set(xint64 seconds, xint64 nanosecs);
+  void get(xint64 &seconds, xint64 &nanosecs) const { seconds = _secs; nanosecs = _nanosecs; }
+
 private:
   Time(xint64, xint64);
   xint64 _secs;
@@ -55,6 +58,13 @@ public:
   void append(const TimeStatistics &);
   void clear();
   };
+
+#if X_QT_INTEROP
+
+EKSCORE_EXPORT QDataStream &operator<<(QDataStream &s, const Time &l);
+EKSCORE_EXPORT QDataStream &operator>>(QDataStream &s, Time &l);
+
+#endif
 
 }
 
