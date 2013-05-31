@@ -41,6 +41,7 @@ public:
     const Location &allocatedLocation() const;
 
     bool hasEmbeddedLocation() const { return _hasEmbeddedLocation; }
+    bool hasAllocatedLocation() const { return _hasAllocatedLocation; }
 
     QString data;
 
