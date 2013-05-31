@@ -3,6 +3,7 @@
 
 #include "XProperty"
 #include "XGlobal"
+#include "QMetaType"
 
 namespace Eks
 {
@@ -60,6 +61,8 @@ public:
   };
 
 #if X_QT_INTEROP
+
+Q_DECLARE_METATYPE(Time)
 
 EKSCORE_EXPORT QDataStream &operator<<(QDataStream &s, const Time &l);
 EKSCORE_EXPORT QDataStream &operator>>(QDataStream &s, Time &l);
