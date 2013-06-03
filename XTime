@@ -3,7 +3,7 @@
 
 #include "XProperty"
 #include "XGlobal"
-#include "QMetaType"
+#include "QtCore/QMetaType"
 
 namespace Eks
 {

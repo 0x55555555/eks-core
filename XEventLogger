@@ -17,6 +17,7 @@ class EKSCORE_EXPORT ThreadEventLogger
   {
 XProperties:
   XROProperty(QThread *, thread);
+  XProperty(ThreadEventLogger *, next, setNext);
 
 public:
   class EKSCORE_EXPORT EventData
@@ -81,16 +82,9 @@ public:
 
   EventVector *swapEventVector(EventVector *vec);
 
-  void *operator new(size_t, void *w) { return w; }
-  void operator delete(void *ptr, void *)
-    {
-    static_cast<ThreadEventLogger*>(ptr)->~ThreadEventLogger();
-    }
-  void operator delete(void* ptr)
-    {
-    auto p = static_cast<ThreadEventLogger*>(ptr);
-    p->_allocator->destroy(ptr);
-    }
+  void *operator new(size_t, void *w);
+  void operator delete(void *ptr, void *);
+  void operator delete(void* ptr);
 
 private:
   EventItem *addAndLockItems();
@@ -122,6 +116,8 @@ public:
 
   void syncCachedEvents();
 
+  Eks::AllocatorBase *deleteThread(ThreadEventLogger *t);
+
 private:
   class Impl;
   Eks::UniquePointer<Impl> _impl;
@@ -148,6 +144,8 @@ private:
 # define X_EVENT_BLOCK(data)
 
 #endif
+
+Q_DECLARE_METATYPE(ThreadEventLogger::EventData::Location)
 
 }
 
