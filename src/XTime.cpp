@@ -138,7 +138,12 @@ bool Time::operator<(const Time &t) const
     {
     return true;
     }
-  return _nanosecs < t._nanosecs;
+  else if(_secs == t._secs)
+    {
+    return _nanosecs < t._nanosecs;
+    }
+
+  return false;
   }
 bool Time::operator>(const Time &t) const
   {
