@@ -54,7 +54,7 @@ bool Assert::defaultFire(const Assert &a)
      || !QCoreApplication::instance()
      || !dynamic_cast<QApplication*>(QCoreApplication::instance())
 #endif
-     )
+       )
     {
     // crap. just break
     return true;

@@ -150,7 +150,6 @@ void ThreadEventLogger::momentEvent(const EventData *e)
 ThreadEventLogger::EventVector *ThreadEventLogger::swapEventVector(EventVector *vec)
   {
   auto i = _events.exchange(vec);
-  xAssert(i);
   return i;
   }
 
@@ -170,6 +169,7 @@ void ThreadEventLogger::unlockItems()
   // below if syncing we swap the vector out
   // and put it back if zero.
   while(_events.exchange(_lockedEvents)) ;
+  _lockedEvents = 0;
   }
 
 class EventLogger::Impl
@@ -232,18 +232,19 @@ void EventLogger::syncCachedEvents()
   auto w = _impl->_lastLogger;
   while(w)
     {
-    xAssert(_impl->_eventSwap);
-    xAssert(_impl->_eventSwap->size() == 0);
+    auto &currentEvents = _impl->_eventSwap;
+    xAssert(currentEvents);
+    xAssert(currentEvents->size() == 0);
     
-    xAssert(_impl->_eventSwap);
-    auto vec = w->swapEventVector(_impl->_eventSwap);
-    _impl->_eventSwap = vec;
+    auto vec = w->swapEventVector(currentEvents);
+    currentEvents = vec;
 
     // if there is no vector, its locked for writing, continue.
     if(!vec)
       {
-      auto vec = w->swapEventVector(_impl->_eventSwap);
-      _impl->_eventSwap = vec;
+      auto vec = w->swapEventVector(currentEvents);
+      currentEvents = vec;
+      vec->clear();
       continue;
       }
 

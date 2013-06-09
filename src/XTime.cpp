@@ -24,7 +24,6 @@ Time Time::fromMilliseconds(double ms)
   xint64 seconds = ms / 1000.0;
   xint64 nanoseconds = ms * 1000000.0;
   nanoseconds -= seconds * SECOND_IN_NANO_SECONDS;
-  xAssert(nanoseconds > 0);
   return Time(seconds, nanoseconds);
   }
 

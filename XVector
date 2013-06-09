@@ -236,7 +236,7 @@ public:
 
     T *newData = ThisBase::allocate(newBestCapacity, AlignmentOf<T>::Alignment);
 
-    move(newData, newData+s, ThisBase::_first);
+    moveConstruct(newData, newData+s, ThisBase::_first);
 
     // destroy the old data
     for(size_type i = 0; i < s; ++i)
@@ -600,6 +600,16 @@ public:
         }
       }
     }
+private:
+  template <typename X>
+      void moveConstruct(const iterator &begin, const iterator &end, X from)
+    {
+    for(iterator it = begin; it != end; ++it, ++from)
+      {
+      new(&(*it)) T(std::move(*from));
+      }
+    }
+
   };
 
 namespace detail
