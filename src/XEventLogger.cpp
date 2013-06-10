@@ -76,7 +76,6 @@ ThreadEventLogger::ThreadEventLogger(QThread *t, Eks::AllocatorBase *alloc)
   _thread = t;
   _allocator = alloc;
   _currentID = 0;
-  _lockedEvents = 0;
 
   _events = _allocator->create<EventVector>(_allocator);
   }
@@ -107,44 +106,26 @@ void ThreadEventLogger::operator delete(void* ptr)
 ThreadEventLogger::EventID ThreadEventLogger::beginDurationEvent(const EventData *e)
   {
   xAssert(_currentID < X_SIZE_SENTINEL);
-  EventItem *item = addAndLockItems();
 
-  item->time = Time::now();
-  item->type = EventType::Begin;
-  item->data = *e;
-  xsize id = item->id = _currentID++;
-
-  unlockItems();
+  xsize id = _currentID++;
+  addItem(EventType::Begin, e, id);
 
   return id;
   }
 
 void ThreadEventLogger::endDurationEvent(EventID id)
   {
-  EventItem *item = addAndLockItems();
-
-  item->time = Time::now();
-  item->type = EventType::End;
-  item->id = id;
+  addItem(EventType::End, 0, id);
 
   if(id == (_currentID - 1))
     {
     --_currentID;
     }
-
-  unlockItems();
   }
 
 void ThreadEventLogger::momentEvent(const EventData *e)
   {
-  EventItem *item = addAndLockItems();
-
-  item->time = Time::now();
-  item->type = EventType::Moment;
-  item->data = *e;
-  item->id = _currentID++;
-
-  unlockItems();
+  addItem(EventType::Moment, e, X_SIZE_SENTINEL);
   }
 
 ThreadEventLogger::EventVector *ThreadEventLogger::swapEventVector(EventVector *vec)
@@ -153,23 +134,30 @@ ThreadEventLogger::EventVector *ThreadEventLogger::swapEventVector(EventVector *
   return i;
   }
 
-ThreadEventLogger::EventItem *ThreadEventLogger::addAndLockItems()
+void ThreadEventLogger::addItem(EventType type, const EventData *d, xsize id)
   {
-  _lockedEvents = _events.exchange(0);
+  auto locked = _events.exchange(0);
+  // at this point _events may be written over,
+  // we must ignore any value in there until we put back our value.
 
-  xAssert(_lockedEvents);
-  _lockedEvents->resize(_lockedEvents->size() + 1);
+  xAssert(locked);
 
-  return &_lockedEvents->back();
-  }
+  locked->resize(locked->size() + 1);
 
-void ThreadEventLogger::unlockItems()
-  {
+  auto &item = locked->back();
+  item.time = Time::now();
+  item.type = type;
+  item.id = id;
+
+  if(d)
+    {
+    item.data = *d;
+    }
+
   // spin to ensure we set correctly,
   // below if syncing we swap the vector out
   // and put it back if zero.
-  while(_events.exchange(_lockedEvents)) ;
-  _lockedEvents = 0;
+  while(_events.exchange(locked)) ;
   }
 
 class EventLogger::Impl
@@ -229,24 +217,28 @@ void EventLogger::syncCachedEvents()
   {
   while (_impl->_loggerLock.test_and_set(std::memory_order_acquire)) ; // spin
 
+  xAssert(_impl->_eventSwap->isEmpty());
+
   auto w = _impl->_lastLogger;
   while(w)
     {
-    auto &currentEvents = _impl->_eventSwap;
+    ThreadEventLogger::EventVector *currentEvents = _impl->_eventSwap;
     xAssert(currentEvents);
-    xAssert(currentEvents->size() == 0);
+    xAssert(currentEvents->isEmpty());
     
     auto vec = w->swapEventVector(currentEvents);
-    currentEvents = vec;
 
-    // if there is no vector, its locked for writing, continue.
+    // if there is no vector, its locked for writing, continue,
+    // assume our vector is cleared in a sec, dont write over the memory,
+    // as it may already be cleared.
     if(!vec)
       {
-      auto vec = w->swapEventVector(currentEvents);
-      currentEvents = vec;
-      vec->clear();
+      xAssert(currentEvents->isEmpty());
       continue;
       }
+
+    xAssert(vec != _impl->_eventSwap);
+    _impl->_eventSwap = vec;
 
     if(_impl->_watcher && vec->size())
       {

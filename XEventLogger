@@ -87,13 +87,11 @@ public:
   void operator delete(void* ptr);
 
 private:
-  EventItem *addAndLockItems();
-  void unlockItems();
+  void addItem(EventType type, const EventData *d, xsize id);
 
   Eks::AllocatorBase *_allocator;
   EventID _currentID;
   std::atomic<EventVector *> _events;
-  EventVector *_lockedEvents;
   };
 
 class EKSCORE_EXPORT EventLogger
