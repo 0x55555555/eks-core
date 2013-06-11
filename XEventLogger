@@ -26,6 +26,7 @@ public:
     EventData();
     EventData(const EventData&);
     ~EventData();
+    EventData &operator=(const EventData&);
 
     struct Location
       {
@@ -41,8 +42,8 @@ public:
     void setAllocatedLocation(const Location &loc);
     const Location &allocatedLocation() const;
 
-    bool hasEmbeddedLocation() const { return _hasEmbeddedLocation; }
-    bool hasAllocatedLocation() const { return _hasAllocatedLocation; }
+    bool hasEmbeddedLocation() const;
+    bool hasAllocatedLocation() const;
 
     QString data;
 
@@ -92,6 +93,8 @@ private:
   Eks::AllocatorBase *_allocator;
   EventID _currentID;
   std::atomic<EventVector *> _events;
+  EventVector *_myEventsData;
+  EventVector *_lockedData;
   };
 
 class EKSCORE_EXPORT EventLogger

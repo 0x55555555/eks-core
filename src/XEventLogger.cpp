@@ -26,6 +26,19 @@ ThreadEventLogger::EventData::EventData(const EventData &d)
     }
   }
 
+ThreadEventLogger::EventData &ThreadEventLogger::EventData::operator=(const EventData &d)
+  {
+  if(d._hasEmbeddedLocation)
+    {
+    setLocation(d.location());
+    }
+  if(d._hasAllocatedLocation)
+    {
+    setAllocatedLocation(d.allocatedLocation());
+    }
+  return *this;
+  }
+
 void ThreadEventLogger::EventData::clear()
   {
   if(_hasEmbeddedLocation)
@@ -71,6 +84,18 @@ const ThreadEventLogger::EventData::Location &ThreadEventLogger::EventData::allo
   return *reinterpret_cast<const Location*>(&_data);
   }
 
+bool ThreadEventLogger::EventData::hasEmbeddedLocation() const
+  {
+  xAssert(!_hasAllocatedLocation || !_hasEmbeddedLocation);
+  return _hasEmbeddedLocation;
+  }
+
+bool ThreadEventLogger::EventData::hasAllocatedLocation() const
+  {
+  xAssert(!_hasAllocatedLocation || !_hasEmbeddedLocation);
+  return _hasAllocatedLocation;
+  }
+
 ThreadEventLogger::ThreadEventLogger(QThread *t, Eks::AllocatorBase *alloc)
   {
   _thread = t;
@@ -78,6 +103,9 @@ ThreadEventLogger::ThreadEventLogger(QThread *t, Eks::AllocatorBase *alloc)
   _currentID = 0;
 
   _events = _allocator->create<EventVector>(_allocator);
+
+  _myEventsData = _events;
+  _lockedData = 0;
   }
 
 ThreadEventLogger::~ThreadEventLogger()
@@ -131,12 +159,15 @@ void ThreadEventLogger::momentEvent(const EventData *e)
 ThreadEventLogger::EventVector *ThreadEventLogger::swapEventVector(EventVector *vec)
   {
   auto i = _events.exchange(vec);
+  _myEventsData = i;
   return i;
   }
 
 void ThreadEventLogger::addItem(EventType type, const EventData *d, xsize id)
   {
   auto locked = _events.exchange(0);
+  _myEventsData = 0;
+  _lockedData = locked;
   // at this point _events may be written over,
   // we must ignore any value in there until we put back our value.
 
@@ -157,7 +188,9 @@ void ThreadEventLogger::addItem(EventType type, const EventData *d, xsize id)
   // spin to ensure we set correctly,
   // below if syncing we swap the vector out
   // and put it back if zero.
-  while(_events.exchange(locked)) ;
+  _events.exchange(locked);
+  _myEventsData = locked;
+  _lockedData = 0;
   }
 
 class EventLogger::Impl
@@ -237,7 +270,7 @@ void EventLogger::syncCachedEvents()
       continue;
       }
 
-    xAssert(vec != _impl->_eventSwap);
+    xAssert(vec != _impl->_eventSwap || vec->size() == 0);
     _impl->_eventSwap = vec;
 
     if(_impl->_watcher && vec->size())
