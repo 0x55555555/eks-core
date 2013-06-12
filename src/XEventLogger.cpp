@@ -6,94 +6,11 @@
 
 namespace Eks
 {
-ThreadEventLogger::EventData::EventData()
-  {
-  _hasEmbeddedLocation = false;
-  _hasAllocatedLocation = false;
-  }
 
-ThreadEventLogger::EventData::EventData(const EventData &d)
-  : _hasEmbeddedLocation(d._hasEmbeddedLocation),
-    _hasAllocatedLocation(d._hasAllocatedLocation)
+EventLocation::EventLocation(const CodeLocation &l, const QString &data)
   {
-  if(_hasEmbeddedLocation)
-    {
-    setLocation(d.location());
-    }
-  if(_hasAllocatedLocation)
-    {
-    setAllocatedLocation(d.allocatedLocation());
-    }
-  }
-
-ThreadEventLogger::EventData &ThreadEventLogger::EventData::operator=(const EventData &d)
-  {
-  if(d._hasEmbeddedLocation)
-    {
-    setLocation(d.location());
-    }
-  if(d._hasAllocatedLocation)
-    {
-    setAllocatedLocation(d.allocatedLocation());
-    }
-  return *this;
-  }
-
-void ThreadEventLogger::EventData::clear()
-  {
-  if(_hasEmbeddedLocation)
-    {
-    reinterpret_cast<CodeLocation*>(&_data)->~CodeLocation();
-    }
-  if(_hasAllocatedLocation)
-    {
-    const Location &l = allocatedLocation();
-    (void)l;
-    reinterpret_cast<Location*>(&_data)->~Location();
-    }
-  }
-
-ThreadEventLogger::EventData::~EventData()
-  {
-  clear();
-  }
-
-void ThreadEventLogger::EventData::setLocation(const CodeLocation &loc)
-  {
-  clear();
-  _hasEmbeddedLocation = true;
-  new(&_data) CodeLocation(loc);
-  }
-
-const CodeLocation &ThreadEventLogger::EventData::location() const
-  {
-  xAssert(_hasEmbeddedLocation);
-  return *reinterpret_cast<const CodeLocation*>(&_data);
-  }
-
-void ThreadEventLogger::EventData::setAllocatedLocation(const Location &loc)
-  {
-  clear();
-  _hasAllocatedLocation = true;
-  new(&_data) Location(loc);
-  }
-
-const ThreadEventLogger::EventData::Location &ThreadEventLogger::EventData::allocatedLocation() const
-  {
-  xAssert(_hasAllocatedLocation);
-  return *reinterpret_cast<const Location*>(&_data);
-  }
-
-bool ThreadEventLogger::EventData::hasEmbeddedLocation() const
-  {
-  xAssert(!_hasAllocatedLocation || !_hasEmbeddedLocation);
-  return _hasEmbeddedLocation;
-  }
-
-bool ThreadEventLogger::EventData::hasAllocatedLocation() const
-  {
-  xAssert(!_hasAllocatedLocation || !_hasEmbeddedLocation);
-  return _hasAllocatedLocation;
+  xAssert(Core::eventLogger())
+  _id = Core::eventLogger()->createLocation(l, data);
   }
 
 ThreadEventLogger::ThreadEventLogger(QThread *t, Eks::AllocatorBase *alloc)
@@ -129,19 +46,19 @@ void ThreadEventLogger::operator delete(void* ptr)
   a->free(ptr);
   }
 
-ThreadEventLogger::EventID ThreadEventLogger::beginDurationEvent(const EventData *e)
+ThreadEventLogger::EventID ThreadEventLogger::beginDurationEvent(const EventLocation::ID location)
   {
   xAssert(_currentID < X_SIZE_SENTINEL);
 
   xsize id = _currentID++;
-  addItem(EventType::Begin, e, id);
+  addItem(EventType::Begin, location, id);
 
   return id;
   }
 
 void ThreadEventLogger::endDurationEvent(EventID id)
   {
-  addItem(EventType::End, 0, id);
+  addItem(EventType::End, X_SIZE_SENTINEL, id);
 
   if(id == (_currentID - 1))
     {
@@ -149,9 +66,9 @@ void ThreadEventLogger::endDurationEvent(EventID id)
     }
   }
 
-void ThreadEventLogger::momentEvent(const EventData *e)
+void ThreadEventLogger::momentEvent(const EventLocation::ID loc)
   {
-  addItem(EventType::Moment, e, X_SIZE_SENTINEL);
+  addItem(EventType::Moment, loc, X_SIZE_SENTINEL);
   }
 
 ThreadEventLogger::EventVector *ThreadEventLogger::swapEventVector(EventVector *vec)
@@ -171,7 +88,7 @@ void ThreadEventLogger::setAvailableEvents(EventVector *e)
   _availableEvents = e;
   }
 
-void ThreadEventLogger::addItem(EventType type, const EventData *d, xsize id)
+void ThreadEventLogger::addItem(EventType type, const EventLocation::ID d, xsize id)
   {
   auto locked = _events.exchange(0);
   // at this point _events may be written over,
@@ -185,11 +102,7 @@ void ThreadEventLogger::addItem(EventType type, const EventData *d, xsize id)
   item.time = Time::now();
   item.type = type;
   item.id = id;
-
-  if(d)
-    {
-    item.data = *d;
-    }
+  item.location = d;
 
   // spin to ensure we set correctly,
   // below if syncing we swap the vector out
@@ -243,6 +156,16 @@ void EventLogger::setEventWatcher(Watcher *w)
   {
   xAssert(!_impl->_watcher || !w);
   _impl->_watcher = w;
+  }
+
+xsize EventLogger::createLocation(const CodeLocation &l, const QString &data)
+  {
+  if(!_impl->_watcher)
+    {
+    return X_SIZE_SENTINEL;
+    }
+
+  return _impl->_watcher->onCreateLocation(l, data);
   }
 
 void EventLogger::syncCachedEvents()
@@ -306,13 +229,10 @@ Eks::AllocatorBase *EventLogger::deleteThread(ThreadEventLogger *t)
 
 #if X_EVENT_LOGGING_ENABLED
 
-ScopedEvent::ScopedEvent(const CodeLocation &loc, const QString &dataStr)
+ScopedEvent::ScopedEvent(const EventLocation *loc)
   {
-  ThreadEventLogger::EventData data;
-  data.setLocation(loc);
-  data.data = dataStr;
-
-  _id = Core::eventLogger()->threadLogger()->beginDurationEvent(&data);
+  auto locationId = loc->id();
+  _id = Core::eventLogger()->threadLogger()->beginDurationEvent(locationId);
   }
 
 ScopedEvent::~ScopedEvent()

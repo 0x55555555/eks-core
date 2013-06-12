@@ -13,6 +13,18 @@ namespace Eks
 
 class AllocatorBase;
 
+class EKSCORE_EXPORT EventLocation
+  {
+public:
+  typedef xsize ID;
+
+XProperties:
+  XROProperty(ID, id);
+
+public:
+  EventLocation(const CodeLocation &l, const QString &data = QString());
+  };
+
 class EKSCORE_EXPORT ThreadEventLogger
   {
 XProperties:
@@ -20,41 +32,6 @@ XProperties:
   XProperty(ThreadEventLogger *, next, setNext);
 
 public:
-  class EKSCORE_EXPORT EventData
-    {
-  public:
-    EventData();
-    EventData(const EventData&);
-    ~EventData();
-    EventData &operator=(const EventData&);
-
-    struct Location
-      {
-      QString file;
-      xsize line;
-      QString function;
-      };
-    xCompileTimeAssert(sizeof(Location) == sizeof(CodeLocation));
-
-    void setLocation(const CodeLocation &loc);
-    const CodeLocation &location() const;
-
-    void setAllocatedLocation(const Location &loc);
-    const Location &allocatedLocation() const;
-
-    bool hasEmbeddedLocation() const;
-    bool hasAllocatedLocation() const;
-
-    QString data;
-
-  private:
-    void clear();
-
-    ResourceDescriptionTypeHelper<CodeLocation>::Storage _data;
-
-    bool _hasEmbeddedLocation;
-    bool _hasAllocatedLocation;
-    };
 
   enum class EventType : xuint8
     {
@@ -68,7 +45,7 @@ public:
     {
     Eks::Time time;
     EventType type;
-    EventData data;
+    EventLocation::ID location;
     EventID id;
     };
   typedef Eks::Vector<EventItem, 1024> EventVector;
@@ -76,10 +53,10 @@ public:
   ThreadEventLogger(QThread *thread, Eks::AllocatorBase *allocator);
   ~ThreadEventLogger();
 
-  EventID beginDurationEvent(const EventData *);
+  EventID beginDurationEvent(const EventLocation::ID location);
   void endDurationEvent(EventID id);
 
-  void momentEvent(const EventData *);
+  void momentEvent(const EventLocation::ID location);
 
   EventVector *swapEventVector(EventVector *vec);
 
@@ -91,7 +68,7 @@ public:
   void operator delete(void* ptr);
 
 private:
-  void addItem(EventType type, const EventData *d, xsize id);
+  void addItem(EventType type, const EventLocation::ID d, xsize id);
 
   Eks::AllocatorBase *_allocator;
   EventID _currentID;
@@ -111,12 +88,16 @@ public:
 
   ThreadEventLogger *threadLogger();
 
+  xsize createLocation(const CodeLocation &l, const QString &data);
+
   class Watcher
     {
   public:
     virtual void onEvents(
         const QThread *thread,
         const ThreadEventLogger::EventVector &) = 0;
+
+    virtual xsize onCreateLocation(const CodeLocation &l, const QString &data) = 0;
     };
 
   void setEventWatcher(Watcher *w);
@@ -135,15 +116,18 @@ private:
 class EKSCORE_EXPORT ScopedEvent
   {
 public:
-  ScopedEvent(const CodeLocation &loc, const QString& data=QString());
+  ScopedEvent(const EventLocation *);
   ~ScopedEvent();
 
 private:
   ThreadEventLogger::EventID _id;
   };
 
-# define X_EVENT_FUNCTION Eks::ScopedEvent _EVENT_##__LINE__(X_CURRENT_CODE_LOCATION)
-# define X_EVENT_BLOCK(data) Eks::ScopedEvent _EVENT_##__LINE__(X_CURRENT_CODE_LOCATION, data)
+# define X_EVENT_FUNCTION \
+  static Eks::EventLocation __loc##__LINE__(X_CURRENT_CODE_LOCATION); Eks::ScopedEvent _EVENT_##__LINE__(&__loc##__LINE__)
+
+# define X_EVENT_BLOCK(data) \
+  static Eks::EventLocation __loc##__LINE__(X_CURRENT_CODE_LOCATION, data); Eks::ScopedEvent _EVENT_##__LINE__(&__loc##__LINE__)
 
 #else
 
@@ -152,7 +136,7 @@ private:
 
 #endif
 
-Q_DECLARE_METATYPE(ThreadEventLogger::EventData::Location)
+Q_DECLARE_METATYPE(EventLocation*)
 
 }
 
