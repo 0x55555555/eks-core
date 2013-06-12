@@ -71,7 +71,7 @@ public:
     EventData data;
     EventID id;
     };
-  typedef Eks::Vector<EventItem, 64> EventVector;
+  typedef Eks::Vector<EventItem, 1024> EventVector;
 
   ThreadEventLogger(QThread *thread, Eks::AllocatorBase *allocator);
   ~ThreadEventLogger();
@@ -83,6 +83,9 @@ public:
 
   EventVector *swapEventVector(EventVector *vec);
 
+  EventVector *getAvailableEvents();
+  void setAvailableEvents(EventVector *);
+
   void *operator new(size_t, void *w);
   void operator delete(void *ptr, void *);
   void operator delete(void* ptr);
@@ -92,9 +95,12 @@ private:
 
   Eks::AllocatorBase *_allocator;
   EventID _currentID;
+
   std::atomic<EventVector *> _events;
-  EventVector *_myEventsData;
-  EventVector *_lockedData;
+  EventVector * _availableEvents;
+
+  EventVector _primaryVector;
+  EventVector _secondaryVector;
   };
 
 class EKSCORE_EXPORT EventLogger
