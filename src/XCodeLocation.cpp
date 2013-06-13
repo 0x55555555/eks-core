@@ -12,7 +12,7 @@
 namespace Eks
 {
 
-CodeLocation::CodeLocation(const char *file, xsize line, const char *function)
+CodeLocation::CodeLocation(const char *file, xuint32 line, const char *function)
     : _file(file), _line(line), _function(function)
   {
   }

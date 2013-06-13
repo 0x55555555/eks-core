@@ -7,10 +7,10 @@
 namespace Eks
 {
 
-EventLocation::EventLocation(const CodeLocation &l, const QString &data)
+EventLocation::EventLocation(const CodeLocation &l, const char *data)
   {
-  xAssert(Core::eventLogger())
-  _id = Core::eventLogger()->createLocation(l, data);
+  xAssert(Core::eventLogger());
+  Core::eventLogger()->createLocation(this, l, data);
   }
 
 ThreadEventLogger::ThreadEventLogger(QThread *t, Eks::AllocatorBase *alloc)
@@ -58,7 +58,7 @@ ThreadEventLogger::EventID ThreadEventLogger::beginDurationEvent(const EventLoca
 
 void ThreadEventLogger::endDurationEvent(EventID id)
   {
-  addItem(EventType::End, X_SIZE_SENTINEL, id);
+  addItem(EventType::End, X_UINT32_SENTINEL, id);
 
   if(id == (_currentID - 1))
     {
@@ -117,6 +117,10 @@ public:
   EventLogger::Watcher *_watcher;
   QThreadStorage<ThreadEventLogger*> _logger;
 
+  std::atomic_flag _locationLock;
+  EventLogger::EventLocationVector _locations;
+  EventLocation::ID _locationID;
+
   std::atomic_flag _loggerLock;
   ThreadEventLogger *_lastLogger;
   };
@@ -127,6 +131,8 @@ EventLogger::EventLogger(Eks::AllocatorBase *allocator)
   _impl->_allocator = allocator;
   _impl->_lastLogger = 0;
   _impl->_loggerLock.clear();
+
+  _impl->_locationID = 0;
 
   _impl->_watcher = 0;
   }
@@ -158,18 +164,32 @@ void EventLogger::setEventWatcher(Watcher *w)
   _impl->_watcher = w;
   }
 
-xsize EventLogger::createLocation(const CodeLocation &l, const QString &data)
+void EventLogger::createLocation(EventLocation *loc, const CodeLocation &locData, const char *data)
   {
-  if(!_impl->_watcher)
-    {
-    return X_SIZE_SENTINEL;
-    }
+  while (_impl->_locationLock.test_and_set(std::memory_order_acquire)) ; // spin
+  loc->setId(_impl->_locationID++);
 
-  return _impl->_watcher->onCreateLocation(l, data);
+  LocationReference ref = { loc->id(), locData.file(), locData.line(), locData.function(), data };
+
+  _impl->_locations << ref;
+  _impl->_locationLock.clear(std::memory_order_release);
   }
 
 void EventLogger::syncCachedEvents()
   {
+  if(_impl->_watcher)
+    {
+    while (_impl->_locationLock.test_and_set(std::memory_order_acquire)) ; // spin
+
+    if(_impl->_locations.size())
+      {
+      _impl->_watcher->onLocations(_impl->_locations);
+      _impl->_locations.clear();
+      }
+
+    _impl->_locationLock.clear(std::memory_order_release);
+    }
+
   while (_impl->_loggerLock.test_and_set(std::memory_order_acquire)) ; // spin
 
   auto w = _impl->_lastLogger;

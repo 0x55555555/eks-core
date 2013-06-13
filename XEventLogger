@@ -16,13 +16,13 @@ class AllocatorBase;
 class EKSCORE_EXPORT EventLocation
   {
 public:
-  typedef xsize ID;
+  typedef xuint32 ID;
 
 XProperties:
-  XROProperty(ID, id);
+  XProperty(ID, id, setId);
 
 public:
-  EventLocation(const CodeLocation &l, const QString &data = QString());
+  EventLocation(const CodeLocation &l, const char *data = "");
   };
 
 class EKSCORE_EXPORT ThreadEventLogger
@@ -88,7 +88,18 @@ public:
 
   ThreadEventLogger *threadLogger();
 
-  xsize createLocation(const CodeLocation &l, const QString &data);
+  void createLocation(EventLocation *, const CodeLocation &loc, const char *data);
+
+  struct LocationReference
+    {
+    EventLocation::ID id;
+    const char *file;
+    xuint32 line;
+    const char *function;
+    const char *data;
+    };
+
+  typedef Eks::Vector<LocationReference, 1024> EventLocationVector;
 
   class Watcher
     {
@@ -97,7 +108,7 @@ public:
         const QThread *thread,
         const ThreadEventLogger::EventVector &) = 0;
 
-    virtual Eks::EventLocation::ID onCreateLocation(const CodeLocation &l, const QString &data) = 0;
+    virtual void onLocations(const EventLocationVector &) = 0;
     };
 
   void setEventWatcher(Watcher *w);
@@ -124,10 +135,10 @@ private:
   };
 
 # define X_EVENT_FUNCTION \
-  static Eks::EventLocation __loc##__LINE__(X_CURRENT_CODE_LOCATION); Eks::ScopedEvent _EVENT_##__LINE__(&__loc##__LINE__)
+  static const Eks::EventLocation __loc##__LINE__(X_CURRENT_CODE_LOCATION); Eks::ScopedEvent _EVENT_##__LINE__(&__loc##__LINE__)
 
 # define X_EVENT_BLOCK(data) \
-  static Eks::EventLocation __loc##__LINE__(X_CURRENT_CODE_LOCATION, data); Eks::ScopedEvent _EVENT_##__LINE__(&__loc##__LINE__)
+  static const Eks::EventLocation __loc##__LINE__(X_CURRENT_CODE_LOCATION, data); Eks::ScopedEvent _EVENT_##__LINE__(&__loc##__LINE__)
 
 #else
 
