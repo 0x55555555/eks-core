@@ -97,7 +97,7 @@ public:
         const QThread *thread,
         const ThreadEventLogger::EventVector &) = 0;
 
-    virtual xsize onCreateLocation(const CodeLocation &l, const QString &data) = 0;
+    virtual Eks::EventLocation::ID onCreateLocation(const CodeLocation &l, const QString &data) = 0;
     };
 
   void setEventWatcher(Watcher *w);
@@ -135,8 +135,6 @@ private:
 # define X_EVENT_BLOCK(data)
 
 #endif
-
-Q_DECLARE_METATYPE(EventLocation*)
 
 }
 
