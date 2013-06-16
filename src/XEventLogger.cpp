@@ -131,6 +131,7 @@ EventLogger::EventLogger(Eks::AllocatorBase *allocator)
   _impl->_allocator = allocator;
   _impl->_lastLogger = 0;
   _impl->_loggerLock.clear();
+  _impl->_locationLock.clear();
 
   _impl->_locationID = 0;
 
