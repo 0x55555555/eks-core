@@ -439,7 +439,7 @@ public:
     ThisBase::_end++;
     }
 
-  void pushBack(const T &&t)
+  void pushBack(T &&t)
     {
     const size_type s = size();
     if(s == capacity())

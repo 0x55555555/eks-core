@@ -28,7 +28,7 @@ public:
     return new(mem) T();
     }
 
-  template <typename T, typename A> T *create(A a)
+  template <typename T, typename A> T *create(const A &a)
     {
     void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
     return new(mem) T(a);
@@ -36,7 +36,7 @@ public:
 
   template <typename T,
             typename A,
-            typename B> T *create(A a, B b)
+            typename B> T *create(const A &a, const B &b)
     {
     void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
     return new(mem) T(a, b);
@@ -45,7 +45,7 @@ public:
   template <typename T,
             typename A,
             typename B,
-            typename C> T *create(A a, B b, C c)
+            typename C> T *create(const A &a, const B &b, const C &c)
     {
     void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
     return new(mem) T(a, b, c);
@@ -55,7 +55,7 @@ public:
             typename A,
             typename B,
             typename C,
-            typename D> T *create(A a, B b, C c, D d)
+            typename D> T *create(const A &a, const B &b, const C &c, const D &d)
     {
     void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
     return new(mem) T(a, b, c, d);
