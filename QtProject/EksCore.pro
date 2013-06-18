@@ -40,7 +40,6 @@ HEADERS += \
     ../XColour \
     ../XQuaternion \
     ../XFileSequence \
-    ../XShared \
     ../XFlags \
     ../XWeakShared \
     ../XTime \
@@ -163,7 +162,8 @@ HEADERS += \
     ../QtHelper/XQWidget \
     ../QtHelper/XQApplication \
     ../QtHelper/XQWidgets \
-    ../XFrame
+    ../XFrame \
+    ../XSharedPointer
 
 
 

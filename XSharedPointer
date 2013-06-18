@@ -39,15 +39,15 @@ public:
     {
     }
 
-  explicit ConstSharedPointer(const detail::SharedData *ptr)
-      : _ptr(const_cast<detail::SharedData*>(ptr))
+  explicit ConstSharedPointer(const detail::SharedData *ptr, const Alloc &a = Alloc())
+      : Alloc(a), _ptr(const_cast<detail::SharedData*>(ptr))
     {
     xAssert(_ptr);
     ++_ptr->_ref;
     }
 
-  ConstSharedPointer(const ConstSharedPointer<T> &cpy)
-      : _ptr(cpy._ptr)
+  ConstSharedPointer(const ConstSharedPointer<T, Alloc> &cpy, const Alloc &a = Alloc())
+      : Alloc(a), _ptr(cpy._ptr)
     {
     if(_ptr)
       {
@@ -63,6 +63,11 @@ public:
   ConstSharedPointer<T> &operator=(const ConstSharedPointer<T> &cpy)
     {
     asign(cpy.ptr());
+    }
+
+  bool operator==(const ConstSharedPointer<T> &oth)
+    {
+    return _ptr == oth._ptr;
     }
 
   void clear()
@@ -84,6 +89,9 @@ public:
       ++_ptr->_ref;
       }
     }
+
+  operator const bool() const { return ptr(); }
+  operator const T *() const { return ptr(); }
 
   const T &operator *() const { return *ptr(); }
 
@@ -119,36 +127,44 @@ public:
     {
     }
 
-  explicit SharedPointer(detail::SharedData *ptr)
-    : ConstSharedPointer<T, Alloc>(ptr)
+  explicit SharedPointer(detail::SharedData *ptr, const Alloc &a = Alloc())
+    : ConstSharedPointer<T, Alloc>(ptr, a)
     {
     }
 
-  SharedPointer(const SharedPointer<T> &cpy)
-    : ConstSharedPointer(cpy)
+  SharedPointer(const SharedPointer<T, Alloc> &cpy, const Alloc &a = Alloc())
+    : ConstSharedPointer(cpy, a)
     {
     }
 
-  SharedPointer<T> &operator=(SharedPointer<T> &cpy)
+  SharedPointer<T> &operator=(const SharedPointer<T, Alloc> &cpy)
     {
     assign(cpy.ptr());
     return *this;
     }
 
+  operator T *() { return ptr(); }
+
   T &operator *() { detach(); return *ptr(); }
-  const T &operator *() const { return *ptr(); }
+  T &operator *() const { return *ptr(); }
 
   T *operator->() { detach(); return ptr(); }
-  const T *operator->() const { return ptr(); }
+  T *operator->() const { return ptr(); }
 
   T *ptr() { detach(); return static_cast<T*>(_ptr); }
-  const T *ptr() const { return static_cast<T*>(_ptr); }
-  const T *constPtr() const { return static_cast<T*>(_ptr); }
+  T *ptr() const { return static_cast<T*>(_ptr); }
+  T *constPtr() const { return static_cast<T*>(_ptr); }
 
 private:
   SharedPointer(const ConstSharedPointer<T, Alloc> &cpy);
   SharedPointer &operator=(const ConstSharedPointer<T, Alloc> &);
   };
+
+template <typename T> Eks::SharedPointer<T, TypedAllocator<T>> AllocatorBase::createShared()
+  {
+  void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+  return Eks::SharedPointer<T, TypedAllocator<T>>(new(mem) T(), this);
+  }
 
 }
 

@@ -19,7 +19,7 @@
 namespace Eks
 {
 
-class EKSCORE_EXPORT FixedSizeBucketAllocator
+class EKSCORE_EXPORT FixedSizeBucketAllocatorBase
   {
 public:
 
@@ -164,7 +164,7 @@ public:
     xuint8 _alloc[1];
     };
 
-  FixedSizeBucketAllocator(AllocatorBase *allocator, xsize s, xsize d=128, xsize e=1024)
+  FixedSizeBucketAllocatorBase(AllocatorBase *allocator, xsize s, xsize d=128, xsize e=1024)
       : _freePtr(0), _size(s), _defaultSize(d), _expandSize(e), _first(0), _allocator(allocator)
     {
     xAssert(_allocator);
@@ -175,7 +175,7 @@ public:
       }
     }
 
-  ~FixedSizeBucketAllocator()
+  ~FixedSizeBucketAllocatorBase()
     {
     Bucket *b = _first;
     while(b)
@@ -313,13 +313,47 @@ public:
   void debugDump() const;
 
 private:
-  X_DISABLE_COPY(FixedSizeBucketAllocator);
+  X_DISABLE_COPY(FixedSizeBucketAllocatorBase);
   Bucket *_freePtr;
   xsize _size;
   xsize _defaultSize;
   xsize _expandSize;
   Bucket * _first;
   AllocatorBase *_allocator;
+  };
+
+class EKSCORE_EXPORT FixedSizeBucketAllocator
+    : public AllocatorBase,
+      FixedSizeBucketAllocatorBase
+  {
+public:
+  FixedSizeBucketAllocator(AllocatorBase *allocator, xsize s, xsize d=128, xsize e=1024)
+      : FixedSizeBucketAllocatorBase(allocator, s, d, e)
+    {
+    }
+
+  FixedSizeBucketAllocator(
+    AllocatorBase *allocator,
+    const Eks::ResourceDescription &desc,
+    xsize d=128,
+    xsize e=1024)
+      : FixedSizeBucketAllocatorBase(allocator, Eks::roundToAlignment(desc.size()), d, e)
+    {
+    }
+
+  virtual void *alloc(xsize s, xsize alignment=1)
+    {
+    // alignment should be embedded in the size passed to the constructor.
+    xAssert(s == size());
+    xAssert(alignment == 1);
+
+    return FixedSizeBucketAllocatorBase::alloc();
+    }
+
+  virtual void free(void *mem)
+    {
+    FixedSizeBucketAllocatorBase::free(mem);
+    }
   };
 
 class EKSCORE_EXPORT BucketAllocator : public AllocatorBase
@@ -346,10 +380,10 @@ public:
     {
     size = Eks::roundToAlignment(size, alignment);
 
-    FixedSizeBucketAllocator *b = _internal.value(size, 0);
+    FixedSizeBucketAllocatorBase *b = _internal.value(size, 0);
     if(!b)
       {
-      b = _allocator->create<FixedSizeBucketAllocator>(_allocator, size, _defaultSize, _expandSize);
+      b = _allocator->create<FixedSizeBucketAllocatorBase>(_allocator, size, _defaultSize, _expandSize);
       _internal.insert(size, b);
       }
 
@@ -396,7 +430,7 @@ private:
   xsize _defaultSize;
   xsize _expandSize;
 
-  typedef UnorderedMap <xsize, FixedSizeBucketAllocator *> HashType;
+  typedef UnorderedMap <xsize, FixedSizeBucketAllocatorBase *> HashType;
   HashType _internal;
 
   AllocatorBase *_allocator;

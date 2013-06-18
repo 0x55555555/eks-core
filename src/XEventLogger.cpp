@@ -127,7 +127,7 @@ public:
 
 EventLogger::EventLogger(Eks::AllocatorBase *allocator)
   {
-  _impl.create(allocator);
+  _impl = allocator->createUnique<Impl>();
   _impl->_allocator = allocator;
   _impl->_lastLogger = 0;
   _impl->_loggerLock.clear();

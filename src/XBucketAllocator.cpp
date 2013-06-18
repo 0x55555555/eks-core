@@ -8,12 +8,12 @@ void BucketAllocator::debugDump() const
   {
   Q_FOREACH(xsize s, _internal.keys())
     {
-    FixedSizeBucketAllocator *alloc = _internal.value(s);
+    FixedSizeBucketAllocatorBase *alloc = _internal.value(s);
     alloc->debugDump();
     }
   }
 
-void FixedSizeBucketAllocator::debugDump() const
+void FixedSizeBucketAllocatorBase::debugDump() const
   {
   qDebug() << "Bucket allocator (Size: " << _size << " bytes)," << bucketCount() << "buckets.";
   if(!empty())
@@ -33,7 +33,7 @@ void FixedSizeBucketAllocator::debugDump() const
     }
   }
 
-void FixedSizeBucketAllocator::Bucket::debugDump() const
+void FixedSizeBucketAllocatorBase::Bucket::debugDump() const
   {
   xuint32 mask = 0;
   for(xsize i=0, s=(_count/32); i<s; ++i)

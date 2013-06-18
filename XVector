@@ -273,8 +273,8 @@ public:
       {
       T *newData = ThisBase::allocate(newCapacity);
 
-      // copy the new elements
-      copy(newData, newData+s, ThisBase::_first);
+      // move the new elements
+      move(newData, newData+s, ThisBase::_first);
 
       // destroy the old data
       for(size_type i = 0; i < s; ++i)
@@ -298,29 +298,25 @@ public:
       }
     }
 
-  void resize(size_type newSize, const T &val = T())
+  void resize(size_type newSize, const T &val)
     {
-    size_type s = size();
-
-    // destroy extra members
-    for(size_type i = newSize; i < s; ++i)
-      {
-      destroy(&at(i));
-      }
-
-    // adjust the end
-    ThisBase::_end = ThisBase::_first + xMin(s, newSize);
-
-    // now expand, copying the needed members
-    reserve(newSize);
-
-    // adjust the new end
-    ThisBase::_end = ThisBase::_first + newSize;
+    size_type oldSize = resizeBase(newSize);
 
     // construct the extra members
-    for(size_type i = s; i < newSize; ++i)
+    for(size_type i = oldSize; i < newSize; ++i)
       {
       construct(&at(i), val);
+      }
+    }
+
+  void resize(size_type newSize)
+    {
+    size_type oldSize = resizeBase(newSize);
+
+    // construct the extra members
+    for(size_type i = oldSize; i < newSize; ++i)
+      {
+      construct(&at(i), T());
       }
     }
 
@@ -448,8 +444,14 @@ public:
       }
 
     xAssert(ThisBase::_end < ThisBase::_last);
-    construct(ThisBase::_end, t);
+    construct(ThisBase::_end, std::move(t));
     ThisBase::_end++;
+    }
+
+  T &createBack()
+    {
+    pushBack(T());
+    return back();
     }
 
   template <typename X> void append(X vals, size_type count)
@@ -600,7 +602,30 @@ public:
         }
       }
     }
+
 private:
+  size_type resizeBase(size_type newSize)
+    {
+    size_type s = size();
+
+    // destroy extra members
+    for(size_type i = newSize; i < s; ++i)
+      {
+      destroy(&at(i));
+      }
+
+    // adjust the end
+    ThisBase::_end = ThisBase::_first + xMin(s, newSize);
+
+    // now expand, copying the needed members
+    reserve(newSize);
+
+    // adjust the new end
+    ThisBase::_end = ThisBase::_first + newSize;
+
+    return s;
+    }
+
   template <typename X>
       void moveConstruct(const iterator &begin, const iterator &end, X from)
     {

@@ -10,28 +10,8 @@
 namespace Eks
 {
 
-namespace detail
-{
-template <typename T> class AllocatorDelete : public Eks::TypedAllocator<T>
-  {
-public:
-  AllocatorDelete()
-    {
-    }
-
-  AllocatorDelete(Eks::AllocatorBase *base) : Eks::TypedAllocator<T>(base)
-    {
-    }
-
-  template <typename X> X *create()
-    {
-    return allocator()->create<X>();
-    }
-  };
-}
-
 template <typename T,
-          typename Deleter=detail::AllocatorDelete<T> > class UniquePointer : Deleter
+          typename Deleter=Eks::TypedAllocator<T> > class UniquePointer : Deleter
   {
 XProperties:
   XROProperty(T *, pointer);
@@ -48,7 +28,7 @@ public:
     std::swap(_pointer, oth);
     }
 
-  UniquePointer(UniquePointer<T> &&oth)
+  UniquePointer(UniquePointer<T, Deleter> &&oth)
       : Deleter(oth), _pointer(0)
     {
     std::swap(_pointer, oth._pointer);
@@ -59,7 +39,7 @@ public:
     clear();
     }
 
-  UniquePointer<T>& operator=(UniquePointer<T> &&oth)
+  UniquePointer<T>& operator=(UniquePointer<T, Deleter> &&oth)
     {
     std::swap(_pointer, oth._pointer);
     return *this;
@@ -73,37 +53,17 @@ public:
 
   void clear()
     {
-	if(_pointer)
-	  {
-	  destroy(_pointer);
-	  _pointer = 0;
-	  }
+    if(_pointer)
+      {
+      destroy(_pointer);
+      _pointer = 0;
+      }
     }
 
   void assign(T *data, const Deleter &d)
     {
     *this = d;
     _pointer = data;
-    }
-
-  template <typename X> X *create(const Deleter &d)
-    {
-    Deleter &thisD = *this;
-    clear();
-    thisD = d;
-    X *x = thisD.create<X>();
-    _pointer = x;
-    return x;
-    }
-
-  T *create(const Deleter &d)
-    {
-    Deleter &thisD = *this;
-    clear();
-    thisD = d;
-    T *x = thisD.create<T>();
-    _pointer = x;
-    return x;
     }
 
   T *value() { return _pointer; }
@@ -118,6 +78,28 @@ public:
 private:
   X_DISABLE_COPY(UniquePointer);
   };
+
+template <typename T> Eks::UniquePointer<T, TypedAllocator<T>> AllocatorBase::createUnique()
+  {
+  void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+
+  auto t = new(mem) T();
+  TypedAllocator<T> alloc(this);
+
+  Eks::UniquePointer<T, TypedAllocator<T>> ptr(t, alloc);
+  return std::move(ptr);
+  }
+
+template <typename T, typename A> Eks::UniquePointer<T, TypedAllocator<T>> AllocatorBase::createUnique(A a)
+  {
+  void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+
+  auto t = new(mem) T(a);
+  TypedAllocator<T> alloc(this);
+
+  Eks::UniquePointer<T, TypedAllocator<T>> ptr(t, alloc);
+  return std::move(ptr);
+  }
 
 }
 
