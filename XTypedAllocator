@@ -48,9 +48,6 @@ public:
     return allocator() == oth.allocator();
     }
 
-  template <typename T> Eks::SharedPointer<T, Derived> createShared();
-  template <typename T> Eks::UniquePointer<T, Derived> createUnique();
-
   AllocatorBase *allocator()
     {
     Derived *d = static_cast<Derived*>(this);

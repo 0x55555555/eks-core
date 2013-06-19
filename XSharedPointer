@@ -7,8 +7,8 @@
 namespace Eks
 {
 
-template <typename T, typename Alloc> class ConstSharedPointer;
-template <typename T, typename Alloc> class SharedPointer;
+template <typename T, typename Policy, typename Alloc> class ConstSharedPointer;
+template <typename T, typename Policy, typename Alloc> class SharedPointer;
 
 namespace detail
 {
@@ -16,24 +16,47 @@ class SharedData
   {
 public:
   SharedData() : _ref(0) { }
-  SharedData(const SharedData &d) : _ref((xuint32)d._ref)
+  SharedData(const SharedData &) : _ref(0)
     {
-
     }
 
 private:
   mutable std::atomic<xuint32> _ref;
 
-  template <typename T, typename Alloc> friend class Eks::SharedPointer;
-  template <typename T, typename Alloc> friend class Eks::ConstSharedPointer;
+  template <typename T, typename Policy, typename Alloc> friend class Eks::SharedPointer;
+  template <typename T, typename Policy, typename Alloc> friend class Eks::ConstSharedPointer;
+  };
+
+struct SharedPolicy
+  {
+  template <typename T> static void onWrite(T *)
+    {
+    }
+  };
+
+struct CopyOnWritePolicy
+  {
+  template <typename T> static void onWrite(T *ptr)
+    {
+    if(ptr && ptr->_ref > 1)
+      {
+      --ptr->_ref;
+
+      Eks::AllocatorBase *alloc = allocator()->allocator();
+      ptr = alloc->create<T>(*constPtr());
+      ++ptr->_ref;
+      }
+    }
   };
 }
 
 template <typename T,
+          typename SharedPolicy = detail::SharedPolicy,
           typename Alloc=TypedAllocator<T> > class ConstSharedPointer
     : Alloc
   {
 public:
+  typedef SharedPolicy Policy;
   ConstSharedPointer()
     : _ptr(0)
     {
@@ -46,7 +69,7 @@ public:
     ++_ptr->_ref;
     }
 
-  ConstSharedPointer(const ConstSharedPointer<T, Alloc> &cpy, const Alloc &a = Alloc())
+  ConstSharedPointer(const ConstSharedPointer<T, Policy, Alloc> &cpy, const Alloc &a = Alloc())
       : Alloc(a), _ptr(cpy._ptr)
     {
     if(_ptr)
@@ -60,12 +83,12 @@ public:
     clear();
     }
 
-  ConstSharedPointer<T> &operator=(const ConstSharedPointer<T> &cpy)
+  ConstSharedPointer<T, Policy, Alloc> &operator=(const ConstSharedPointer<T, Policy, Alloc> &cpy)
     {
     asign(cpy.ptr());
     }
 
-  bool operator==(const ConstSharedPointer<T> &oth)
+  bool operator==(const ConstSharedPointer<T, Policy, Alloc> &oth)
     {
     return _ptr == oth._ptr;
     }
@@ -101,15 +124,6 @@ public:
   const T *constPtr() const { return static_cast<const T*>(_ptr); }
 
 protected:
-  void detach()
-    {
-    if(_ptr && _ptr->_ref > 1)
-      {
-      Eks::AllocatorBase *alloc = allocator()->allocator();
-      _ptr = alloc->create<T>(*constPtr());
-      }
-    }
-
   Alloc *allocator()
     {
     return this;
@@ -119,8 +133,9 @@ protected:
   };
 
 template <typename T,
+          typename SharedPolicy = detail::SharedPolicy,
           typename Alloc=TypedAllocator<T> > class SharedPointer
-    : public ConstSharedPointer<T, Alloc>
+    : public ConstSharedPointer<T, SharedPolicy, Alloc>
   {
 public:
   SharedPointer()
@@ -128,16 +143,16 @@ public:
     }
 
   explicit SharedPointer(detail::SharedData *ptr, const Alloc &a = Alloc())
-    : ConstSharedPointer<T, Alloc>(ptr, a)
+    : ConstSharedPointer<T, Policy, Alloc>(ptr, a)
     {
     }
 
-  SharedPointer(const SharedPointer<T, Alloc> &cpy, const Alloc &a = Alloc())
+  SharedPointer(const SharedPointer<T, Policy, Alloc> &cpy, const Alloc &a = Alloc())
     : ConstSharedPointer(cpy, a)
     {
     }
 
-  SharedPointer<T> &operator=(const SharedPointer<T, Alloc> &cpy)
+  SharedPointer<T, Policy, Alloc> &operator=(const SharedPointer<T, Policy, Alloc> &cpy)
     {
     assign(cpy.ptr());
     return *this;
@@ -145,25 +160,26 @@ public:
 
   operator T *() { return ptr(); }
 
-  T &operator *() { detach(); return *ptr(); }
+  T &operator *() { Policy::onWrite(this); return *ptr(); }
   T &operator *() const { return *ptr(); }
 
-  T *operator->() { detach(); return ptr(); }
+  T *operator->() { Policy::onWrite(this); return ptr(); }
   T *operator->() const { return ptr(); }
 
-  T *ptr() { detach(); return static_cast<T*>(_ptr); }
+  T *ptr() { Policy::onWrite(this); return static_cast<T*>(_ptr); }
   T *ptr() const { return static_cast<T*>(_ptr); }
   T *constPtr() const { return static_cast<T*>(_ptr); }
 
 private:
-  SharedPointer(const ConstSharedPointer<T, Alloc> &cpy);
-  SharedPointer &operator=(const ConstSharedPointer<T, Alloc> &);
+  SharedPointer(const ConstSharedPointer<T, Policy, Alloc> &);
+  SharedPointer<T, Policy, Alloc> operator=(const ConstSharedPointer<T, Policy, Alloc> &);
   };
 
-template <typename T> Eks::SharedPointer<T, TypedAllocator<T>> AllocatorBase::createShared()
+template <typename T>
+    Eks::SharedPointer<T, Eks::detail::SharedPolicy, TypedAllocator<T>> AllocatorBase::createShared()
   {
   void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
-  return Eks::SharedPointer<T, TypedAllocator<T>>(new(mem) T(), this);
+  return Eks::SharedPointer<T, Eks::detail::SharedPolicy, TypedAllocator<T>>(new(mem) T(), this);
   }
 
 }

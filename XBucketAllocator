@@ -344,8 +344,7 @@ public:
   virtual void *alloc(xsize s, xsize alignment=1)
     {
     // alignment should be embedded in the size passed to the constructor.
-    xAssert(s == size());
-    xAssert(alignment == 1);
+    xAssert((s+alignment) == size());
 
     return FixedSizeBucketAllocatorBase::alloc();
     }
