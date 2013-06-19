@@ -599,6 +599,11 @@ public:
         {
         i = remove(i);
         e = end();
+
+        if(i == e)
+          {
+          break;
+          }
         }
       }
     }

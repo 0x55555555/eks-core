@@ -21,6 +21,18 @@ public:
     }
 
 private:
+  // returns true if the data is still referenced.
+  bool deref()
+    {
+    xuint32 old = --_ref;
+    return old != 0;
+    }
+
+  void ref()
+    {
+    ++_ref;
+    }
+
   mutable std::atomic<xuint32> _ref;
 
   template <typename T, typename Policy, typename Alloc> friend class Eks::SharedPointer;
@@ -38,13 +50,16 @@ struct CopyOnWritePolicy
   {
   template <typename T> static void onWrite(T *ptr)
     {
-    if(ptr && ptr->_ref > 1)
+    if (ptr && ptr->deref())
       {
-      --ptr->_ref;
-
       Eks::AllocatorBase *alloc = allocator()->allocator();
       ptr = alloc->create<T>(*constPtr());
-      ++ptr->_ref;
+      ptr->ref();
+      }
+    else if(ptr)
+      {
+      ptr->ref();
+      xAssert(_ref == 1);
       }
     }
   };
@@ -66,7 +81,7 @@ public:
       : Alloc(a), _ptr(const_cast<detail::SharedData*>(ptr))
     {
     xAssert(_ptr);
-    ++_ptr->_ref;
+    _ptr->ref();
     }
 
   ConstSharedPointer(const ConstSharedPointer<T, Policy, Alloc> &cpy, const Alloc &a = Alloc())
@@ -74,7 +89,7 @@ public:
     {
     if(_ptr)
       {
-      ++_ptr->_ref;
+      _ptr->ref();
       }
     }
 
@@ -95,7 +110,7 @@ public:
 
   void clear()
     {
-    if(_ptr && !(--_ptr->_ref))
+    if(_ptr && !_ptr->deref())
       {
       allocator()->destroy(_ptr);
       _ptr = 0;
@@ -109,7 +124,7 @@ public:
     if(cpy)
       {
       _ptr = cpy;
-      ++_ptr->_ref;
+      _ptr->ref();
       }
     }
 
