@@ -175,7 +175,7 @@ public:
 
   ThisType& operator<<(T &&t)
     {
-    pushBack(t);
+    pushBack(std::move(t));
     return *this;
     }
 
@@ -411,15 +411,18 @@ public:
     return indexOf(t) != X_SIZE_SENTINEL;
     }
 
-  void popBack()
+  T popBack()
     {
     xAssert(ThisBase::_end);
 
     --ThisBase::_end;
 
+    T bck = std::move(*ThisBase::_end);
+
     // destroy extra member
     destroy(ThisBase::_end);
 
+    return bck;
     }
 
   void pushBack(const T &t)

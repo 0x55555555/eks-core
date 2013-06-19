@@ -21,14 +21,18 @@ public:
   double nanoseconds() const { return ((double)_secs * 1000000000.0) + (double)_nanosecs; }
 
   Time &operator+=(const Time &t);
-  Time operator+(const Time &t);
+  Time operator+(const Time &t) const;
 
   Time operator-(const Time &t) const;
   Time operator/(double d) const;
   Time operator*(double d) const;
 
+
+  bool operator==(const Time &t) const;
   bool operator<(const Time &t) const;
+  bool operator<=(const Time &t) const;
   bool operator>(const Time &t) const;
+  bool operator>=(const Time &t) const;
 
   static Time fromMilliseconds(double ms);
 

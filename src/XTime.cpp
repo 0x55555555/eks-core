@@ -90,7 +90,7 @@ Time &Time::operator+=(const Time &t)
   return *this;
   }
 
-Time Time::operator+(const Time &t)
+Time Time::operator+(const Time &t) const
   {
   xint64 s, n;
   s = _secs + t._secs;
@@ -144,13 +144,25 @@ bool Time::operator<(const Time &t) const
 
   return false;
   }
+
+bool Time::operator==(const Time &t) const
+  {
+  return _secs == t._secs && _nanosecs == t._nanosecs;
+  }
+
+bool Time::operator<=(const Time &t) const
+  {
+  return *this < t || *this == t;
+  }
+
 bool Time::operator>(const Time &t) const
   {
-  if(_secs > t._secs)
-    {
-    return true;
-    }
-  return _nanosecs > t._nanosecs;
+  return t < *this;
+  }
+
+bool Time::operator>=(const Time &t) const
+  {
+  return *this > t || *this == t;
   }
 
 TimeStatistics::TimeStatistics() : _count(0)
