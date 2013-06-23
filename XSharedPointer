@@ -77,8 +77,8 @@ public:
     {
     }
 
-  explicit ConstSharedPointer(const detail::SharedData *ptr, const Alloc &a = Alloc())
-      : Alloc(a), _ptr(const_cast<detail::SharedData*>(ptr))
+  explicit ConstSharedPointer(const T *ptr, const Alloc &a = Alloc())
+      : Alloc(a), _ptr(const_cast<T*>(ptr))
     {
     xAssert(_ptr);
     _ptr->ref();
@@ -144,7 +144,7 @@ protected:
     return this;
     }
 
-  detail::SharedData *_ptr;
+  T *_ptr;
   };
 
 template <typename T,
@@ -157,7 +157,7 @@ public:
     {
     }
 
-  explicit SharedPointer(detail::SharedData *ptr, const Alloc &a = Alloc())
+  explicit SharedPointer(T *ptr, const Alloc &a = Alloc())
     : ConstSharedPointer<T, Policy, Alloc>(ptr, a)
     {
     }
