@@ -4,6 +4,11 @@
 #include "XCore"
 #include "XStringSimple"
 
+bool loggingEnabled()
+  {
+  return false;
+  }
+
 namespace Eks
 {
 
@@ -48,6 +53,11 @@ void ThreadEventLogger::operator delete(void* ptr)
 
 ThreadEventLogger::EventID ThreadEventLogger::beginDurationEvent(const EventLocation::ID location)
   {
+  if(!loggingEnabled())
+    {
+    return 0;
+    }
+
   xAssert(_currentID < X_SIZE_SENTINEL);
 
   xsize id = _currentID++;
@@ -58,6 +68,11 @@ ThreadEventLogger::EventID ThreadEventLogger::beginDurationEvent(const EventLoca
 
 void ThreadEventLogger::endDurationEvent(EventID id)
   {
+  if(!loggingEnabled())
+    {
+    return;
+    }
+
   addItem(EventType::End, X_UINT32_SENTINEL, id);
 
   if(id == (_currentID - 1))
@@ -68,6 +83,11 @@ void ThreadEventLogger::endDurationEvent(EventID id)
 
 void ThreadEventLogger::momentEvent(const EventLocation::ID loc)
   {
+  if(!loggingEnabled())
+    {
+    return;
+    }
+
   addItem(EventType::Moment, loc, X_SIZE_SENTINEL);
   }
 
