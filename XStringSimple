@@ -430,6 +430,28 @@ template <typename C, xsize P, typename A> QDebug operator<<(
   return dbg << str.data();
   }
 
+template <typename T, xsize S, typename A>
+    QTextStream &operator>>(QTextStream &str, Eks::StringBase<T, S, A> &vec)
+  {
+  while(!str.atEnd())
+    {
+    T t;
+    str >> t;
+    vec << t;
+    }
+  return str;
+  }
+
+template <typename T, xsize S, typename A>
+    QTextStream &operator<<(QTextStream &str, const Eks::StringBase<T, S, A> &vec)
+  {
+  for(xsize i = 0, s = vec.size(); i < s; ++i)
+    {
+    str << vec[i];
+    }
+  return str;
+  }
+
 #endif
 
 
