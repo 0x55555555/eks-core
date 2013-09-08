@@ -31,10 +31,14 @@ public:
   StringBase(AllocatorBase *alloc=0)
       : String(Alloc(alloc))
     {
+    append("");
+    xAssert(!String::size() || at(size()) == '\0');
     }
   StringBase(const Allocator &alloc)
       : String(alloc)
     {
+    append("");
+    xAssert(!String::size() || at(size()) == '\0');
     }
   StringBase(const Char *n, AllocatorBase *alloc=0)
       : String(Alloc(alloc))
@@ -263,12 +267,12 @@ public:
 
   void popBack()
     {
-    resize(size() - 1, ' ');
+    xAssert(size());
+    resize(String::size() - 1, ' ');
     }
 
   void pushBack(Char c)
     {
-    popBack();
     const Char arr[] = { c, '\0' };
     append(arr);
     }
