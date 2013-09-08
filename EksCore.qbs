@@ -1,9 +1,9 @@
-import qbs 1.0
-import "Utils.js" as Utils
+import "../EksBuild" as Eks;
+//import "Utils.js" as Utils
 
-DynamicLibrary {
-    name: "Core"
-    files: [ "include/*.h", "src/*.cpp" ]
-    Depends { name: "cpp" }
+Eks.Library {
+    name: "EksCore"
     Depends { name: "Qt.core" }
+
+    cpp.includePaths: [thisRoot + "include"]
 }
