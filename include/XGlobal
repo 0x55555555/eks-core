@@ -33,10 +33,6 @@
 # define EKSCORE_EXPORT
 #endif
 
-#ifndef QT_NO_DEBUG
-# define X_DEBUG
-#endif
-
 #ifdef X_DEBUG
 # define X_ASSERTS_ENABLED 1
 
@@ -73,10 +69,9 @@
 # define X_QCOLOUR_COMPATIBILITY 1
 # define X_QT_INTEROP 1
 # define X_STL_INTEROP 1
-# define X_ENABLE_STACK_WALKING 1
 #endif
 
-#ifdef X_DEBUG
+#if defined(X_DEBUG) && !defined(X_ARCH_ARM)
 # define X_ENABLE_STACK_WALKING 1
 #else
 # define X_ENABLE_STACK_WALKING 0
