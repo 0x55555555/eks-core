@@ -630,7 +630,7 @@ break_out_of_outer_loop:
 template <class Key, class T>
 Q_OUTOFLINE_TEMPLATE Vector<Key> UnorderedMap<Key, T>::keys() const
 {
-    Vector<Key> res;
+    Vector<Key> res(allocator);
     res.reserve(size());
     const_iterator i = begin();
     while (i != end()) {
