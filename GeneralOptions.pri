@@ -8,7 +8,7 @@ win32-g++ {
 }
 
 CONFIG(debug) {
-  DEFINES += NDEBUG _DEBUG
+  DEFINES += NDEBUG _DEBUG X_DEBUG
 } else {
   DEFINES += QT_NO_DEBUG
 }
