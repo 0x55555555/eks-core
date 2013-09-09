@@ -11,9 +11,11 @@ namespace Eks
 
 struct Core::Impl
   {
-  Impl()
-    : disabledAsserts(&alloc),
+  Impl() :
     temporaryAllocator(&alloc)
+#if X_ASSERTS_ENABLED
+    , disabledAsserts(&alloc)
+#endif
 #if X_EVENT_LOGGING_ENABLED
     , eventLogger(&alloc)
 #endif

@@ -1,9 +1,19 @@
 import "../EksBuild" as Eks;
-//import "Utils.js" as Utils
 
 Eks.Library {
     name: "EksCore"
-    Depends { name: "Qt.core" }
+    toRoot: "../../"
 
-    cpp.includePaths: [thisRoot + "include"]
+    Depends { name: "Qt.gui" }
+    Depends { name: "Qt.widgets" }
+
+    Properties {
+        condition: debug
+        cpp.dynamicLibraries: [ "Dbghelp" ]
+    }
+
+    Export {
+        Depends { name: "Qt.core" }
+        cpp.includePaths: [ toRoot + "EksCore/include" ]
+    }
 }

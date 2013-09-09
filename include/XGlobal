@@ -111,17 +111,8 @@ typedef unsigned long long xuint64; /* 64 bit unsigned */
 #define X_INT64_MAX (X_INT64_C(9223372036854775807))
 #define X_INT64_MIN (X_INT64_C(-9223372036854775808))
 
-#ifdef X_CPPOX_OVERRIDE_SUPPORT
-# define X_OVERRIDE override
-# define X_FINAL final
-#else
-# ifdef Q_CC_MSVC
-#  define X_OVERRIDE override
-# else
-#  define X_OVERRIDE
-# endif
-# define X_FINAL
-#endif
+#define X_OVERRIDE override
+#define X_FINAL final
 
 #define X_HACK(level, why, suggestion)
 

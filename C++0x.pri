@@ -26,12 +26,5 @@ win32-msvc2012|win32-arm-msvc2012 {
   DEFINES += X_CPPOX_SUPPORT X_CPPOX_OVERRIDE_SUPPORT X_HAS_LONG_LONG
 }
 
-OTHER_FILES += \
-    ../../Eks/EksCore/Utils.js
-
-
-
-
-
 
 
