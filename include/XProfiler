@@ -1,7 +1,0 @@
-#ifndef XPROFILER_H
-#define XPROFILER_H
-
-# define XProfileFunctionBase(component)
-# define XProfileScopedBlockBase(component, mess)
-
-#endif // XPROFILER_H

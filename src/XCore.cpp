@@ -3,7 +3,6 @@
 #include "XLoggingAllocator"
 #include "XTemporaryAllocator"
 #include "XUnorderedMap"
-#include "XProfiler"
 #include "XEventLogger"
 
 namespace Eks
