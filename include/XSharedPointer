@@ -100,7 +100,8 @@ public:
 
   ConstSharedPointer<T, Policy, Alloc> &operator=(const ConstSharedPointer<T, Policy, Alloc> &cpy)
     {
-    asign(cpy.ptr());
+    assign(const_cast<T*>(cpy.ptr()));
+    return *this;
     }
 
   bool operator==(const ConstSharedPointer<T, Policy, Alloc> &oth)

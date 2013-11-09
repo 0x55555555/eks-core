@@ -37,9 +37,6 @@
 # define X_ASSERTS_ENABLED 1
 
 # ifndef X_ARCH_ARM
-#  define X_EVENT_LOGGING_ENABLED 1
-
-#  define X_PROFILING_ENABLED
 #  define X_ENABLE_HEAP_CHECK
 # endif
 
