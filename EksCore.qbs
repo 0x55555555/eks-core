@@ -10,7 +10,7 @@ Eks.Library {
 	"C:\\Program Files (x86)\\Windows Kits\\8.1\\Include\\shared"
   ]
   
-  property var windoewsLibPaths: [
+  property var windowsLibPaths: [
 	"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\lib\\amd64",
 	"C:\\Program Files (x86)\\Windows Kits\\8.1\\Lib\\winv6.3\\umc"
   ]
@@ -24,12 +24,15 @@ Eks.Library {
   }
   
   cpp.includePaths: base.concat( windowsIncludePaths )
-  cpp.dynamicLibraries: base.concat( windoewsLibPaths )
+  cpp.dynamicLibraries: base.concat( windowsLibPaths )
 
   Export {
     Depends { name: "cpp" }
     Depends { name: "Qt.core" }
 	
-    cpp.includePaths: [ "./include" ].concat(windowsIncludePaths)
+    cpp.includePaths: [
+      "./include",
+      Qt.core.incPath + "\\QtANGLE" ]
+        .concat(windowsIncludePaths)
   }
 }
