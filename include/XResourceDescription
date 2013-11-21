@@ -124,9 +124,13 @@ public:
     return ths;
     }
 
-  template <typename T> T *create()
+  template <typename T> T *create() const
     {
     return new(_resource) T();
+    }
+  template <typename T, typename A> T *create(A&& a) const
+    {
+    return new(_resource) T(a);
     }
 
   void *data() const { return _resource; }
