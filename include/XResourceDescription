@@ -78,10 +78,61 @@ public:
     {
     }
 
+  ResourceDescription operator+(const ResourceDescription &desc) const
+    {
+    ResourceDescription newDesc(*this);
+    newDesc._size = Eks::roundToAlignment(_size, desc.alignment());
+    newDesc._size += desc.size();
+    return newDesc;
+    }
+
   xsize allocatedSize() const
     {
     return _size + _alignment;
     }
+  };
+
+class Resource
+  {
+public:
+  Resource(void *rsc = nullptr) : _resource(rsc)
+    {
+    }
+
+  template <typename T> static Resource destroy(T *t)
+    {
+    ((T*)t)->~T();
+    return Eks::Resource((T*)t);
+    }
+
+  Resource align(const ResourceDescription &desc) const
+    {
+    Resource rsc(Eks::roundToAlignment(_resource, desc.alignment()));
+    xAssertIsSpecificAligned(rsc._resource, desc.alignment());
+    return rsc;
+    }
+
+  Resource increment(xsize s) const
+    {
+    return Resource(static_cast<xuint8*>(_resource) + s);
+    }
+
+  Resource alignAndIncrement(const ResourceDescription &rsc, Resource* next) const
+    {
+    Resource ths(Eks::roundToAlignment(_resource, rsc.alignment()));
+    *next = ths.increment(rsc.size());
+    return ths;
+    }
+
+  template <typename T> T *create()
+    {
+    return new(_resource) T();
+    }
+
+  void *data() const { return _resource; }
+
+private:
+  void *_resource;
   };
 
 template <typename T>

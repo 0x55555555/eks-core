@@ -43,7 +43,6 @@ HEADERS += \
     ../include/XFlags \
     ../include/XWeakShared \
     ../include/XTime \
-    ../include/XProfiler \
     ../include/Eigen/SVD \
     ../include/Eigen/StdVector \
     ../include/Eigen/StdList \

@@ -4,35 +4,41 @@ Eks.Library {
   name: "EksCore"
   toRoot: "../../"
 
-  property var windowsIncludePaths: [
-    "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\include",
-	"C:\\Program Files (x86)\\Windows Kits\\8.1\\Include\\um",
-	"C:\\Program Files (x86)\\Windows Kits\\8.1\\Include\\shared"
-  ]
-  
-  property var windowsLibPaths: [
-	"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\VC\\lib\\amd64",
-	"C:\\Program Files (x86)\\Windows Kits\\8.1\\Lib\\winv6.3\\umc"
-  ]
-  
   Depends { name: "Qt.gui" }
   Depends { name: "Qt.widgets" }
-  
+
+  property string msvcPath: "C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\"
+  property string windowsSDKPath: "C:\\Program Files (x86)\\Windows Kits\\8.1\\"
+
+  property var windowsIncludePaths: [
+    msvcPath + "VC\\include",
+    windowsSDKPath + "Include\\um",
+    windowsSDKPath + "Include\\shared"
+  ]
+
+  property var windowsLibPaths: [
+    msvcPath + "VC\\lib\\amd64",
+    windowsSDKPath + "Lib\\winv6.3\\umc"
+  ]
+
   Properties {
-    condition: debug
-    cpp.dynamicLibraries: [ "Dbghelp" ]
+    condition: qbs.targetOS == "windows"
+
+    cpp.includePaths: base.concat( windowsIncludePaths )
+    cpp.libraryPaths: base.concat( windowsLibPaths )
+
+   Properties {
+      condition: debug
+      cpp.dynamicLibraries: base.concat([ "Dbghelp" ])
+    }
   }
-  
-  cpp.includePaths: base.concat( windowsIncludePaths )
-  cpp.dynamicLibraries: base.concat( windowsLibPaths )
 
   Export {
     Depends { name: "cpp" }
     Depends { name: "Qt.core" }
-	
+
     cpp.includePaths: [
       "./include",
-      Qt.core.incPath + "\\QtANGLE" ]
-        .concat(windowsIncludePaths)
+      Qt.core.incPath + "\\QtANGLE" ].concat(windowsIncludePaths)
   }
 }

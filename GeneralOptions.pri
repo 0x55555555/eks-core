@@ -29,7 +29,7 @@ win32-msvc2010 {
 win32-msvc2012 {
   LIBS += -L"C:\\Program Files (x86)\\Microsoft Visual Studio 11.0\\VC\\lib\amd64"
 
-  QMAKE_CXXFLAGS += /WX /FS
+  QMAKE_CXXFLAGS += /WX # /FS
 
   release {
     QMAKE_CFLAGS += /Zi

@@ -24,11 +24,15 @@ public:
   virtual void *alloc(xsize size, xsize alignment=1) = 0;
   virtual void free(void *mem) = 0;
 
-  void *alloc(const ResourceDescription &fmt)
+  Resource alloc(const ResourceDescription &fmt)
     {
     return alloc(fmt.size(), fmt.alignment());
     }
 
+  void free(const Resource &rsc)
+    {
+    return free(rsc.data());
+    }
 
   // todo, variadic template args here...
   template <typename T>
