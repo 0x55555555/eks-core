@@ -3,6 +3,7 @@
 
 #include "XGlobal"
 #include "XProperty"
+#include "XAssert"
 
 namespace Eks
 {
@@ -92,36 +93,98 @@ public:
     }
   };
 
-class Resource
+template <typename T, typename Derived> class MemoryResourceBase
   {
 public:
-  Resource(void *rsc = nullptr) : _resource(rsc)
+  MemoryResourceBase(T rsc) : _resource(rsc)
     {
     }
 
-  template <typename T> static Resource destroy(T *t)
+  Derived decrememt(xsize s) const
     {
-    ((T*)t)->~T();
-    return Eks::Resource((T*)t);
+    return Derived(_resource - s);
     }
 
-  Resource align(const ResourceDescription &desc) const
+  Derived increment(xsize s) const
     {
-    Resource rsc(Eks::roundToAlignment(_resource, desc.alignment()));
+    return Derived(_resource + s);
+    }
+
+  Derived align(const ResourceDescription &desc) const
+    {
+    Derived rsc(Eks::roundToAlignment(_resource, desc.alignment()));
     xAssertIsSpecificAligned(rsc._resource, desc.alignment());
     return rsc;
     }
 
-  Resource increment(xsize s) const
+  Derived alignAndIncrement(const ResourceDescription &rsc, MemoryResourceBase* next) const
     {
-    return Resource(static_cast<xuint8*>(_resource) + s);
-    }
-
-  Resource alignAndIncrement(const ResourceDescription &rsc, Resource* next) const
-    {
-    Resource ths(Eks::roundToAlignment(_resource, rsc.alignment()));
+    Derived ths(Eks::roundToAlignment(_resource, rsc.alignment()));
     *next = ths.increment(rsc.size());
     return ths;
+    }
+
+protected:
+  T _resource;
+  };
+
+class RelativeMemoryResource : public MemoryResourceBase<xptrdiff, RelativeMemoryResource>
+  {
+public:
+  RelativeMemoryResource() : MemoryResourceBase(0)
+    {
+    }
+  RelativeMemoryResource(xptrdiff x) : MemoryResourceBase(x)
+    {
+    }
+
+  RelativeMemoryResource operator+(const RelativeMemoryResource& r)
+    {
+    return _resource + r._resource;
+    }
+
+  RelativeMemoryResource operator-(const RelativeMemoryResource& r)
+    {
+    return _resource - r._resource;
+    }
+
+  bool operator<(xsize s) const
+    {
+    return value() < (xptrdiff)s;
+    }
+
+  bool operator>(const RelativeMemoryResource s) const
+    {
+    return value() > s.value();
+    }
+
+  bool operator==(const RelativeMemoryResource &rsc) const
+    {
+    return _resource == rsc._resource;
+    }
+
+  bool isPre() const { return _resource < 0; }
+  bool isPost() const { return _resource > 0; }
+
+  xptrdiff value() const { return _resource; }
+  };
+
+class MemoryResource : public MemoryResourceBase<xuint8*, MemoryResource>
+  {
+public:
+  MemoryResource(void *rsc = nullptr) : MemoryResourceBase(static_cast<xuint8*>(rsc))
+    {
+    }
+
+  bool isValid() const
+    {
+    return _resource != false;
+    }
+
+  template <typename T> static MemoryResource destroy(T *t)
+    {
+    ((T*)t)->~T();
+    return Eks::MemoryResource((T*)t);
     }
 
   template <typename T> T *create() const
@@ -134,9 +197,6 @@ public:
     }
 
   void *data() const { return _resource; }
-
-private:
-  void *_resource;
   };
 
 template <typename T>
