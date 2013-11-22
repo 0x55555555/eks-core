@@ -79,6 +79,11 @@ public:
     {
     }
 
+  void alignTo(xsize align)
+    {
+    _alignment = xMax(align, _alignment);
+    }
+
   ResourceDescription operator+(const ResourceDescription &desc) const
     {
     ResourceDescription newDesc(*this);
@@ -112,8 +117,13 @@ public:
 
   Derived align(const ResourceDescription &desc) const
     {
-    Derived rsc(Eks::roundToAlignment(_resource, desc.alignment()));
-    xAssertIsSpecificAligned(rsc._resource, desc.alignment());
+    return align(desc.alignment());
+    }
+
+  Derived align(xsize align) const
+    {
+    Derived rsc(Eks::roundToAlignment(_resource, align));
+    xAssertIsSpecificAligned(rsc._resource, align);
     return rsc;
     }
 
@@ -122,6 +132,11 @@ public:
     Derived ths(Eks::roundToAlignment(_resource, rsc.alignment()));
     *next = ths.increment(rsc.size());
     return ths;
+    }
+
+  Derived increment(const ResourceDescription &rs) const
+    {
+    return Derived(_resource + rs.allocatedSize());
     }
 
 protected:
@@ -143,7 +158,7 @@ public:
     return _resource + r._resource;
     }
 
-  RelativeMemoryResource operator-(const RelativeMemoryResource& r)
+  RelativeMemoryResource relativeTo(const RelativeMemoryResource& r)
     {
     return _resource - r._resource;
     }
@@ -164,6 +179,7 @@ public:
     }
 
   bool isPre() const { return _resource < 0; }
+  bool isZero() const { return _resource == 0; }
   bool isPost() const { return _resource > 0; }
 
   xptrdiff value() const { return _resource; }
