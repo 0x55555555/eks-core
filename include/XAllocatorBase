@@ -49,37 +49,38 @@ public:
     return new(mem) T();
     }
 
-  template <typename T, typename A> T *create(const A &a)
+  template <typename T, typename A> T *create(A &&a)
     {
     void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
-    return new(mem) T(a);
+    return new(mem) T(std::forward<A>(a));
     }
 
   template <typename T,
             typename A,
-            typename B> T *create(const A &a, const B &b)
+            typename B> T *create(A &&a, B &&b)
     {
     void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
-    return new(mem) T(a, b);
+    return new(mem) T(std::forward<A>(a), std::forward<B>(b));
     }
 
   template <typename T,
             typename A,
             typename B,
-            typename C> T *create(const A &a, const B &b, const C &c)
+            typename C> T *create(A &&a, B &&b, C &&c)
     {
     void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
-    return new(mem) T(a, b, c);
+    return new(mem) T(std::forward<A>(a), std::forward<B>(b), std::forward<C>(c));
     }
 
   template <typename T,
             typename A,
             typename B,
             typename C,
-            typename D> T *create(const A &a, const B &b, const C &c, const D &d)
+            typename D> T *create(A &&a, B &&b, C &&c, D &&d)
     {
     void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
-    return new(mem) T(a, b, c, d);
+    return new(mem) T(std::forward<A>(a), std::forward<B>(b), std::forward<C>(c), std::forward<D>(d
+                                                                                                  ));
     }
 
 
