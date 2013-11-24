@@ -60,7 +60,10 @@ void StackWalker::terminateSymbolNames()
 #endif
   }
 
-void StackWalker::getSymbolName(void *symbolLocation, Eks::String &symbolName, xsize maxSize)
+void StackWalker::getSymbolName(
+    void *X_USED_FOR_ASSERTS(symbolLocation),
+    Eks::String &X_USED_FOR_ASSERTS(symbolName),
+    xsize X_USED_FOR_ASSERTS(maxSize))
   {
 #if X_ENABLE_STACK_WALKING
 #ifdef Q_CC_MSVC
@@ -89,10 +92,13 @@ void StackWalker::getSymbolName(void *symbolLocation, Eks::String &symbolName, x
   (void)symbolName;
   (void)maxSize;
 #endif
+#else
 #endif
   }
 
-void StackWalker::walk(xsize skip, Visitor *visit)
+void StackWalker::walk(
+    xsize X_USED_FOR_ASSERTS(skip),
+    Visitor *X_USED_FOR_ASSERTS(visit))
   {
 #if X_ENABLE_STACK_WALKING
 #ifdef Q_CC_MSVC

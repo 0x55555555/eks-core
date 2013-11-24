@@ -88,10 +88,12 @@ private:
 #if X_ASSERTS_ENABLED
 # define xAssertMessage(condition, message, ...) if(!(condition) && Eks::detail::Assert::currentFireFunction()) { X_CONSTRUCT_ASSERT(condition, message, __VA_ARGS__); if( Eks::detail::Assert::currentFireFunction()(ass) && Eks::detail::Assert::currentBreakFunction() ) { Eks::detail::Assert::currentBreakFunction()(); } }
 # define xVerify xAssert
+#define X_USED_FOR_ASSERTS(x) x
 
 #else
 # define xAssertMessage(condition, message, ...)
 # define xVerify(x, ...) x
+#define X_USED_FOR_ASSERTS(x)
 
 template <bool Condition>
 struct xCompileTimeAssertDef
@@ -105,6 +107,7 @@ struct xCompileTimeAssertDef
 #define xAssert(condition, ...) xAssertMessage((condition), "", __VA_ARGS__)
 #define xAssertFail(...) xAssert(0, __VA_ARGS__);
 #define xAssertFailMessage(msg, ...) xAssertMessage(0, msg, __VA_ARGS__);
+
 
 
 

@@ -341,7 +341,7 @@ public:
     {
     }
 
-  virtual void *alloc(xsize s, xsize alignment=1)
+  virtual void *alloc(xsize X_USED_FOR_ASSERTS(s), xsize X_USED_FOR_ASSERTS(alignment=1))
     {
     // alignment should be embedded in the size passed to the constructor.
     xAssert((s+alignment) == size());
