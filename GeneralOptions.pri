@@ -1,4 +1,4 @@
-CONFIG += debug
+# CONFIG += debug
 
 include($$PWD"/SIMD.pri")
 include($$PWD"/C++0x.pri")
