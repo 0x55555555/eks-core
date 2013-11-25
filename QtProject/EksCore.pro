@@ -162,7 +162,8 @@ HEADERS += \
     ../include/QtHelper/XQApplication \
     ../include/QtHelper/XQWidgets \
     ../include/XFrame \
-    ../include/XSharedPointer
+    ../include/XSharedPointer \
+    ../include/XIntrusiveLinkedList
 
 
 
