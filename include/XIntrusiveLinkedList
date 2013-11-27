@@ -77,8 +77,9 @@ public:
     *location = val;
     }
 
-  static void remove(Node **start, Node *val)
+  static Node *remove(Node **start, Node *val)
     {
+    Node *node = nullptr;
     Node **location = start;
     while(*location)
       {
@@ -90,10 +91,12 @@ public:
         break;
         }
 
-      location = Derived::getNextLocation(*location);
+      node = *location;
+      location = Derived::getNextLocation(node);
       }
 
     *Derived::getNextLocation(val) = nullptr;
+    return node;
     }
 
   static bool contains(const Node *const *start, const Node *val)
