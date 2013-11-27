@@ -1,28 +1,80 @@
 #ifndef XINTRUSIVELINKEDLIST_H
 #define XINTRUSIVELINKEDLIST_H
 
+#include "XAssert"
+
 namespace Eks
 {
 template <typename Node, typename Derived> class IntrusiveLinkedListBase
   {
 public:
-  static void append(Node **start, Node *val)
+  static Node *getNext(Node *prev)
+    {
+    xAssert(prev);
+    Node **location = Derived::getNextLocation(prev);
+
+    xAssert(location);
+    return *location;
+    }
+
+  static Node *append(Node **start, Node *val, xsize *index)
     {
     xAssert(!Derived::getNext(val));
+    Node *node = nullptr;
     Node **location = start;
 
+    *index = 0;
     while(*location)
       {
-      Node **next = Derived::getNextLocation(*location);
+      node = *location;
 
-      xAssert(*next != val);
-      location = next;
+      location = Derived::getNextLocation(node);
+      xAssert(*location != val);
+
+      ++*index;
       }
 
-    if(location)
+    appendAt(location, val);
+    return node;
+    }
+
+  static Node* insert(Node** start, Node *val, xsize index)
+    {
+    xAssert(val);
+
+    Node *node = nullptr;
+    Node **location = start;
+
+    xsize count = 0;
+    while(*location && index != count)
       {
-      *location = val;
+      ++count;
+      node = *location;
+      location = Derived::getNextLocation(node);
       }
+
+    // failed to find insert point.
+    if(index != count)
+      {
+	  xAssertFail();
+      return nullptr;
+      }
+
+    appendAt(location, val);
+    return node;
+    }
+
+  static void appendAt(Node **location, Node *val)
+    {
+    xAssert(location);
+    xAssert(val);
+
+    xAssert(!Derived::getNext(val));
+
+    // insert this prop into the list
+    *Derived::getNextLocation(val) = *location;
+
+    *location = val;
     }
 
   static void remove(Node **start, Node *val)
@@ -66,10 +118,6 @@ template <typename Node,
     : public IntrusiveLinkedListBase<Node, IntrusiveLinkedListMember<Node, Next>>
   {
 public:
-  static Node *getNext(Node *prev)
-    {
-    return prev->*Next;
-    }
   static Node **getNextLocation(Node *prev)
     {
     return &(prev->*Next);
