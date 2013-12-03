@@ -15,7 +15,7 @@ struct SharedPolicy;
 
 template <typename T> class TypedAllocator;
 template <typename T, typename Policy, typename Alloc> class SharedPointer;
-template <typename T, typename Alloc> class UniquePointer;
+template <typename T, typename Alloc=Eks::TypedAllocator<T>> class UniquePointer;
 
 class AllocatorBase
   {
@@ -41,7 +41,9 @@ public:
   template <typename T>
     Eks::UniquePointer<T, TypedAllocator<T>> createUnique();
   template <typename T, typename A>
-    Eks::UniquePointer<T, TypedAllocator<T>> createUnique(A a);
+    Eks::UniquePointer<T, TypedAllocator<T>> createUnique(A &&a);
+  template <typename T, typename A, typename B>
+    Eks::UniquePointer<T, TypedAllocator<T>> createUnique(A &&a, B &&b);
 
   template <typename T> T *create()
     {

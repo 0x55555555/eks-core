@@ -92,14 +92,13 @@ public:
 
   template <typename U> void destroy(U *p)
     {
-    (void)p;
-    p->~U();
+    _alloc->destroy(p);
     }
 
   AllocatorBase *allocator() const
-	{
-	return _alloc;
-	}
+    {
+    return _alloc;
+    }
 
 protected:
   AllocatorBase *_alloc;
