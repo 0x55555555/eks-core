@@ -110,7 +110,7 @@ private:
 
   template <typename T> static void wrapDelete(void *p, Deleter* d)
     {
-    d->destroy(static_cast<T*>(p));
+    d->allocator()->destroy(static_cast<T*>(p));
     }
 
   void (*_delete)(void *, Deleter* d);

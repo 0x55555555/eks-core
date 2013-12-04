@@ -81,8 +81,7 @@ public:
             typename D> T *create(A &&a, B &&b, C &&c, D &&d)
     {
     void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
-    return new(mem) T(std::forward<A>(a), std::forward<B>(b), std::forward<C>(c), std::forward<D>(d
-                                                                                                  ));
+    return new(mem) T(std::forward<A>(a), std::forward<B>(b), std::forward<C>(c), std::forward<D>(d));
     }
 
 
@@ -128,9 +127,26 @@ public:
 
   template <typename T> void destroy(T *t)
     {
-    (void)t;
-    t->~T();
+    destruct(t);
     free(t);
+    }
+
+  template <typename Type>
+      static void construct(Type *p, const Type& val)
+    {
+    new(p) Type(val);
+    }
+
+  template <typename Type>
+      static void construct(Type *p, Type&& val)
+    {
+    new(p) Type(std::move(val));
+    }
+
+  template <typename U> static void destruct(U *p)
+    {
+    (void)p;
+    p->~U();
     }
   };
 

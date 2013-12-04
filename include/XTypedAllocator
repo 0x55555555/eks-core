@@ -80,21 +80,6 @@ public:
     _alloc = alloc.allocator();
     }
 
-  void construct(typename Base::pointer p, const_reference val)
-    {
-    new(p) T(val);
-    }
-
-  void construct(typename Base::pointer p, rvalue_reference val)
-    {
-    new(p) T(std::move(val));
-    }
-
-  template <typename U> void destroy(U *p)
-    {
-    _alloc->destroy(p);
-    }
-
   AllocatorBase *allocator() const
     {
     return _alloc;

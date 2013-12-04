@@ -241,7 +241,7 @@ public:
     // destroy the old data
     for(size_type i = 0; i < s; ++i)
       {
-      destroy(ThisBase::_first+i);
+      AllocatorBase::destruct(ThisBase::_first+i);
       }
 
     // always destroy the old data if it existed
@@ -279,7 +279,7 @@ public:
       // destroy the old data
       for(size_type i = 0; i < s; ++i)
         {
-        destroy(oldData+i);
+        AllocatorBase::destruct(oldData+i);
         }
 
       ThisBase::_first = newData;
@@ -305,7 +305,7 @@ public:
     // construct the extra members
     for(size_type i = oldSize; i < newSize; ++i)
       {
-      construct(&at(i), val);
+      AllocatorBase::construct(&at(i), val);
       }
     }
 
@@ -316,7 +316,7 @@ public:
     // construct the extra members
     for(size_type i = oldSize; i < newSize; ++i)
       {
-      construct(&at(i), T());
+      AllocatorBase::construct(&at(i), T());
       }
     }
 
@@ -328,7 +328,7 @@ public:
     // destroy extra members
     for(size_type i = newSize; i < s; ++i)
       {
-      destroy(&at(i));
+      AllocatorBase::destruct(&at(i));
       }
 
     // adjust the end
@@ -343,7 +343,7 @@ public:
     // construct the extra members
     for(size_type i = s; i < newSize; ++i, ++val)
       {
-      construct(&at(i), *val);
+      AllocatorBase::construct(&at(i), *val);
       }
     }
 
@@ -354,7 +354,7 @@ public:
 
   bool compare(const T *other, size_type count, size_type start=0) const
     {
-    if(start + count >= length())
+    if(start + count > length())
       {
       return false;
       }
@@ -420,7 +420,7 @@ public:
     T bck = std::move(*ThisBase::_end);
 
     // destroy extra member
-    destroy(ThisBase::_end);
+    AllocatorBase::destruct(ThisBase::_end);
 
     return bck;
     }
@@ -434,7 +434,7 @@ public:
       }
 
     xAssert(ThisBase::_end < ThisBase::_last);
-    construct(ThisBase::_end, t);
+    AllocatorBase::construct(ThisBase::_end, t);
     ThisBase::_end++;
     }
 
@@ -447,7 +447,7 @@ public:
       }
 
     xAssert(ThisBase::_end < ThisBase::_last);
-    construct(ThisBase::_end, std::move(t));
+    AllocatorBase::construct(ThisBase::_end, std::move(t));
     ThisBase::_end++;
     }
 
@@ -619,7 +619,7 @@ private:
     // destroy extra members
     for(size_type i = newSize; i < s; ++i)
       {
-      destroy(&at(i));
+      AllocatorBase::destruct(&at(i));
       }
 
     // adjust the end
