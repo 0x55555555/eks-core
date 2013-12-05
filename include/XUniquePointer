@@ -47,6 +47,12 @@ public:
     clear();
     }
 
+  UniquePointer<T>& operator=(nullptr_t)
+    {
+    clear();
+    return *this;
+    }
+
   UniquePointer<T>& operator=(UniquePointer<T, Deleter> &&oth)
     {
     assign(std::move(oth));
