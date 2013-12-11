@@ -1,5 +1,3 @@
-# CONFIG += debug
-
 include($$PWD"/SIMD.pri")
 include($$PWD"/C++0x.pri")
 
@@ -7,7 +5,7 @@ win32-g++ {
   QMAKE_CXXFLAGS += -Wall
 }
 
-debug {
+CONFIG( debug, debug|release ) {
   DEFINES += NDEBUG _DEBUG X_DEBUG
 } else {
   DEFINES += QT_NO_DEBUG
