@@ -1,5 +1,4 @@
-#include "XStringSimple"
-#include "QtCore/QHash"
+#include "Containers/XStringSimple.h"
 
 QDataStream &operator>>(QDataStream &str, Eks::Char &vec)
   {

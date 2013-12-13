@@ -1,7 +1,6 @@
-#include "XTime"
-#include "QDebug"
-#include "XGlobal"
-#include "XAssert"
+#include "Utilities/XTime.h"
+#include "XGlobal.h"
+#include "Utilities/XAssert.h"
 #include "QDataStream"
 
 #if defined(Q_OS_WIN)

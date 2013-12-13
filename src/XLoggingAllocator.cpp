@@ -1,9 +1,9 @@
-#include "XLoggingAllocator"
-#include "XAssert"
+#include "Memory/XLoggingAllocator.h"
+#include "Utilities/XAssert.h"
 #include "QDebug"
 #include "unordered_map"
-#include "XStringSimple"
-#include "XGlobalAllocator"
+#include "Containers/XStringSimple.h"
+#include "Memory/XGlobalAllocator.h"
 
 namespace Eks
 {

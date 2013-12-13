@@ -1,4 +1,4 @@
-#include "XFileSequence"
+#include "Utilities/XFileSequence.h"
 #include "QRegExp"
 
 #include "QDebug"

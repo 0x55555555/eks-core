@@ -1,8 +1,8 @@
-#include "XEventLogger"
+#include "Utilities/XEventLogger.h"
 #include "QtCore/QThreadStorage"
 #include "QtCore/QThread"
-#include "XCore"
-#include "XStringSimple"
+#include "XCore.h"
+#include "Containers/XStringSimple.h"
 
 bool loggingEnabled()
   {

@@ -1,7 +1,7 @@
-#include "XGlobalAllocator"
-#include "XEventLogger"
-#include "XAssert"
-#include "XLoggingAllocator"
+#include "Memory/XGlobalAllocator.h"
+#include "Utilities/XEventLogger.h"
+#include "Utilities/XAssert.h"
+#include "Memory/XLoggingAllocator.h"
 
 #ifndef Q_CC_MSVC
 # include <malloc.h>

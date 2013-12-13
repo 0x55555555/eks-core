@@ -1,9 +1,9 @@
-#include "XCore"
-#include "XGlobalAllocator"
-#include "XLoggingAllocator"
-#include "XTemporaryAllocator"
-#include "XUnorderedMap"
-#include "XEventLogger"
+#include "XCore.h"
+#include "Memory/XGlobalAllocator.h"
+#include "Memory/XLoggingAllocator.h"
+#include "Memory/XTemporaryAllocator.h"
+#include "Containers/XUnorderedMap.h"
+#include "Utilities/XEventLogger.h"
 
 namespace Eks
 {

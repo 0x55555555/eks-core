@@ -1,7 +1,7 @@
-#include "XAssert"
-#include "XUnorderedMap"
-#include "XCore"
-#include "XStringSimple"
+#include "Utilities/XAssert.h"
+#include "Containers/XUnorderedMap.h"
+#include "XCore.h"
+#include "Containers/XStringSimple.h"
 
 #if X_ADVANCED_ASSERT
 #if QT_VERSION >= 0x050000
@@ -12,7 +12,7 @@
 # include "QtGui/QPushButton"
 #endif
 
-#include "QtHelper/XQApplication"
+#include "QtHelper/XQApplication.h"
 #include "QtCore/QThread"
 #endif
 

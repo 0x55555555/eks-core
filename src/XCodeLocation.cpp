@@ -1,8 +1,14 @@
-#include "XCodeLocation"
-#include "XStringSimple"
-#include "XStringBuffer"
+#include "Utilities/XCodeLocation.h"
+#include "Containers/XStringSimple.h"
+#include "Containers/XStringBuffer.h"
 #include "QHash"
 #include "QDebug"
+
+#if defined(X_DEBUG) && !defined(X_ARCH_ARM)
+# define X_ENABLE_STACK_WALKING 1
+#else
+# define X_ENABLE_STACK_WALKING 0
+#endif
 
 #if defined(Q_CC_MSVC) && X_ENABLE_STACK_WALKING
 # include <Windows.h>
