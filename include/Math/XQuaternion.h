@@ -20,6 +20,16 @@ inline bool operator!=(const Eks::Quaternion &a, const Eks::Quaternion& b)
   return a.coeffs() != b.coeffs();
   }
 
+inline std::ostream &operator<<(std::ostream &str, const Eks::Quaternion &quat)
+  {
+  return str << quat.x() << " " << quat.y() << " " << quat.z() << " " << quat.w();
+  }
+
+inline std::istream &operator>>(std::istream &str, Eks::Quaternion &quat)
+  {
+  return str >> quat.x() >> quat.y() >> quat.z() >> quat.w();
+  }
+
 #if X_QT_INTEROP
 
 #include "QtCore/QTextStream"
@@ -27,7 +37,6 @@ inline bool operator!=(const Eks::Quaternion &a, const Eks::Quaternion& b)
 
 inline QTextStream &operator<<(QTextStream &str, const Eks::Quaternion &quat)
   {
-
   return str << quat.x() << " " << quat.y() << " " << quat.z() << " " << quat.w();
   }
 

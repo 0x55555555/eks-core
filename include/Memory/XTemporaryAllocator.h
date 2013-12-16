@@ -44,8 +44,12 @@ private:
 class EKSCORE_EXPORT TemporaryAllocator : public AllocatorBase
   {
 public:
-  TemporaryAllocator(TemporaryAllocatorCore *core);
+  TemporaryAllocator(TemporaryAllocatorCore *core = nullptr);
   ~TemporaryAllocator();
+
+  void reset();
+  void init(TemporaryAllocatorCore *core);
+
 
   void *alloc(xsize size, xsize alignment) X_OVERRIDE;
   void free(void *mem) X_OVERRIDE;

@@ -272,6 +272,13 @@ public:
     append(arr);
     }
 
+  template <xsize P, typename A>
+  String& operator+=(const StringBase<Char, P, A> &t)
+    {
+    append(t);
+    return *this;
+    }
+
   String& operator+=(const String &t)
     {
     append(t);
@@ -376,13 +383,20 @@ public:
     {
     }
   template<xsize Prealloc, typename Alloc>
-  String(
-    const StringBase<Char, Prealloc, Alloc> &n,
-    AllocatorBase *alloc=Core::defaultAllocator())
+  String(const StringBase<Char, Prealloc, Alloc> &n)
+      : BaseType(n, n.allocator().allocator() ? n.allocator().allocator() : Core::defaultAllocator())
+    {
+    }
+  template<xsize Prealloc, typename Alloc>
+  String(const StringBase<Char, Prealloc, Alloc> &n, AllocatorBase *alloc)
       : BaseType(n, alloc)
     {
     }
-  String(String &&n, AllocatorBase *alloc=Core::defaultAllocator())
+  String(String &&n)
+      : BaseType(n, n.allocator().allocator() ? n.allocator().allocator() : Core::defaultAllocator())
+    {
+    }
+  String(String &&n, AllocatorBase *alloc)
       : BaseType(n, alloc)
     {
     }
@@ -424,6 +438,13 @@ Q_DECLARE_METATYPE(Eks::String);
 
 template <typename C, xsize P, typename A> QDebug operator<<(
     QDebug dbg,
+    const Eks::StringBase<C, P, A> &str)
+  {
+  return dbg << str.data();
+  }
+
+template <typename C, xsize P, typename A> std::ostream &operator<<(
+    std::ostream &dbg,
     const Eks::StringBase<C, P, A> &str)
   {
   return dbg << str.data();

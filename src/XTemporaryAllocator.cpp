@@ -82,15 +82,20 @@ TemporaryAllocatorCore::Block *TemporaryAllocatorCore::createBlock(xsize expecte
 
 TemporaryAllocator::TemporaryAllocator(TemporaryAllocatorCore *core)
     : _current(0),
-      _used(0),
+      _used(nullptr),
       _allocationCount(0)
   {
-  _core = core;
+  init(core);
   }
 
 TemporaryAllocator::~TemporaryAllocator()
   {
-  xAssert(_allocationCount == 0);  
+  reset();
+  }
+
+void TemporaryAllocator::reset()
+  {
+  xAssert(_allocationCount == 0);
   xAssert(!_used || _current);
 
   if(_current)
@@ -108,10 +113,24 @@ TemporaryAllocator::~TemporaryAllocator()
 
     b = next;
     }
+
+  _current = nullptr;
+  _used = nullptr;
+  _allocationCount = 0;
+  }
+
+void TemporaryAllocator::init(TemporaryAllocatorCore *core)
+  {
+  xAssert(!_current);
+  xAssert(!_used);
+  xAssert(!_allocationCount);
+
+  _core = core;
   }
 
 void *TemporaryAllocator::alloc(xsize size, xsize alignment)
   {
+  xAssert(_core);
   ++_allocationCount;
 
   if(_current)

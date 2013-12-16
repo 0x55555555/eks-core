@@ -17,8 +17,14 @@ XProperties:
   XROProperty(T *, pointer);
 
 public:
-  explicit UniquePointer(T *value=0, Deleter d=Deleter())
+  explicit UniquePointer(T *value=nullptr, Deleter d=Deleter())
       : Deleter(d), _pointer(value), _delete(wrapDelete<T>)
+    {
+    }
+
+  template <typename X>
+  UniquePointer(UniquePointer<X>&& value)
+      : Deleter(value), _pointer(value._pointer), _delete(value._delete)
     {
     }
 
