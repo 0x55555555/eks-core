@@ -44,6 +44,8 @@ public:
     Eks::UniquePointer<T, TypedAllocator<T>> createUnique(A &&a);
   template <typename T, typename A, typename B>
     Eks::UniquePointer<T, TypedAllocator<T>> createUnique(A &&a, B &&b);
+  template <typename T, typename A, typename B, typename C>
+    Eks::UniquePointer<T, TypedAllocator<T>> createUnique(A &&a, B &&b, C &&c);
 
   template <typename T> T *create()
     {

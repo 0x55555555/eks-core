@@ -126,6 +126,8 @@ private:
     }
 
   void (*_delete)(void *, Deleter* d);
+
+  template <typename, typename> friend class UniquePointer;
   };
 
 template <typename T> Eks::UniquePointer<T, TypedAllocator<T>> AllocatorBase::createUnique()
@@ -157,6 +159,19 @@ template <typename T, typename A, typename B>
   void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
 
   auto t = new(mem) T(std::forward<A>(a), std::forward<B>(b));
+  TypedAllocator<T> alloc(this);
+
+  Eks::UniquePointer<T, TypedAllocator<T>> ptr(t, alloc);
+  return std::move(ptr);
+  }
+
+
+template <typename T, typename A, typename B, typename C>
+    Eks::UniquePointer<T, TypedAllocator<T>> AllocatorBase::createUnique(A &&a, B &&b, C &&c)
+  {
+  void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+
+  auto t = new(mem) T(std::forward<A>(a), std::forward<B>(b), std::forward<C>(c));
   TypedAllocator<T> alloc(this);
 
   Eks::UniquePointer<T, TypedAllocator<T>> ptr(t, alloc);
