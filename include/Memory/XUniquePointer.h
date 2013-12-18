@@ -26,6 +26,7 @@ public:
   UniquePointer(UniquePointer<X>&& value)
       : Deleter(value), _pointer(value._pointer), _delete(value._delete)
     {
+    value.release();
     }
 
   UniquePointer(nullptr_t)
