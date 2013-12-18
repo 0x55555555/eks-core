@@ -77,7 +77,7 @@ public:
     {
     if(_pointer)
       {
-      _delete(_pointer, this);
+      _delete(_pointer, allocator());
       _pointer = 0;
       }
     }
@@ -120,12 +120,12 @@ public:
 private:
   X_DISABLE_COPY(UniquePointer);
 
-  template <typename T> static void wrapDelete(void *p, Deleter* d)
+  template <typename T> static void wrapDelete(void *p, AllocatorBase* d)
     {
-    d->allocator()->destroy(static_cast<T*>(p));
+    d->destroy(static_cast<T*>(p));
     }
 
-  void (*_delete)(void *, Deleter* d);
+  void (*_delete)(void *, AllocatorBase* d);
 
   template <typename, typename> friend class UniquePointer;
   };
