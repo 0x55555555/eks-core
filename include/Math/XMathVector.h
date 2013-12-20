@@ -32,10 +32,9 @@ xCompileTimeAssert(sizeof(Vector2DTight) == sizeof(float) * 2);
 #if X_QT_INTEROP
 
 #include "QtCore/QMetaType"
-#include "QtCore/QTextStream"
 #include "QtCore/QDataStream"
 
-template <typename Derived> QTextStream &operator>>(QTextStream &str, Eigen::PlainObjectBase<Derived> &vec)
+template <typename Derived> std::istream &operator>>(std::istream &str, Eigen::PlainObjectBase<Derived> &vec)
   {
   qint32 rows = Derived::RowsAtCompileTime;
   xint32 cols = Derived::ColsAtCompileTime;
@@ -61,7 +60,7 @@ template <typename Derived> QTextStream &operator>>(QTextStream &str, Eigen::Pla
   return str;
   }
 
-template <typename Derived> QTextStream &operator<<(QTextStream &str, const Eigen::PlainObjectBase<Derived> &vec)
+template <typename Derived> std::ostream &operator<<(std::ostream &str, const Eigen::PlainObjectBase<Derived> &vec)
   {
   xint32 rows = Derived::RowsAtCompileTime;
   xint32 cols = Derived::ColsAtCompileTime;

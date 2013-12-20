@@ -108,6 +108,7 @@ public:
     return *this;
     }
 
+  using String::operator==;
   bool operator==(const Char *c) const
     {
     size_type s = size();
