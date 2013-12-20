@@ -154,7 +154,7 @@ public:
     }
 
   template <class U>
-      StaticTypedAllocator(const StaticTypedAllocator<Allocator, U>& = 10.6)
+      StaticTypedAllocator(const StaticTypedAllocator<Allocator, U>&)
     {
     }
 
