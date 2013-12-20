@@ -41,17 +41,17 @@ public:
     {
     const size_type s = strlen(n);
     resizeAndCopy(s, n);
-    xAssert(!String::size() || at(size()) == '\0');
+    xAssert(!String::size() || String::at(size()) == '\0');
     }
-  StringBase(const String &n, AllocatorBase *alloc=0)
-      : String(n, Alloc(alloc))
+  StringBase(const String &n)
+      : String(n, n)
     {
-    xAssert(!String::size() || at(size()) == '\0');
+    xAssert(!String::size() || String::at(size()) == '\0');
     }
   StringBase(String &&n)
       : String(n)
     {
-    xAssert(!String::size() || at(size()) == '\0');
+    xAssert(!String::size() || String::at(size()) == '\0');
     }
 
   template <typename C, xsize S, typename A> StringBase(
@@ -59,7 +59,7 @@ public:
       AllocatorBase *alloc=0)
     : String(n, Alloc(alloc))
     {
-    xAssert(!String::size() || at(size()) == '\0');
+    xAssert(!String::size() || String::at(size()) == '\0');
     }
 
 #if X_STL_INTEROP
@@ -95,6 +95,13 @@ public:
 #endif
 
   using String::operator=;
+  ThisType& operator=(const ThisType& oth)
+    {
+    clear();
+    append(oth);
+    return *this;
+    }
+
   ThisType& operator=(const Char* oth)
     {
     clear();
@@ -106,8 +113,7 @@ public:
   bool operator==(const Char *c) const
     {
     size_type s = size();
-    return s == Traits::length(c) &&
-        compare(c, s);
+    return s == Traits::length(c) && String::compare(c, s);
     }
 
   using String::operator!=;
@@ -189,7 +195,7 @@ public:
       }
     // resize up
     String::resize(newSize+1, val);
-    at(newSize) = '\0';
+    String::at(newSize) = '\0';
     }
 
   template <typename It>
@@ -221,7 +227,7 @@ public:
       }
     String::append(data);
     String::pushBack('\0');
-    xAssert(!String::size() || at(size()) == '\0');
+    xAssert(!String::size() || String::at(size()) == '\0');
     }
 
   void append(const Char *data)
@@ -231,7 +237,7 @@ public:
       String::popBack();
       }
     String::resizeAndCopy(String::size()+strlen(data)+1, data);
-    xAssert(at(size()) == '\0');
+    xAssert(String::at(size()) == '\0');
     }
 
   void append(Char data)
@@ -242,7 +248,7 @@ public:
       }
     String::resize(size() + 2, data);
     String::at(String::size()-1) = '\0';
-    xAssert(at(size()) == '\0');
+    xAssert(String::at(size()) == '\0');
     }
 
   template <typename Other>
@@ -392,6 +398,10 @@ public:
       : BaseType(n, alloc)
     {
     }
+  String(const String &n)
+      : BaseType(n, n.allocator().allocator() ? n.allocator().allocator() : Core::defaultAllocator())
+    {
+    }
   String(String &&n)
       : BaseType(n, n.allocator().allocator() ? n.allocator().allocator() : Core::defaultAllocator())
     {
@@ -418,6 +428,13 @@ public:
     resizeAndCopy(arr.length(), arr.data());
     }
 #endif
+
+  String &operator=(const String &str)
+    {
+    clear();
+    append(str);
+    return *this;
+    }
   };
 
 }

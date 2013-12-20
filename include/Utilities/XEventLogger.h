@@ -40,7 +40,7 @@ public:
     Moment
     };
 
-  typedef xsize EventID;
+  typedef xuint64 EventID;
   struct EventItem
     {
     Eks::Time time;

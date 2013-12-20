@@ -43,7 +43,7 @@ bool Assert::defaultFire(const Assert &a)
     return false;
     }
 
-  if(QThread::currentThread() != QApplication::instance()->thread())
+  if(QApplication::instance() && QThread::currentThread() != QApplication::instance()->thread())
     {
     return true;
     } 

@@ -2,9 +2,14 @@
 #define XGLOBAL_H
 
 #include <stdint.h>
+#include <cstddef>
 
 #if defined(_WIN32) || defined(_WIN64)
 #define X_WIN
+#endif
+
+#if defined(__APPLE__)
+#define X_MAC
 #endif
 
 #ifdef _MSC_VER
@@ -32,7 +37,7 @@
 #ifdef X_DEBUG
 # define X_ASSERTS_ENABLED 1
 
-# ifndef X_ARCH_ARM
+# if !(defined(X_ARCH_ARM) || defined(X_MAC))
 #  define X_ENABLE_HEAP_CHECK
 # endif
 
@@ -81,8 +86,8 @@ typedef int32_t xint32;       /* 32 bit signed */
 typedef uint32_t xuint32;     /* 32 bit unsigned */
 typedef int64_t xint64;       /* 64 bit signed */
 typedef uint64_t xuint64;     /* 46 bit unsigned */
-typedef size_t xsize;
-typedef ptrdiff_t xptrdiff;
+typedef std::size_t xsize;
+typedef std::ptrdiff_t xptrdiff;
 
 #define X_INT64_C(c) static_cast<long long>(c ## LL)     /* signed 64 bit constant */
 #define X_UINT64_C(c) static_cast<unsigned long long>(c ## ULL) /* unsigned 64 bit constant */

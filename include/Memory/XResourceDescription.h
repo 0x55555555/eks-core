@@ -4,6 +4,7 @@
 #include "XGlobal.h"
 #include "Utilities/XProperty.h"
 #include "Utilities/XAssert.h"
+#include <type_traits>
 
 namespace Eks
 {

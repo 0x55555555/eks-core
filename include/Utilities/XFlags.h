@@ -152,6 +152,16 @@ public:
     return _internal;
     }
 
+  void setValue(CONTAINER c)
+    {
+    _internal = c;
+    }
+
+  CONTAINER value() const
+    {
+    return _internal;
+    }
+
   xuint8 numberOfSetBits() const
     {
     return Helpers::numberOfSetBits(_internal);
@@ -190,49 +200,46 @@ protected:
 template <typename ENUM, typename CONTAINER=xuint32> class Flags : Eks::BitField<CONTAINER>
   {
 public:
-  Flags(CONTAINER c) { _internal = c; }
-  Flags(ENUM c) { _internal = (CONTAINER)c; }
+  Flags(CONTAINER c) : BitField<CONTAINER>(c) { }
+  Flags(ENUM c) : BitField<CONTAINER>((CONTAINER)c) { }
 
   typedef decltype(std::declval<CONTAINER>() | std::declval<ENUM>()) OrResult;
 
-  bool hasFlag(ENUM c) const { return (_internal&c) != 0; }
-  bool hasAnyFlags(OrResult c) const { return (_internal&c) != 0; }
-  bool hasAnyFlags() const { return _internal != 0; }
-  bool hasAllFlags(OrResult c) const { return (_internal&c) == (CONTAINER)c; }
+  CONTAINER value() const { return BitField<CONTAINER>::value(); }
 
-  void clearFlag(ENUM c) { _internal = ~(~_internal | c); }
-  void setFlag(ENUM c) { _internal = _internal|c; }
+  bool hasFlag(ENUM c) const { return (value()&c) != 0; }
+  bool hasAnyFlags(OrResult c) const { return (value()&c) != 0; }
+  bool hasAnyFlags() const { return value() != 0; }
+  bool hasAllFlags(OrResult c) const { return (value()&c) == (CONTAINER)c; }
+
+  void clearFlag(ENUM c) { BitField<CONTAINER>::setValue(~(~value() | c)); }
+  void setFlag(ENUM c) { BitField<CONTAINER>::setValue(value()|c); }
   void setFlag(ENUM c, bool val) { if(val) { setFlag(c); } else { clearFlag(c); } }
 
   Flags<ENUM, CONTAINER> operator~() const
     {
-    return Flags(~_internal);
+    return Flags(~value());
     }
 
   Flags<ENUM, CONTAINER> operator&(const Flags<ENUM, CONTAINER> &f) const
     {
-    return Flags(_internal&f._internal);
+    return Flags(value()&f.value());
     }
 
   bool operator==(CONTAINER c)
     {
-    return _internal == c;
+    return value() == c;
     }
 
   bool operator!=(CONTAINER c)
     {
-    return _internal != c;
+    return value() != c;
     }
 
   Flags<ENUM, CONTAINER> &operator |=(CONTAINER c)
     {
-    _internal |= c;
+    value() |= c;
     return *this;
-    }
-
-  CONTAINER operator*() const
-    {
-    return _internal;
     }
   };
 

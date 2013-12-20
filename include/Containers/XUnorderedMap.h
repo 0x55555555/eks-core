@@ -862,7 +862,7 @@ Q_OUTOFLINE_TEMPLATE typename UnorderedMap<Key, T>::Node **UnorderedMap<Key, T>:
                                                                             uint *ahp) const
 {
     Node **node;
-    uint h = qHash(akey);
+    uint h = ::qHash(akey);
 
     if (d->numBuckets) {
         node = reinterpret_cast<Node **>(&d->buckets[h % d->numBuckets]);

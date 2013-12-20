@@ -18,24 +18,30 @@ XProperties:
 
 public:
   explicit UniquePointer(T *value=nullptr, Deleter d=Deleter())
-      : Deleter(d), _pointer(value), _delete(wrapDelete<T>)
+      : Deleter(d),
+        _pointer(value),
+        _delete(wrapDelete<T>)
     {
     }
 
   template <typename X>
   UniquePointer(UniquePointer<X>&& value)
-      : Deleter(value), _pointer(value._pointer), _delete(value._delete)
+      : Deleter(value),
+        _pointer(value._pointer),
+        _delete(value._delete)
     {
     value.release();
     }
 
-  UniquePointer(nullptr_t)
-      : _pointer(nullptr), _delete(wrapDelete<void>)
+  UniquePointer(std::nullptr_t)
+      : _pointer(nullptr),
+        _delete(wrapDelete<int>)
     {
     }
 
   UniquePointer(UniquePointer<T, Deleter> &&oth)
-      : Deleter(oth), _pointer(0)
+      : Deleter(oth),
+        _pointer(0)
     {
     std::swap(_pointer, oth._pointer);
     std::swap(_delete, oth._delete);
@@ -43,7 +49,8 @@ public:
 
   /// \brief move from a further derived class
   template <typename Higher> UniquePointer(UniquePointer<Higher, Deleter> &&oth)
-      : Deleter(oth), _pointer(0)
+      : Deleter(oth),
+        _pointer(0)
     {
     std::swap(_pointer, oth._pointer);
     std::swap(_delete, oth._delete);
@@ -54,7 +61,7 @@ public:
     clear();
     }
 
-  UniquePointer<T>& operator=(nullptr_t)
+  UniquePointer<T>& operator=(std::nullptr_t)
     {
     clear();
     return *this;
@@ -78,7 +85,7 @@ public:
     {
     if(_pointer)
       {
-      _delete(_pointer, allocator());
+      _delete(_pointer, Deleter::allocator());
       _pointer = 0;
       }
     }
@@ -121,9 +128,9 @@ public:
 private:
   X_DISABLE_COPY(UniquePointer);
 
-  template <typename T> static void wrapDelete(void *p, AllocatorBase* d)
+  template <typename X> static void wrapDelete(void *p, AllocatorBase* d)
     {
-    d->destroy(static_cast<T*>(p));
+    d->destroy(static_cast<X*>(p));
     }
 
   void (*_delete)(void *, AllocatorBase* d);

@@ -3,10 +3,6 @@
 #include "Utilities/XAssert.h"
 #include "Memory/XLoggingAllocator.h"
 
-#ifndef Q_CC_MSVC
-# include <malloc.h>
-#endif
-
 namespace Eks
 {
 

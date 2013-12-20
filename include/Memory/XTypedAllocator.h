@@ -125,7 +125,7 @@ public:
     }
 
   template <class U>
-      StaticTypedAllocator(const StaticTypedAllocator<Allocator, U>& alloc)
+      StaticTypedAllocator(const StaticTypedAllocator<Allocator, U>&)
     {
     }
 
@@ -154,7 +154,7 @@ public:
     }
 
   template <class U>
-      StaticTypedAllocator(const StaticTypedAllocator<Allocator, U>& alloc)
+      StaticTypedAllocator(const StaticTypedAllocator<Allocator, U>& = 10.6)
     {
     }
 

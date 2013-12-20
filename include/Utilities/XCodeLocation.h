@@ -44,7 +44,11 @@ public:
 
 }
 
+#if X_QT_INTEROP
+
 uint qHash(const Eks::CodeLocation &a);
+
+#endif
 
 #define X_CURRENT_CODE_LOCATION Eks::CodeLocation(__FILE__, __LINE__, xCurrentFunction)
 

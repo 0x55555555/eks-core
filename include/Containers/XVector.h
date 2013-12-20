@@ -246,7 +246,7 @@ public:
     // always destroy the old data if it existed
     if(ThisBase::_first && !isUsingEmbeddedStorage())
       {
-      deallocate(ThisBase::_first, oldCapacity);
+      ThisBase::deallocate(ThisBase::_first, oldCapacity);
       }
 
     ThisBase::_first = newData;
@@ -293,7 +293,7 @@ public:
     // always destroy the old data if it existed
     if(shouldDestroy)
       {
-      deallocate(oldData, oldCapacity);
+      ThisBase::deallocate(oldData, oldCapacity);
       }
     }
 
