@@ -50,6 +50,7 @@ public:
   void reset();
   void init(TemporaryAllocatorCore *core);
 
+  bool isEmpty() const { return _allocationCount == 0; }
 
   void *alloc(xsize size, xsize alignment) X_OVERRIDE;
   void free(void *mem) X_OVERRIDE;

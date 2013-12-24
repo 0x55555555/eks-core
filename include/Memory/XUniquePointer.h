@@ -96,7 +96,7 @@ public:
     clear();
     (Deleter&)(*this) = data;
     _pointer = data.release();
-    _delete = wrapDelete<T>;
+    _delete = data._delete;
     }
 
   void assign(UniquePointer<T> &&data)
@@ -104,7 +104,7 @@ public:
     clear();
     (Deleter&)(*this) = data;
     std::swap(_pointer, data._pointer);
-    _delete = wrapDelete<T>;
+    _delete = data._delete;
     }
 
   T *release()

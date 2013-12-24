@@ -30,7 +30,8 @@ SOURCES += \
     ../src/XGlobalAllocator.cpp \
     ../src/XTemporaryAllocator.cpp \
     ../src/XLoggingAllocator.cpp \
-    ../src/XCore.cpp
+    ../src/XCore.cpp \
+    ../src/XJsonWriter.cpp
 
 HEADERS += \
     ../include/Math/Eigen/SVD \
@@ -149,7 +150,8 @@ HEADERS += \
     ../include/Utilities/XCodeLocation.h \
     ../include/Utilities/XAssert.h \
     ../include/XGlobal.h \
-    ../include/XCore.h
+    ../include/XCore.h \
+    ../include/Utilities/XJsonWriter.h
 
 
 
