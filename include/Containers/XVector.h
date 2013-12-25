@@ -360,7 +360,14 @@ public:
 
     const T *ths = data() + start;
 
-    return memcmp(ths, other, sizeof(T) * count) == 0;
+    for(xsize i = 0; i < count; ++i)
+      {
+      if(*(ths+i) != *(other+i))
+        {
+        return false;
+        }
+      }
+    return true;
     }
 
   bool operator==(const ThisType &oth) const

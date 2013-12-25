@@ -121,6 +121,11 @@ public:
     return !(*this == c);
     }
 
+  bool operator<(const ThisType &oth) const
+    {
+    return std::lexicographical_compare(String::begin(), String::end(), oth.begin(), oth.end());
+    }
+
   void clear()
     {
     String::clear();
