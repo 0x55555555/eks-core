@@ -56,7 +56,7 @@ public:
     // failed to find insert point.
     if(index != count)
       {
-	  xAssertFail();
+      xAssertFail();
       return nullptr;
       }
 

@@ -447,7 +447,7 @@ public:
 
 template <typename C, xsize P, typename A> uint qHash(const Eks::StringBase<C, P, A> &a)
   {
-  return qHash(a.data());
+  return qHash(QLatin1String(a.data(), a.length()));
   }
 
 EKSCORE_EXPORT QDataStream &operator>>(QDataStream &str, Eks::Char &vec);
