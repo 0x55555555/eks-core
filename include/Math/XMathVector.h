@@ -34,6 +34,8 @@ xCompileTimeAssert(sizeof(Vector2DTight) == sizeof(float) * 2);
 #include "QtCore/QMetaType"
 #include "QtCore/QDataStream"
 
+namespace Eigen
+{
 template <typename Derived> std::istream &operator>>(std::istream &str, Eigen::PlainObjectBase<Derived> &vec)
   {
   qint32 rows = Derived::RowsAtCompileTime;
@@ -94,6 +96,7 @@ template <typename Derived> std::ostream &operator<<(std::ostream &str, const Ei
 
   return str;
   }
+}
 
 template <typename Derived> QDataStream &operator>>(QDataStream &str, Eigen::PlainObjectBase<Derived> &vec)
   {
