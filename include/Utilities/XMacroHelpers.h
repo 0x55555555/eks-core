@@ -123,17 +123,6 @@
 #define X_NUM_ARGS(...)								X_IF(X_IS_EMPTY(__VA_ARGS__), 0, X_VA_NUM_ARGS(__VA_ARGS__))
 
 
-// X_PASS_ARGS passes __VA_ARGS__ as multiple parameters to another macro, working around the following bug:
-// https://connect.microsoft.com/VisualStudio/feedback/details/521844/variadic-macro-treating-va-args-as-a-single-parameter-for-other-macros#details
-#if _MSC_VER >= 1400
-#	define X_PASS_ARGS_LEFT (
-#	define X_PASS_ARGS_RIGHT )
-#	define X_PASS_ARGS(...)							X_PASS_ARGS_LEFT __VA_ARGS__ X_PASS_ARGS_RIGHT
-#else
-#	define X_PASS_ARGS(...)							(__VA_ARGS__)
-#endif
-
-
 // Expand any number of arguments into a list of operations called with those arguments
 #define X_EXPAND_ARGS_0(op, arg, empty)
 #define X_EXPAND_ARGS_1(op, arg, a1)																			op(a1, arg, 0)
@@ -153,7 +142,16 @@
 #define X_EXPAND_ARGS_15(op, arg, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)			op(a1, arg, 0) op(a2, arg, 1) op(a3, arg, 2) op(a4, arg, 3) op(a5, arg, 4) op(a6, arg, 5) op(a7, arg, 6) op(a8, arg, 7) op(a9, arg, 8) op(a10, arg, 9) op(a11, arg, 10) op(a12, arg, 11) op(a13, arg, 12) op(a14, arg, 13) op(a15, arg, 14)
 #define X_EXPAND_ARGS_16(op, arg, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)	op(a1, arg, 0) op(a2, arg, 1) op(a3, arg, 2) op(a4, arg, 3) op(a5, arg, 4) op(a6, arg, 5) op(a7, arg, 6) op(a8, arg, 7) op(a9, arg, 8) op(a10, arg, 9) op(a11, arg, 10) op(a12, arg, 11) op(a13, arg, 12) op(a14, arg, 13) op(a15, arg, 14) op(a16, arg, 15)
 
-#define X_EXPAND_ARGS(op, a1, ...)		X_JOIN_2(X_EXPAND_ARGS_, X_NUM_ARGS(__VA_ARGS__)) X_PASS_ARGS(op, a1, __VA_ARGS__)
+// X_PASS_ARGS passes __VA_ARGS__ as multiple parameters to another macro, working around the following bug:
+// https://connect.microsoft.com/VisualStudio/feedback/details/521844/variadic-macro-treating-va-args-as-a-single-parameter-for-other-macros#details
+#if _MSC_VER >= 1400
+#	define X_PASS_ARGS_LEFT (
+#	define X_PASS_ARGS_RIGHT )
+#	define X_PASS_ARGS(...)							X_PASS_ARGS_LEFT __VA_ARGS__ X_PASS_ARGS_RIGHT
+# define X_EXPAND_ARGS(op, a1, ...)		X_JOIN_2(X_EXPAND_ARGS_, X_NUM_ARGS(__VA_ARGS__)) X_PASS_ARGS(op, a1, __VA_ARGS__)
+#else
+# define X_EXPAND_ARGS(op, a1, ...)		X_JOIN_2(X_EXPAND_ARGS_, X_NUM_ARGS(__VA_ARGS__)) (op, a1, __VA_ARGS__)
+#endif
 
 #if defined(Q_CC_MSVC)
 # define xForeach(VAR, RANGE) for each(VAR in RANGE)

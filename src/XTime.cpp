@@ -62,6 +62,7 @@ Time Time::now()
   xAssertFail();
   return Time();
 #else
+
   // find the current time from the system in floating point seconds
   struct timeval newTime;
   gettimeofday(&newTime, 0);

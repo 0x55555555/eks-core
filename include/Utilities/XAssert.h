@@ -5,11 +5,11 @@
 #include "Utilities/XProperty.h"
 #include "Utilities/XCodeLocation.h"
 
-#define X_ASSERT_VALUE_HANDLING (X_QT_INTEROP && X_ADVANCED_ASSERT)
-
 #if X_ASSERT_VALUE_HANDLING
-# include "QtCore/QVariant"
+# include <sstream>
 #endif
+
+#define X_ASSERT_VALUE_HANDLING (X_QT_INTEROP && X_ADVANCED_ASSERT)
 
 namespace Eks
 {
@@ -25,7 +25,7 @@ public:
   public:
     const char *name;
 #if X_ASSERT_VALUE_HANDLING
-    QVariant value;
+    std::string value;
 #endif
     };
 
@@ -42,8 +42,14 @@ public:
     Argument &arg = _arguments[_argCount++];
 
     arg.name = name;
+
 #if X_ASSERT_VALUE_HANDLING
-    arg.value = val;
+      {
+      // using std:: classes here as Eks classes use assert.
+      std::ostringstream str;
+      str << val;
+      arg.value = str.str();
+      }
 #else
     (void)val;
 #endif
@@ -80,11 +86,7 @@ private:
 
 #define X_ASSERT_VARIABLE(variable, aa, n) .arg(#variable, variable)
 
-#ifdef Q_CC_MSVC
-# define X_CONSTRUCT_ASSERT(condition, message, ...) Eks::detail::Assert ass(X_CURRENT_CODE_LOCATION, #condition, message); ass X_EXPAND_ARGS(X_ASSERT_VARIABLE, 0, __VA_ARGS__)
-#else
-# define X_CONSTRUCT_ASSERT(condition, message, ...) Eks::detail::Assert ass(X_CURRENT_CODE_LOCATION, #condition, message)
-#endif
+#define X_CONSTRUCT_ASSERT(condition, message, ...) Eks::detail::Assert ass(X_CURRENT_CODE_LOCATION, #condition, message); ass X_EXPAND_ARGS(X_ASSERT_VARIABLE, 0, __VA_ARGS__)
 
 #if X_ASSERTS_ENABLED
 # define xAssertMessage(condition, message, ...) if(!(condition) && Eks::detail::Assert::currentFireFunction()) { X_CONSTRUCT_ASSERT(condition, message, __VA_ARGS__); if( Eks::detail::Assert::currentFireFunction()(ass) && Eks::detail::Assert::currentBreakFunction() ) { Eks::detail::Assert::currentBreakFunction()(); } }

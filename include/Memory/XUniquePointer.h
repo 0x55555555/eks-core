@@ -199,15 +199,15 @@ template <typename T, typename A, typename B, typename C, typename D>
 
 template <typename T, typename A, typename B, typename C, typename D, typename E>
     Eks::UniquePointer<T, TypedAllocator<T>> AllocatorBase::createUnique(A &&a, B &&b, C &&c, D &&d, E &&e)
-{
-void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
+  {
+  void *mem = alloc(sizeof(T), AlignmentOf<T>::Alignment);
 
-auto t = new(mem) T(std::forward<A>(a), std::forward<B>(b), std::forward<C>(c), std::forward<D>(d), std::forward<E>(e));
-TypedAllocator<T> alloc(this);
+  auto t = new(mem) T(std::forward<A>(a), std::forward<B>(b), std::forward<C>(c), std::forward<D>(d), std::forward<E>(e));
+  TypedAllocator<T> alloc(this);
 
-Eks::UniquePointer<T, TypedAllocator<T>> ptr(t, alloc);
-return std::move(ptr);
-}
+  Eks::UniquePointer<T, TypedAllocator<T>> ptr(t, alloc);
+  return std::move(ptr);
+  }
 }
 
 #endif // XUNIQUEPOINTER_H

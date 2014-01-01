@@ -95,11 +95,14 @@ bool Assert::defaultFire(const Assert &a)
       text + "  ";
       text += arg.name;
 # if X_ASSERT_VALUE_HANDLING
-      text += ": " + arg.value.toString() + "\n";
+      text += ": ";
+      text += arg.value.c_str();
+      text += "\n";
 # endif
       }
     }
 
+  qWarning() << text;
   msgBox.setText(text);
 
   msgBox.exec();

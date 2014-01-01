@@ -33,9 +33,9 @@ String CodeLocation::toString() const
   String out;
 
   out += file();
-  out += " ";
+  out += ":";
   out.appendType(line());
-  out += " ";
+  out += " - ";
   out += function();
 
   return out;
