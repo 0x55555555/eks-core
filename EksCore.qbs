@@ -12,4 +12,9 @@ Eks.Library {
     cpp.includePaths: [ "include" ]
   }
 
+  Properties {
+    condition: buildtools.windows && buildtools.debug
+    cpp.dynamicLibraries: [ "DbgHelp" ]
+  }
+
 }

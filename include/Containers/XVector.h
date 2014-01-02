@@ -428,7 +428,7 @@ public:
     // destroy extra member
     AllocatorBase::destruct(ThisBase::_end);
 
-    return bck;
+    return std::move(bck);
     }
 
   void pushBack(const T &t)
