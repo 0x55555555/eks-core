@@ -11,7 +11,7 @@ namespace Eks
 {
 
 template <typename T,
-          typename Deleter > class UniquePointer : public Deleter
+          typename Deleter> class UniquePointer : public Deleter
   {
 XProperties:
   XROProperty(T *, pointer);
@@ -24,8 +24,8 @@ public:
     {
     }
 
-  template <typename X>
-  UniquePointer(UniquePointer<X>&& value)
+  /// \brief move from a further derived class
+  template <typename X, typename XDel> UniquePointer(UniquePointer<X, XDel> &&value)
       : Deleter(value),
         _pointer(value._pointer),
         _delete(value._delete)
@@ -40,15 +40,6 @@ public:
     }
 
   UniquePointer(UniquePointer<T, Deleter> &&oth)
-      : Deleter(oth),
-        _pointer(0)
-    {
-    std::swap(_pointer, oth._pointer);
-    std::swap(_delete, oth._delete);
-    }
-
-  /// \brief move from a further derived class
-  template <typename Higher> UniquePointer(UniquePointer<Higher, Deleter> &&oth)
       : Deleter(oth),
         _pointer(0)
     {

@@ -346,6 +346,33 @@ public:
       }
     }
 
+  template <typename It>
+      void resizeAndMove(size_type newSize, It val)
+    {
+    size_type s = size();
+
+    // destroy extra members
+    for(size_type i = newSize; i < s; ++i)
+      {
+      AllocatorBase::destruct(&at(i));
+      }
+
+    // adjust the end
+    ThisBase::_end = ThisBase::_first + xMin(s, newSize);
+
+    // now expand, copying the needed members
+    reserve(newSize);
+
+    // adjust the new end
+    ThisBase::_end = ThisBase::_first + newSize;
+
+    // construct the extra members
+    for(size_type i = s; i < newSize; ++i, ++val)
+      {
+      AllocatorBase::construct(&at(i), std::move(*val));
+      }
+    }
+
   void clear()
     {
     resize(0);
@@ -431,6 +458,21 @@ public:
     return std::move(bck);
     }
 
+  template <typename... Args> void emplaceBack(Args &&... args)
+    {
+    const size_type s = size();
+    if(s == capacity())
+      {
+      reserve(s + 1);
+      }
+
+    xAssert(ThisBase::_end < ThisBase::_last);
+
+    new(ThisBase::_end) T{std::forward<Args>(args)...};
+
+    ThisBase::_end++;
+    }
+
   void pushBack(const T &t)
     {
     const size_type s = size();
@@ -492,32 +534,6 @@ public:
     }
 
   bool isUsingEmbeddedStorage() const { return ThisBase::isUsingEmbeddedStorage(); }
-
-  template <xsize Pre, typename AllocX>
-  void swap(Vector<T, Pre, AllocX> &oth)
-    {
-    if(oth.allocator() == oth.allocator() &&
-       !isUsingEmbeddedStorage() &&
-       !oth.isUsingEmbeddedStorage())
-      {
-      T *&f = ThisBase::_first;
-      T *&l = ThisBase::_last;
-      T *&e = ThisBase::_end;
-      oth.swapInternal(&f, &l, &e);
-      }
-    else
-      {
-      clear();
-      resizeAndCopy(oth.size(), oth.data());
-      }
-    }
-
-  void swapInternal(T **f, T **l, T **e)
-    {
-    std::swap(ThisBase::_first, *f);
-    std::swap(ThisBase::_last, *l);
-    std::swap(ThisBase::_end, *e);
-    }
 
   T &at(size_type i)
     {
@@ -585,10 +601,10 @@ public:
 
     // remove all the intermediate elements
     for(iterator it = b, from = e;
-        it != e && from != ThisBase::_end;
+        from != ThisBase::_end;
         ++it, ++from)
       {
-      it = std::move(from);
+      *it = std::move(*from);
       }
 
     resize(newSize);
@@ -618,6 +634,32 @@ public:
     }
 
 private:
+  template <xsize Pre, typename AllocX>
+  void swap(Vector<T, Pre, AllocX> &oth)
+    {
+    if(oth.allocator() == oth.allocator() &&
+       !isUsingEmbeddedStorage() &&
+       !oth.isUsingEmbeddedStorage())
+      {
+      T *&f = ThisBase::_first;
+      T *&l = ThisBase::_last;
+      T *&e = ThisBase::_end;
+      oth.swapInternal(&f, &l, &e);
+      }
+    else
+      {
+      clear();
+      resizeAndMove(oth.size(), oth.data());
+      }
+    }
+
+  void swapInternal(T **f, T **l, T **e)
+    {
+    std::swap(ThisBase::_first, *f);
+    std::swap(ThisBase::_last, *l);
+    std::swap(ThisBase::_end, *e);
+    }
+
   size_type resizeBase(size_type newSize)
     {
     size_type s = size();
