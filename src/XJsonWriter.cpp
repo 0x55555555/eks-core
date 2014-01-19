@@ -171,6 +171,8 @@ void JSONWriter::addValueForElement(const char *data)
 
 void JSONWriter::addKeyValueStandalone(const char *key, const char *value, bool commaFirst)
   {
+  xAssert(key);
+  xAssert(value);
   WriteBlock b(this);
 
   if(commaFirst)
