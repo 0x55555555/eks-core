@@ -86,7 +86,7 @@ private:
 
 #define X_ASSERT_VARIABLE(variable, aa, n) .arg(#variable, variable)
 
-#define X_CONSTRUCT_ASSERT(condition, message, ...) Eks::detail::Assert ass(X_CURRENT_CODE_LOCATION, #condition, message); ass X_EXPAND_ARGS(X_ASSERT_VARIABLE, 0, __VA_ARGS__)
+#define X_CONSTRUCT_ASSERT(condition, message, ...) Eks::detail::Assert ass(X_CURRENT_CODE_LOCATION, #condition, message); (void)ass X_EXPAND_ARGS(X_ASSERT_VARIABLE, 0, __VA_ARGS__)
 
 #if X_ASSERTS_ENABLED
 # define xAssertMessage(condition, message, ...) if(!(condition) && Eks::detail::Assert::currentFireFunction()) { X_CONSTRUCT_ASSERT(condition, message, __VA_ARGS__); if( Eks::detail::Assert::currentFireFunction()(ass) && Eks::detail::Assert::currentBreakFunction() ) { Eks::detail::Assert::currentBreakFunction()(); } }
