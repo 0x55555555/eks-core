@@ -1,6 +1,8 @@
 #ifndef XTEMPLATEHELPERS_H
 #define XTEMPLATEHELPERS_H
 
+#include <limits>
+
 namespace Eks
 {
 
@@ -18,6 +20,11 @@ template <typename IF, typename ELSE> struct IfElse<false, IF, ELSE>
   {
   typedef ELSE Type;
   };
+
+template <typename T> T maxFor(const T&)
+  {
+  return std::numeric_limits<T>::max();
+  }
 
 }
 

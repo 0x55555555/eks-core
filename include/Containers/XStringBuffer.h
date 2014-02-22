@@ -3,6 +3,7 @@
 
 #include "Containers/XStringSimple.h"
 #include "Utilities/XAssert.h"
+#include "Utilities/XTemplateHelpers.h"
 #include <iostream>
 
 namespace Eks
@@ -20,7 +21,7 @@ public:
     }
 
   StringBuffer(const StringType *str)
-      : _str(const_cast<StringType *>(str)), _readPos(0), _writePos(X_SIZE_SENTINEL)
+      : _str(const_cast<StringType *>(str)), _readPos(0), _writePos(Eks::maxFor(_writePos))
     {
     }
 
@@ -31,7 +32,7 @@ public:
 
   std::streambuf *setbuf(char *, std::streamsize) X_OVERRIDE
     {
-    xAssert(_writePos != X_SIZE_SENTINEL);
+    xAssert(_writePos != Eks::maxFor(_writePos));
     xAssertFail();
     return this;
     }
@@ -104,7 +105,7 @@ public:
 
   std::streamsize xsputn(const Char *s, std::streamsize n) X_OVERRIDE
     {
-    xAssert(_writePos != X_SIZE_SENTINEL);
+    xAssert(_writePos != Eks::maxFor(_writePos));
     _str->resize(_writePos, ' ');
     _writePos += n;
     _str->resizeAndCopy(_writePos, s);
@@ -113,7 +114,7 @@ public:
 
   int overflow(int c)
     {
-    xAssert(_writePos != X_SIZE_SENTINEL);
+    xAssert(_writePos != Eks::maxFor(_writePos));
     xsize writePoint = _writePos;
 
     xsize newSize = xMax(++_writePos, _str->size());

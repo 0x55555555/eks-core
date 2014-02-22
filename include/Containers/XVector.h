@@ -6,6 +6,7 @@
 #include "Memory/XAllocatorBase.h"
 #include "Memory/XTypedAllocator.h"
 #include "Memory/XResourceDescription.h"
+#include <limits>
 
 namespace Eks
 {
@@ -419,7 +420,7 @@ public:
 
     if(found == end())
       {
-      return X_SIZE_SENTINEL;
+      return std::numeric_limits<size_type>::max();
       }
     return found - begin();
     }
@@ -441,7 +442,7 @@ public:
 
   bool contains(const T &t) const
     {
-    return indexOf(t) != X_SIZE_SENTINEL;
+    return indexOf(t) != std::numeric_limits<size_type>::max();;
     }
 
   T popBack()

@@ -3,6 +3,7 @@
 #include "QtCore/QThread"
 #include "XCore.h"
 #include "Containers/XStringSimple.h"
+#include "Utilities/XTemplateHelpers.h"
 
 bool loggingEnabled()
   {
@@ -58,7 +59,7 @@ ThreadEventLogger::EventID ThreadEventLogger::beginDurationEvent(const EventLoca
     return 0;
     }
 
-  xAssert(_currentID < X_SIZE_SENTINEL);
+  xAssert(_currentID < Eks::maxFor(_currentID));
 
   xsize id = _currentID++;
   addItem(EventType::Begin, location, id);
@@ -73,7 +74,7 @@ void ThreadEventLogger::endDurationEvent(EventID id)
     return;
     }
 
-  addItem(EventType::End, X_UINT32_SENTINEL, id);
+  addItem(EventType::End, std::numeric_limits<EventLocation::ID>::max(), id);
 
   if(id == (_currentID - 1))
     {
@@ -88,7 +89,7 @@ void ThreadEventLogger::momentEvent(const EventLocation::ID loc)
     return;
     }
 
-  addItem(EventType::Moment, loc, X_SIZE_SENTINEL);
+  addItem(EventType::Moment, loc, std::numeric_limits<xsize>::max());
   }
 
 ThreadEventLogger::EventVector *ThreadEventLogger::swapEventVector(EventVector *vec)
