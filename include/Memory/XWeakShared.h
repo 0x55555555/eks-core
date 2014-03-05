@@ -5,39 +5,42 @@
 #include "Utilities/XMacroHelpers.h"
 #include "Utilities/XAssert.h"
 
-class XWeakSharedPointerData;
+namespace Eks
+{
 
-class XWeakSharedData
+class WeakSharedPointerData;
+
+class WeakSharedData
   {
 public:
-  XWeakSharedData() : _first(0) { }
-  ~XWeakSharedData();
+  WeakSharedData() : _first(0) { }
+  ~WeakSharedData();
 
 private:
-  XWeakSharedPointerData *_first;
-  friend class XWeakSharedPointerData;
-  X_DISABLE_COPY(XWeakSharedData);
+  WeakSharedPointerData *_first;
+  friend class WeakSharedPointerData;
+  X_DISABLE_COPY(WeakSharedData);
   };
 
-class XWeakSharedPointerData
+class WeakSharedPointerData
   {
 public:
-  XWeakSharedPointerData(XWeakSharedData *data) : _data(0), _next(0)
+  WeakSharedPointerData(WeakSharedData *data) : _data(0), _next(0)
     {
     assign(data);
     }
 
-  XWeakSharedPointerData(const XWeakSharedPointerData &data) : _data(0), _next(0)
+  WeakSharedPointerData(const WeakSharedPointerData &data) : _data(0), _next(0)
     {
     assign(data._data);
     }
 
-  ~XWeakSharedPointerData()
+  ~WeakSharedPointerData()
     {
     clear();
     }
 
-  XWeakSharedPointerData &operator=(const XWeakSharedPointerData &cpy)
+  WeakSharedPointerData &operator=(const WeakSharedPointerData &cpy)
     {
     assign(cpy._data);
     return *this;
@@ -54,7 +57,7 @@ public:
         }
       else
         {
-        XWeakSharedPointerData *next = _data->_first;
+        WeakSharedPointerData *next = _data->_first;
         while(next->_next != this)
           {
           xAssert(next->_next);
@@ -70,7 +73,7 @@ public:
     }
 
 protected:
-  void assign(XWeakSharedData *data)
+  void assign(WeakSharedData *data)
     {
     clear();
     if(data)
@@ -82,7 +85,7 @@ protected:
         }
       else
         {
-        XWeakSharedPointerData *next = data->_first;
+        WeakSharedPointerData *next = data->_first;
         while(next->_next)
           {
           next = next->_next;
@@ -93,33 +96,35 @@ protected:
       }
     }
 
-  XWeakSharedData *_data;
-  XWeakSharedPointerData *_next;
-  friend class XWeakSharedData;
+  WeakSharedData *_data;
+  WeakSharedPointerData *_next;
+  friend class WeakSharedData;
   };
 
-template <typename T> class XWeakSharedPointer : public XWeakSharedPointerData
+template <typename T> class WeakSharedPointer : public WeakSharedPointerData
   {
 public:
-  XWeakSharedPointer(T *data) : XWeakSharedPointerData(data) { }
+  WeakSharedPointer(T *data) : WeakSharedPointerData(data) { }
 
-  void assign(T *data) { XWeakSharedPointerData::assign(data); }
+  void assign(T *data) { WeakSharedPointerData::assign(data); }
 
   T *data() { return static_cast<T*>(_data); }
   const T *data() const { return static_cast<T*>(_data); }
   };
 
 
-inline XWeakSharedData::~XWeakSharedData()
+inline WeakSharedData::~WeakSharedData()
   {
-  XWeakSharedPointerData *ptr = _first;
+  WeakSharedPointerData *ptr = _first;
   while(ptr)
     {
     ptr->_data = 0;
-    XWeakSharedPointerData *next = ptr->_next;
+    WeakSharedPointerData *next = ptr->_next;
     ptr->_next = 0;
     ptr = next;
     }
   }
+
+}
 
 #endif // XWEAKSHARED_H
