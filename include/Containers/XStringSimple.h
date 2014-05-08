@@ -7,6 +7,7 @@
 
 #if X_STL_INTEROP
 # include <string>
+# include <iostream>
 #endif
 
 namespace Eks
@@ -468,17 +469,12 @@ template <typename C, xsize P, typename A> QDebug operator<<(
   return dbg << str.data();
   }
 
-template <typename C, xsize P, typename A> std::ostream &operator<<(
-    std::ostream &dbg,
-    const Eks::StringBase<C, P, A> &str)
-  {
-  return dbg << str.data();
-  }
+#endif
 
 template <typename T, xsize S, typename A>
-    QTextStream &operator>>(QTextStream &str, Eks::StringBase<T, S, A> &vec)
+    std::istream &operator>>(std::istream &str, Eks::StringBase<T, S, A> &vec)
   {
-  while(!str.atEnd())
+  while(!str.eof())
     {
     T t;
     str >> t;
@@ -487,17 +483,27 @@ template <typename T, xsize S, typename A>
   return str;
   }
 
-template <typename T, xsize S, typename A>
-    QTextStream &operator<<(QTextStream &str, const Eks::StringBase<T, S, A> &vec)
+template <typename C, xsize P, typename A> std::ostream &operator<<(
+    std::ostream &dbg,
+    const Eks::StringBase<C, P, A> &str)
   {
-  for(xsize i = 0, s = vec.size(); i < s; ++i)
-    {
-    str << vec[i];
-    }
-  return str;
+  return dbg << str.data();
   }
 
-#endif
+namespace std
+{
+template <typename T, xsize S, typename A> struct hash<Eks::StringBase<T, S, A>>
+  {
+public:
+  size_t operator()(const Eks::StringBase<T, S, A> &vec) const
+    {
+    std::hash<const T *> a;
+
+    return a(vec.data());
+    }
+
+  };
+}
 
 
 

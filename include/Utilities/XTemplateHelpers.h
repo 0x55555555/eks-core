@@ -2,6 +2,8 @@
 #define XTEMPLATEHELPERS_H
 
 #include <limits>
+#include <utility>
+#include <functional>
 
 namespace Eks
 {
@@ -21,11 +23,22 @@ template <typename IF, typename ELSE> struct IfElse<false, IF, ELSE>
   typedef ELSE Type;
   };
 
-template <typename T> T maxFor(const T&)
-  {
-  return std::numeric_limits<T>::max();
-  }
+}
 
+namespace std
+{
+template <typename A, typename B> struct hash<std::pair<A, B> >
+  {
+public:
+  size_t operator()(const std::pair<A, B> &p) const
+    {
+    std::hash<A> a;
+    std::hash<B> b;
+
+    return a(p.first) ^ b(p.second);
+    }
+
+  };
 }
 
 #endif // XTEMPLATEHELPERS_H

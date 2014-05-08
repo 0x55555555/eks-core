@@ -63,13 +63,14 @@
 # ifdef Q_PROPERTY // Is qt available?
 #  define X_ADVANCED_ASSERT 1
 #  define X_QT_INTEROP 1
+# define X_QCOLOUR_COMPATIBILITY 1
 # else
 #  define X_ADVANCED_ASSERT 0
 #  define X_QT_INTEROP 0
+# define X_QCOLOUR_COMPATIBILITY 0
 # endif
 
 # define X_VECTOR_IS_QVECTOR 1
-# define X_QCOLOUR_COMPATIBILITY 1
 # define X_STL_INTEROP 1
 #endif
 

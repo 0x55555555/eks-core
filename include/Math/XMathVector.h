@@ -29,16 +29,12 @@ xCompileTimeAssert(sizeof(Vector2DTight) == sizeof(float) * 2);
 
 }
 
-#if X_QT_INTEROP
-
-#include "QtCore/QMetaType"
-#include "QtCore/QDataStream"
-
 namespace Eigen
 {
+
 template <typename Derived> std::istream &operator>>(std::istream &str, Eigen::PlainObjectBase<Derived> &vec)
   {
-  qint32 rows = Derived::RowsAtCompileTime;
+  xint32 rows = Derived::RowsAtCompileTime;
   xint32 cols = Derived::ColsAtCompileTime;
 
   if(rows == Eigen::Dynamic)
@@ -98,59 +94,10 @@ template <typename Derived> std::ostream &operator<<(std::ostream &str, const Ei
   }
 }
 
-template <typename Derived> QDataStream &operator>>(QDataStream &str, Eigen::PlainObjectBase<Derived> &vec)
-  {
-  xint32 rows = Derived::RowsAtCompileTime;
-  xint32 cols = Derived::ColsAtCompileTime;
+#if X_QT_INTEROP
 
-  if(rows == Eigen::Dynamic)
-    {
-    str >> rows;
-    }
-
-  if(cols == Eigen::Dynamic)
-    {
-    str >> cols;
-    }
-
-  for(xint32 i=0; i<rows; ++i)
-    {
-    for(xint32 j=0; j<cols; ++j)
-      {
-      str >> vec(i,j);
-      }
-    }
-
-  return str;
-  }
-
-template <typename Derived> QDataStream &operator<<(QDataStream &str, const Eigen::PlainObjectBase<Derived> &vec)
-  {
-  xint32 rows = Derived::RowsAtCompileTime;
-  xint32 cols = Derived::ColsAtCompileTime;
-
-  if(rows == Eigen::Dynamic)
-    {
-    rows = vec.rows();
-    str << rows << " ";
-    }
-
-  if(cols == Eigen::Dynamic)
-    {
-    cols = vec.cols();
-    str << cols << " ";
-    }
-
-  for(xint32 i=0; i<rows; ++i)
-    {
-    for(xint32 j=0; j<cols; ++j)
-      {
-      str << vec(i,j);
-      }
-    }
-
-  return str;
-  }
+#include "QtCore/QMetaType"
+#include "QtCore/QDataStream"
 
 #include "QtGui/QVector2D"
 #include "QtGui/QVector3D"
@@ -170,10 +117,6 @@ inline QVector4D toQt(const Eks::Vector4D &vec)
   {
   return QVector4D(vec(0), vec(1), vec(2), vec(3));
   }
-
-#endif
-
-#if X_QT_INTEROP
 
 Q_DECLARE_METATYPE(Eks::Vector2D);
 Q_DECLARE_METATYPE(Eks::Vector3D);

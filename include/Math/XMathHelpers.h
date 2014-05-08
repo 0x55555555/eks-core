@@ -85,6 +85,11 @@ template <typename T> T lerp(T a, T b, Real factor)
   return a + (factor * (b-a));
   }
 
+template <typename T> T maxFor(const T&)
+  {
+  return std::numeric_limits<T>::max();
+  }
+
 }
 
 #endif // XMATHHELPERS_H

@@ -4,6 +4,7 @@
 #include "Containers/XStringSimple.h"
 #include "Utilities/XAssert.h"
 #include "Utilities/XTemplateHelpers.h"
+#include "Math/XMathHelpers.h"
 #include <iostream>
 
 namespace Eks
