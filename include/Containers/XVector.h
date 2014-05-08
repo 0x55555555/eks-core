@@ -332,7 +332,7 @@ public:
       }
 
     // adjust the end
-    ThisBase::_end = ThisBase::_first + xMin(s, newSize);
+    ThisBase::_end = ThisBase::_first + std::min(s, newSize);
 
     // now expand, copying the needed members
     reserve(newSize);
@@ -359,7 +359,7 @@ public:
       }
 
     // adjust the end
-    ThisBase::_end = ThisBase::_first + xMin(s, newSize);
+    ThisBase::_end = ThisBase::_first + std::min(s, newSize);
 
     // now expand, copying the needed members
     reserve(newSize);
@@ -578,7 +578,7 @@ public:
     {
     const size_type expandExistingPolicy = 2;
     const size_type expandReservePolicy = 2;
-    return xMax(s * expandExistingPolicy, size() * expandReservePolicy);
+    return std::max(s * expandExistingPolicy, size() * expandReservePolicy);
     }
 
   void removeAt(size_type idx)
@@ -672,7 +672,7 @@ private:
       }
 
     // adjust the end
-    ThisBase::_end = ThisBase::_first + xMin(s, newSize);
+    ThisBase::_end = ThisBase::_first + std::min(s, newSize);
 
     // now expand, copying the needed members
     reserve(newSize);
@@ -712,66 +712,5 @@ xCompileTimeAssert(sizeof(Vector <int, 6, TypedAllocator<int> >)
 }
 
 }
-
-#if X_QT_INTEROP
-
-#include "QtCore/QTextStream"
-#include "QtCore/QDataStream"
-
-template <typename T, xsize S, typename A>
-    QTextStream &operator>>(QTextStream &str, Eks::Vector<T, S, A> &vec)
-  {
-  xuint64 size = 0;
-  str >> size;
-  vec.resize(size);
-
-  for(xsize i = 0, s = vec.size(); i < s; ++i)
-    {
-    str >> vec[i];
-    }
-  return str;
-  }
-
-template <typename T, xsize S, typename A>
-    QTextStream &operator<<(QTextStream &str, const Eks::Vector<T, S, A> &vec)
-  {
-  str << (xuint64)vec.length() << " ";
-
-  for(xsize i = 0, s = vec.size(); i < s; ++i)
-    {
-    str << vec[i] << " ";
-    }
-  return str;
-  }
-
-template <typename T, xsize S, typename A>
-    QDataStream &operator>>(QDataStream &str, Eks::Vector<T, S, A> &vec)
-  {
-  xuint64 size = 0;
-  str >> size;
-  vec.resize(size);
-
-  for(xsize i = 0, s = vec.size(); i < s; ++i)
-    {
-    T &el = vec[i];
-    str >> el;
-    }
-
-  return str;
-  }
-
-template <typename T, xsize S, typename A>
-    QDataStream &operator<<(QDataStream &str, const Eks::Vector<T, S, A> &vec)
-  {
-  str << (xuint64)vec.length();
-
-  for(xsize i = 0, s = vec.size(); i < s; ++i)
-    {
-    str << vec[i];
-    }
-  return str;
-  }
-
-#endif
 
 #endif

@@ -1,7 +1,6 @@
 #include "Utilities/XTime.h"
 #include "XGlobal.h"
 #include "Utilities/XAssert.h"
-#include "QDataStream"
 
 #if defined(Q_OS_WIN)
 # include <windows.h>
@@ -220,21 +219,6 @@ void TimeStatistics::append(const TimeStatistics &o)
 void TimeStatistics::clear()
   {
   _count = 0;
-  }
-
-QDataStream &operator<<(QDataStream &str, const Time &l)
-  {
-  qint64 s, n;
-  l.get(s, n);
-  return str << s << n;
-  }
-
-QDataStream &operator>>(QDataStream &str, Time &l)
-  {
-  qint64 s, n;
-  str >> s >> n;
-  l.set(s, n);
-  return str;
   }
 
 }

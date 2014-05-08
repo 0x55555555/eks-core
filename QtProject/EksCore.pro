@@ -4,7 +4,7 @@
 TARGET = EksCore
 TEMPLATE = lib
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT -= core gui
 
 INCLUDEPATH += ../include
 
@@ -17,9 +17,7 @@ win32 {
 }
 
 SOURCES += \
-    ../src/XFileSequence.cpp \
     ../src/XTime.cpp \
-    ../src/XUnorderedMap.cpp \
     ../src/XEventLogger.cpp \
     ../src/XBucketAllocator.cpp \
     ../src/XAssert.cpp \
@@ -124,12 +122,9 @@ HEADERS += \
     ../include/Math/XMathCurve.h \
     ../include/Math/XFrame.h \
     ../include/Math/XColour.h \
-    ../include/Memory/XWeakShared.h \
-    ../include/Memory/XUniquePointer.h \
     ../include/Memory/XTypedAllocator.h \
     ../include/Memory/XThreadSafeAllocator.h \
     ../include/Memory/XTemporaryAllocator.h \
-    ../include/Memory/XSharedPointer.h \
     ../include/Memory/XResourceDescription.h \
     ../include/Memory/XLoggingAllocator.h \
     ../include/Memory/XGlobalAllocator.h \
@@ -145,13 +140,12 @@ HEADERS += \
     ../include/Utilities/XOptional.h \
     ../include/Utilities/XMacroHelpers.h \
     ../include/Utilities/XFlags.h \
-    ../include/Utilities/XFileSequence.h \
-    ../include/Utilities/XEventLogger.h \
     ../include/Utilities/XCodeLocation.h \
     ../include/Utilities/XAssert.h \
     ../include/XGlobal.h \
     ../include/XCore.h \
-    ../include/Utilities/XJsonWriter.h
+    ../include/Utilities/XJsonWriter.h \
+    ../include/Utilities/XEventLogger.h
 
 
 

@@ -3,10 +3,10 @@
 
 #include "XGlobal.h"
 #include "Utilities/XTime.h"
-#include "Memory/XUniquePointer.h"
 #include "Containers/XVector.h"
 #include <atomic>
 
+#if 0
 
 namespace Eks
 {
@@ -148,5 +148,7 @@ private:
 #endif
 
 }
+
+#endif
 
 #endif // XEVENTLOGGER_H

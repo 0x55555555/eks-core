@@ -55,17 +55,21 @@
 
 #ifdef X_ARCH_ARM
 # define X_ADVANCED_ASSERT 0
-# define X_COMPILE_ARRAY_MATH 0
 # define X_VECTOR_IS_QVECTOR 0
 # define X_QCOLOUR_COMPATIBILITY 0
 # define X_QT_INTEROP 0
 # define X_STL_INTEROP 0
 #else
-# define X_ADVANCED_ASSERT 1
-# define X_COMPILE_ARRAY_MATH 1
+# ifdef Q_PROPERTY // Is qt available?
+#  define X_ADVANCED_ASSERT 1
+#  define X_QT_INTEROP 1
+# else
+#  define X_ADVANCED_ASSERT 0
+#  define X_QT_INTEROP 0
+# endif
+
 # define X_VECTOR_IS_QVECTOR 1
 # define X_QCOLOUR_COMPATIBILITY 1
-# define X_QT_INTEROP 1
 # define X_STL_INTEROP 1
 #endif
 
@@ -73,6 +77,18 @@
 # define X_ENABLE_STACK_WALKING 1
 #else
 # define X_ENABLE_STACK_WALKING 0
+#endif
+
+#ifdef _WIN32
+# define X_WIN
+#endif
+
+#ifdef __APPLE__
+# define X_OSX
+#endif
+
+#ifdef __linux
+# define X_LINUX
 #endif
 
 

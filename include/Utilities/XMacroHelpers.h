@@ -1,11 +1,6 @@
 #ifndef XMACROHELPERS_H
 #define XMACROHELPERS_H
 
-#include "QtCore/QtGlobal"
-
-#define xMax qMax
-#define xMin qMin
-
 #define X_DISABLE_COPY(x) x(const x &); x &operator=(const x &);
 
 #ifdef Q_OS_DARWIN

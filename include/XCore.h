@@ -2,6 +2,7 @@
 #define XCORE_H
 
 #include "XGlobal.h"
+#include "Containers/XUnorderedMap.h"
 
 namespace Eks
 {
@@ -10,7 +11,6 @@ class EventLogger;
 class AllocatorBase;
 class TemporaryAllocatorCore;
 class CodeLocation;
-template <typename K, typename V> class UnorderedMap;
 
 class EKSCORE_EXPORT Core
   {

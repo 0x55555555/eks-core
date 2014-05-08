@@ -1,8 +1,6 @@
 #include "Utilities/XCodeLocation.h"
 #include "Containers/XStringSimple.h"
 #include "Containers/XStringBuffer.h"
-#include "QHash"
-#include "QDebug"
 
 #if defined(X_DEBUG) && !defined(X_ARCH_ARM)
 # define X_ENABLE_STACK_WALKING 1
@@ -147,10 +145,6 @@ void StackWalker::walk(
   }
 }
 
-uint qHash(const Eks::CodeLocation &a)
-  {
-  uint hash = qHash(QPair<const char *, const char *>(a.file(), a.function()));
 
-  return qHash(QPair<uint, xsize>(hash, a.line()));
-  }
+
 

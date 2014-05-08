@@ -3,7 +3,6 @@
 
 #include "Utilities/XProperty.h"
 #include "XGlobal.h"
-#include "QtCore/QMetaType"
 
 namespace Eks
 {
@@ -64,17 +63,6 @@ public:
   void clear();
   };
 
-#if X_QT_INTEROP
-
-EKSCORE_EXPORT QDataStream &operator<<(QDataStream &s, const Time &l);
-EKSCORE_EXPORT QDataStream &operator>>(QDataStream &s, Time &l);
-
-#endif
-
 }
-
-#if X_QT_INTEROP
-Q_DECLARE_METATYPE(Eks::Time)
-#endif
 
 #endif // XTIMER_H

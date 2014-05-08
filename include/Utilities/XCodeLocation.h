@@ -4,6 +4,8 @@
 #include "XGlobal.h"
 #include "Utilities/XProperty.h"
 #include "Utilities/XMacroHelpers.h"
+#include <functional>
+#include <utility>
 
 namespace Eks
 {
@@ -26,6 +28,8 @@ public:
   bool operator==(const CodeLocation &a) const;
   };
 
+
+
 class EKSCORE_EXPORT StackWalker
   {
 public:
@@ -44,12 +48,23 @@ public:
 
 }
 
-#if X_QT_INTEROP
-
-uint qHash(const Eks::CodeLocation &a);
-
-#endif
-
 #define X_CURRENT_CODE_LOCATION Eks::CodeLocation(__FILE__, __LINE__, xCurrentFunction)
+
+
+namespace std
+{
+template <> struct hash<Eks::CodeLocation>
+  {
+public:
+  size_t operator()(const Eks::CodeLocation &a) const
+    {
+    std::hash<const char*> hasher;
+    std::hash<xuint32> hasherInt;
+
+    return hasher(a.file()) ^ hasher(a.function()) ^ hasherInt(a.line());
+    }
+
+  };
+}
 
 #endif // XCODELOCATION_H

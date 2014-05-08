@@ -1,9 +1,9 @@
 #include "Memory/XLoggingAllocator.h"
 #include "Utilities/XAssert.h"
-#include "QDebug"
 #include "unordered_map"
 #include "Containers/XStringSimple.h"
 #include "Memory/XGlobalAllocator.h"
+#include <iostream>
 
 namespace Eks
 {
@@ -70,16 +70,16 @@ void LoggingAllocator::logAllocations() const
   GlobalAllocator alloc;
   Eks::String symString(&alloc);
 
-  qDebug() << "Logging live allocations: [" << _impl->_allocations.size() << "/" << _impl->_maxAllocs << "] [" << _impl->_size << "/" << _impl->_maxSize << "] bytes";
+  std::cerr << "Logging live allocations: [" << _impl->_allocations.size() << "/" << _impl->_maxAllocs << "] [" << _impl->_size << "/" << _impl->_maxSize << "] bytes" << std::endl;
   xForeach(auto &a, _impl->_allocations)
     {
-    qDebug() << "Allocation " << a.first << ", " << a.second._allocSize << "bytes";
+    std::cerr << "Allocation " << a.first << ", " << a.second._allocSize << "bytes" << std::endl;
     for(xsize i = 0; i < a.second._symbolSize; ++i)
       {
       StackWalker::getSymbolName(a.second._symbol[i], symString, 1024);
-      qDebug() << symString;
+      std::cerr << symString.data() << std::endl;
       }
-    qDebug() << "";
+    std::cerr << "" << std::endl;
     }
 
   Eks::StackWalker::terminateSymbolNames();
@@ -103,7 +103,7 @@ void *LoggingAllocator::alloc(xsize size, xsize alignment)
       if(level < Allocation::kMaxStackSize)
         {
         allocation->_symbol[level] = symbol;
-        allocation->_symbolSize = xMax(level+1, allocation->_symbolSize);
+        allocation->_symbolSize = std::max(level+1, allocation->_symbolSize);
         }
       }
     } visitor;
@@ -115,9 +115,9 @@ void *LoggingAllocator::alloc(xsize size, xsize alignment)
 
   StackWalker::walk(1, &visitor);
 
-  _impl->_maxAllocs = xMax(_impl->_allocations.size(), _impl->_maxAllocs);
+  _impl->_maxAllocs = std::max(_impl->_allocations.size(), _impl->_maxAllocs);
   _impl->_size += size;
-  _impl->_maxSize = xMax(_impl->_maxSize, _impl->_size);
+  _impl->_maxSize = std::max(_impl->_maxSize, _impl->_size);
 
   return result;
   }

@@ -370,7 +370,7 @@ public:
     HashType::iterator e = _internal.end();
     while (i != e)
       {
-      _allocator->destroy(i.value());
+      _allocator->destroy(i->second);
       ++i;
       }
     }
@@ -383,7 +383,7 @@ public:
     if(!b)
       {
       b = _allocator->create<FixedSizeBucketAllocatorBase>(_allocator, size, _defaultSize, _expandSize);
-      _internal.insert(size, b);
+      _internal[size] = b;
       }
 
     void *mem = b->alloc();
@@ -397,9 +397,9 @@ public:
     HashType::iterator e = _internal.end();
     while (i != e)
       {
-      if(i.value()->contains(ptr))
+      if(i->second->contains(ptr))
         {
-        xVerify(i.value()->free(ptr));
+        xVerify(i->second->free(ptr));
         return;
         }
       ++i;
@@ -409,11 +409,11 @@ public:
 
   bool empty() const
     {
-    HashType::const_iterator i = _internal.constBegin();
-    HashType::const_iterator e = _internal.constEnd();
+    HashType::const_iterator i = _internal.cbegin();
+    HashType::const_iterator e = _internal.cend();
     while (i != e)
       {
-      if(!i.value()->empty())
+      if(!i->second->empty())
         {
         return false;
         }

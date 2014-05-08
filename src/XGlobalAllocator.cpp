@@ -3,6 +3,10 @@
 #include "Utilities/XAssert.h"
 #include "Memory/XLoggingAllocator.h"
 
+#ifndef X_WIN
+# include <stdlib.h>
+#endif
+
 namespace Eks
 {
 
@@ -18,8 +22,9 @@ GlobalAllocator::~GlobalAllocator()
 
 void *GlobalAllocator::alloc(xsize size, xsize alignment)
   {
-#ifndef Q_CC_MSVC
-  void *m = qMallocAligned(size, alignment);
+#ifndef X_WIN
+  void *m = nullptr;
+  posix_memalign(&m, alignment, size);
 
 #else
   // msvc malloc should always be 16 byte aligned
@@ -40,8 +45,8 @@ void GlobalAllocator::free(void *mem)
     return;
     }
 
-#ifndef Q_CC_MSVC
-  qFreeAligned(mem);
+#ifndef X_WIN
+  free(mem);
 #else
   _aligned_free(mem);
 #endif

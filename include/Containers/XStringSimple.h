@@ -5,6 +5,10 @@
 #include "XCore.h"
 #include "Containers/XVector.h"
 
+#if X_STL_INTEROP
+# include <string>
+#endif
+
 namespace Eks
 {
 

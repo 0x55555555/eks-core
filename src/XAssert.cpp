@@ -16,12 +16,13 @@
 #include "QtCore/QThread"
 #endif
 
-#if defined(Q_CC_MSVC)
+#if defined(X_WIN)
 # define WIN32_LEAN_AND_MEAN
 # include <Windows.h>
 # define snprintf _snprintf_s
-#elif defined(Q_CC_GNU)
+#else
 # include <signal.h>
+# include <cassert>
 #endif
 
 namespace Eks
@@ -43,10 +44,12 @@ bool Assert::defaultFire(const Assert &a)
     return false;
     }
 
+#if X_ADVANCED_ASSERT
   if(QApplication::instance() && QThread::currentThread() != QApplication::instance()->thread())
     {
     return true;
-    } 
+    }
+#endif
 
   static bool recursion = false;
   if(recursion
@@ -118,8 +121,10 @@ bool Assert::defaultFire(const Assert &a)
     disabled->insert(a.location(), true);
     }
 #else
-# ifdef Q_OS_WIN
+# if defined(X_WIN)
   _ASSERT(0);
+#elif defined(X_OSX)
+  assert(0);
 # else
 #  error No simple assert defined
 # endif
@@ -139,7 +144,7 @@ void Assert::setCurrentFireFunction(FireFunction *f)
   g_currentFireFunction = f;
   }
 
-#ifdef Q_CC_GNU
+#if defined(X_OSX) || defined(X_LINUX)
 void interuptBreak()
   {
   raise(SIGINT);

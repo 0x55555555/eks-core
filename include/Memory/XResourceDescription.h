@@ -5,6 +5,7 @@
 #include "Utilities/XProperty.h"
 #include "Utilities/XAssert.h"
 #include <type_traits>
+#include <algorithm>
 
 namespace Eks
 {
@@ -82,7 +83,7 @@ public:
 
   void alignTo(xsize align)
     {
-    _alignment = xMax(align, _alignment);
+    _alignment = std::max(align, _alignment);
     }
 
   ResourceDescription operator+(const ResourceDescription &desc) const
@@ -195,7 +196,7 @@ public:
 
   bool isValid() const
     {
-    return _resource != false;
+    return _resource != nullptr;
     }
 
   template <typename T> static MemoryResource destroy(T *t)

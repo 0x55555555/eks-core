@@ -70,7 +70,7 @@ void TemporaryAllocatorCore::releaseBlock(Block *b)
 
 TemporaryAllocatorCore::Block *TemporaryAllocatorCore::createBlock(xsize expected)
   {
-  xsize newSize = xMax(expected, _blockSize);
+  xsize newSize = std::max(expected, _blockSize);
 
   Block *b = (Block *)_allocator->alloc(sizeof(Block) + newSize);
   b->current = b->data;

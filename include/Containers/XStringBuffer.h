@@ -69,7 +69,7 @@ public:
 
   std::streamsize xsgetn(Char *s, std::streamsize n ) X_OVERRIDE
     {
-    std::streamsize num = xMin(_str->size(), (String::size_type)n);
+    std::streamsize num = std::min(_str->size(), (String::size_type)n);
     memcpy(s, _str->data(), num);
     return num;
     }
@@ -117,7 +117,7 @@ public:
     xAssert(_writePos != Eks::maxFor(_writePos));
     xsize writePoint = _writePos;
 
-    xsize newSize = xMax(++_writePos, _str->size());
+    xsize newSize = std::max(++_writePos, _str->size());
     _str->resize(newSize, c);
 
     _str->at(writePoint) = (String::Char)c;

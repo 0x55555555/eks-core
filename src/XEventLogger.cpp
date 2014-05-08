@@ -1,9 +1,11 @@
+#if 0
 #include "Utilities/XEventLogger.h"
 #include "QtCore/QThreadStorage"
 #include "QtCore/QThread"
 #include "XCore.h"
 #include "Containers/XStringSimple.h"
 #include "Utilities/XTemplateHelpers.h"
+
 
 bool loggingEnabled()
   {
@@ -284,3 +286,5 @@ ScopedEvent::~ScopedEvent()
 
 #endif
 }
+
+#endif

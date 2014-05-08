@@ -1,35 +1,35 @@
 #include "Memory/XBucketAllocator.h"
-#include "QDebug"
+#include <iostream>
 
 namespace Eks
 {
 
 void BucketAllocator::debugDump() const
   {
-  Q_FOREACH(xsize s, _internal.keys())
+  xForeach(xsize s, _internal.keys())
     {
-    FixedSizeBucketAllocatorBase *alloc = _internal.value(s);
+    FixedSizeBucketAllocatorBase *alloc = _internal.value(s, nullptr);
     alloc->debugDump();
     }
   }
 
 void FixedSizeBucketAllocatorBase::debugDump() const
   {
-  qDebug() << "Bucket allocator (Size: " << _size << " bytes)," << bucketCount() << "buckets.";
+  std::cerr << "Bucket allocator (Size: " << _size << " bytes)," << bucketCount() << "buckets." << std::endl;
   if(!empty())
     {
     xsize i = 0;
     Bucket *b = _first;
     while(b)
       {
-      qDebug() << "  Bucket" << i++;
+      std::cerr << "  Bucket" << i++ << std::endl;
       b->debugDump();
       b = b->next();
       }
     }
   else
     {
-    qDebug() << "  Empty.";
+    std::cerr << "  Empty." << std::endl;
     }
   }
 
@@ -39,7 +39,7 @@ void FixedSizeBucketAllocatorBase::Bucket::debugDump() const
   for(xsize i=0, s=(_count/32); i<s; ++i)
     {
     mask = _masks[i];
-    qDebug() << "    Mask " << i << "/" << s << ": Free mask:" << mask << "|" << QString::number(mask, 2).rightJustified(32, QChar('0'));
+    std::cerr << "    Mask " << i << "/" << s << ": Free mask:" << mask << "|" << std::to_string(mask) << std::endl;
     }
   }
 
