@@ -147,7 +147,8 @@ HEADERS += \
     ../include/Utilities/XJsonWriter.h \
     ../include/Utilities/XEventLogger.h \
     ../include/Memory/XUniquePointer.h \
-    ../include/Memory/XWeakShared.h
+    ../include/Memory/XWeakShared.h \
+    ../include/Utilities/XScopedValue.h
 
 
 
