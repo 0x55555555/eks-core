@@ -1,4 +1,5 @@
 #include "Utilities/XAssert.h"
+#include "Utilities/XScopedValue.h"
 #include "Containers/XUnorderedMap.h"
 #include "XCore.h"
 #include "Containers/XStringSimple.h"
@@ -63,7 +64,7 @@ bool Assert::defaultFire(const Assert &a)
     return true;
     }
 
-  recursion = true;
+  Eks::ScopedValue<bool> l(recursion, true);
 
 #if X_ADVANCED_ASSERT
   QMessageBox msgBox;
@@ -110,7 +111,6 @@ bool Assert::defaultFire(const Assert &a)
 
   msgBox.exec();
 
-  recursion = false;
   if (msgBox.clickedButton() == breakButton)
     {
     return true;
@@ -130,7 +130,7 @@ bool Assert::defaultFire(const Assert &a)
 # endif
 #endif
 
-  return false;
+  return true;
   }
 
 Assert::FireFunction *g_currentFireFunction = 0;
