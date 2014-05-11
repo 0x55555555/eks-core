@@ -8,9 +8,13 @@
 # define X_ENABLE_STACK_WALKING 0
 #endif
 
-#if defined(Q_CC_MSVC) && X_ENABLE_STACK_WALKING
+#if defined(X_WIN) && X_ENABLE_STACK_WALKING
 # include <Windows.h>
 # include <DbgHelp.h>
+#endif
+
+#if defined (X_OSX) && X_ENABLE_STACK_WALKING
+#include <execinfo.h>
 #endif
 
 namespace Eks
@@ -65,9 +69,9 @@ void StackWalker::terminateSymbolNames()
   }
 
 void StackWalker::getSymbolName(
-    void *X_USED_FOR_ASSERTS(symbolLocation),
-    Eks::String &X_USED_FOR_ASSERTS(symbolName),
-    xsize X_USED_FOR_ASSERTS(maxSize))
+    void *symbolLocation,
+    Eks::String &symbolName,
+    xsize maxSize)
   {
 #if X_ENABLE_STACK_WALKING
 #ifdef Q_CC_MSVC
@@ -91,6 +95,18 @@ void StackWalker::getSymbolName(
   symbolName.clear();
   symbolName.resizeAndCopy(strlen(symbol->Name), symbol->Name);
 
+#elif defined(X_OSX)
+  std::unique_ptr<char *, void (*)(void *)> strs(backtrace_symbols(&symbolLocation, 1), std::free);
+
+  if (strs && strs.get()[0])
+    {
+    symbolName = strs.get()[0];
+    if (symbolName.length() > maxSize)
+      {
+      symbolName.resize(maxSize, '\0');
+      }
+    }
+
 #else
   (void)symbolLocation;
   (void)symbolName;
@@ -101,12 +117,10 @@ void StackWalker::getSymbolName(
   }
 
 void StackWalker::walk(
-    xsize X_USED_FOR_ASSERTS(skip),
-    Visitor *X_USED_FOR_ASSERTS(visit))
+    xsize skip,
+    Visitor *visit)
   {
 #if X_ENABLE_STACK_WALKING
-#ifdef Q_CC_MSVC
-
   struct Utils
     {
     static void doVisit(Visitor *visit, xsize i, void *pcOffset)
@@ -117,8 +131,11 @@ void StackWalker::walk(
 
   enum
     {
-    BlockCaptureSize = 16
+    BlockCaptureSize = 16,
+    MaxSymbols = 128,
     };
+
+#if defined(X_WIN)
 
   xsize position = skip + 1;
   const xsize start = position;
@@ -136,6 +153,21 @@ void StackWalker::walk(
 
     position += captured;
     } while(captured == BlockCaptureSize);
+
+#elif defined(X_OSX)
+
+  void *frames[MaxSymbols];
+
+  int captured = backtrace(frames, MaxSymbols);
+  if (captured <= 0 || (xsize)captured > X_ARRAY_COUNT(frames))
+    {
+    return;
+    }
+
+  for(xsize i = 0; i < (xsize)captured; ++i)
+    {
+    Utils::doVisit(visit, i, frames[skip+i]);
+    }
 
 #else
   (void)skip;
