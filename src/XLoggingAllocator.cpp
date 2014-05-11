@@ -73,7 +73,7 @@ void LoggingAllocator::logAllocations() const
   std::cerr << "Logging live allocations: [" << _impl->_allocations.size() << "/" << _impl->_maxAllocs << "] [" << _impl->_size << "/" << _impl->_maxSize << "] bytes" << std::endl;
   xForeach(auto &a, _impl->_allocations)
     {
-    std::cerr << "Allocation " << a.first << ", " << a.second._allocSize << "bytes" << std::endl;
+    std::cerr << "Allocation " << a.first << ", " << a.second._allocSize << " bytes" << std::endl;
     for(xsize i = 0; i < a.second._symbolSize; ++i)
       {
       StackWalker::getSymbolName(a.second._symbol[i], symString, 1024);
