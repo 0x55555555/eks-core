@@ -446,6 +446,8 @@ public:
     }
   };
 
+EKSCORE_EXPORT size_t hash(const xuint8 *data, size_t length);
+
 }
 
 #if X_QT_INTEROP
@@ -497,9 +499,7 @@ template <typename T, xsize S, typename A> struct hash<Eks::StringBase<T, S, A>>
 public:
   size_t operator()(const Eks::StringBase<T, S, A> &vec) const
     {
-    std::hash<const T *> a;
-
-    return a(vec.data());
+    return Eks::hash((const xuint8*)vec.data(), sizeof(T)*vec.size());
     }
 
   };
