@@ -66,27 +66,22 @@ bool Assert::defaultFire(const Assert &a)
 
   Eks::ScopedValue<bool> l(recursion, true);
 
-#if X_ADVANCED_ASSERT
-  QMessageBox msgBox;
-  msgBox.setWindowModality(Qt::ApplicationModal);
-  QPushButton *breakButton = msgBox.addButton("Break Now", QMessageBox::YesRole);
-  msgBox.addButton("Dont Break", QMessageBox::NoRole);
-  QPushButton *neverBreakButton = msgBox.addButton("Never Break", QMessageBox::NoRole);
+  std::string title;
+  std::string text;
 
-  QString text;
-  text += "Assertion ";
-  text += a.condition();
-  text += " failed";
+  title += "Assertion ";
+  title += a.condition();
+  title += " failed";
 
-  msgBox.setWindowTitle(text);
+  std::string location = a.location().toString().data();
 
-  QString location = QString::fromUtf8(a.location().toString().data());
-
+  text += title;
   text += " in " + location + "\n\n";
 
-  if(!qstrcmp(a.message(), "") == 0)
+  if(strcmp(a.message(), "") == 0)
     {
-    text = QString(a.message()) + ":\n\n" + text;
+    text += a.message();
+    text += ":\n\n" + text;
     }
 
   if(a._argCount)
@@ -106,8 +101,17 @@ bool Assert::defaultFire(const Assert &a)
       }
     }
 
-  qWarning() << text;
-  msgBox.setText(text);
+  std::cerr << text << std::endl;
+
+#if X_ADVANCED_ASSERT
+  QMessageBox msgBox;
+  msgBox.setWindowModality(Qt::ApplicationModal);
+  QPushButton *breakButton = msgBox.addButton("Break Now", QMessageBox::YesRole);
+  msgBox.addButton("Dont Break", QMessageBox::NoRole);
+  QPushButton *neverBreakButton = msgBox.addButton("Never Break", QMessageBox::NoRole);
+
+  msgBox.setWindowTitle(title.c_str());
+  msgBox.setText(text.c_str());
 
   msgBox.exec();
 
@@ -124,7 +128,7 @@ bool Assert::defaultFire(const Assert &a)
 # if defined(X_WIN)
   _ASSERT(0);
 #elif defined(X_OSX)
-  assert(0);
+  __builtin_trap();
 # else
 #  error No simple assert defined
 # endif

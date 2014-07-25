@@ -92,9 +92,6 @@
 # define X_LINUX
 #endif
 
-
-#define X_ASSERT_VALUE_HANDLING (X_QT_INTEROP && X_ADVANCED_ASSERT)
-
 typedef int8_t xint8;         /* 8 bit signed */
 typedef uint8_t xuint8;       /* 8 bit unsigned */
 typedef int16_t xint16;       /* 16 bit signed */

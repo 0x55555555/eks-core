@@ -5,11 +5,12 @@
 #include "Utilities/XProperty.h"
 #include "Utilities/XCodeLocation.h"
 
+#define X_ASSERT_VALUE_HANDLING 1
+
 #if X_ASSERT_VALUE_HANDLING
 # include <sstream>
 #endif
 
-#define X_ASSERT_VALUE_HANDLING (X_QT_INTEROP && X_ADVANCED_ASSERT)
 
 namespace Eks
 {
