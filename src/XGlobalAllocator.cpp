@@ -27,7 +27,7 @@ void *GlobalAllocator::alloc(xsize size, xsize alignment)
 #ifndef X_WIN
   if (alignment != 1)
     {
-    posix_memalign(&m, std::min(alignment, sizeof(void*)), size);
+    posix_memalign(&m, std::max(alignment, sizeof(void*)), size);
     }
   else
     {
