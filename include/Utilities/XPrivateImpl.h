@@ -10,6 +10,16 @@ namespace Eks
 template <xsize size> class PrivateImpl
   {
 public:
+  PrivateImpl()
+    {
+    _valid = false;
+    }
+
+  ~PrivateImpl()
+    {
+    xAssert(!_valid);
+    }
+
   template <typename T> T *data()
     {
     sizeCheck<T>();
@@ -26,12 +36,12 @@ public:
     return reinterpret_cast<const T*>(_data);
     }
 
-  template <typename T> T *create()
+  template <typename T, typename... Args> T *create(Args &&... a)
     {
     sizeCheck<T>();
     xAssert(!_valid);
 
-    T *res = new(_data) T;
+    T *res = new(_data) T(std::forward<Args>(a)...);
     _valid = true;
 
     return res;
@@ -55,17 +65,6 @@ public:
     return _valid;
     }
 
-protected:
-  PrivateImpl()
-    {
-    _valid = false;
-    }
-
-  ~PrivateImpl()
-    {
-    xAssert(!_valid);
-    }
-
 private:
   X_DISABLE_COPY(PrivateImpl)
 
@@ -75,8 +74,8 @@ private:
     xCompileTimeAssert(sizeof(Type) <= size);
     }
 
-  bool _valid;
   xuint8 _data[size];
+  xuint8 _valid;
   };
 
 }
