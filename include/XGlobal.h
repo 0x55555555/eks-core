@@ -9,11 +9,17 @@
 #endif
 
 #if defined(__APPLE__)
-#define X_MAC
+# define X_MAC
 #endif
 
 #ifdef _MSC_VER
 #define X_MSVC
+#endif
+
+#if defined(_WIN64) || defined(__APPLE__)
+# define X_POINTER_SIZE 8
+#else
+# define X_POINTER_SIZE 4
 #endif
 
 #ifdef X_WIN

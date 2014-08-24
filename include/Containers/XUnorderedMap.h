@@ -122,6 +122,10 @@ public:
       );
     }
 
+private:
+  UnorderedMap(const UnorderedMap &)
+    {
+    }
   };
 
 }

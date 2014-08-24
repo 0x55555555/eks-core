@@ -614,6 +614,11 @@ public:
     return b;
     }
 
+  iterator erase(iterator b, iterator e)
+    {
+    return remove(b, e);
+    }
+
   void removeAll(const T &t)
     {
     for(iterator i = begin(), e = end();

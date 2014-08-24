@@ -452,6 +452,8 @@ EKSCORE_EXPORT size_t hash(const xuint8 *data, size_t length);
 
 #if X_QT_INTEROP
 
+#include "QHash"
+
 template <typename C, xsize P, typename A> uint qHash(const Eks::StringBase<C, P, A> &a)
   {
   return qHash(QLatin1String(a.data(), a.length()));
