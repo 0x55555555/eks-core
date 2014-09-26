@@ -4,6 +4,7 @@
 #include "Containers/XStringSimple.h"
 #include "Utilities/XAssert.h"
 #include "Utilities/XTemplateHelpers.h"
+#include "Memory/XTemporaryAllocator.h"
 #include "Math/XMathHelpers.h"
 #include <iostream>
 
@@ -153,10 +154,47 @@ template <typename Char, xsize PreallocatedSize, typename Allocator>
   stream >> out;
   if(error)
     {
-    *error = !stream.fail();
+    *error = stream.fail();
     }
   return out;
   }
+
+class StringBuilder
+  {
+public:
+  StringBuilder()
+      : _alloc(Eks::Core::temporaryAllocator()),
+        _buf(&_alloc)
+    {
+    _buf.reserve(1024);
+    }
+
+  template <typename T> StringBuilder &operator<<(const T &t)
+    {
+    _buf.appendType(t);
+
+    return *this;
+    }
+
+  operator Eks::String() const
+    {
+    return Eks::String(_buf, Core::defaultAllocator());
+    }
+
+  Eks::String value(Eks::AllocatorBase *a=Core::defaultAllocator()) const
+    {
+    return Eks::String(_buf, a);
+    }
+
+  xsize length() const
+    {
+    return _buf.length();
+    }
+
+private:
+  Eks::TemporaryAllocator _alloc;
+  Eks::String _buf;
+  };
 
 }
 

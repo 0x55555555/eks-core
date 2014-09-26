@@ -48,6 +48,12 @@ public:
     resizeAndCopy(s, n);
     xAssert(!String::size() || String::at(size()) == '\0');
     }
+  StringBase(const Char *n, xsize s, AllocatorBase *alloc=0)
+      : String(Alloc(alloc))
+    {
+    resizeAndCopy(s, n);
+    xAssert(!String::size() || String::at(size()) == '\0');
+    }
   StringBase(const String &n)
       : String(n, n)
     {
@@ -191,6 +197,15 @@ public:
     }
 
   template <typename T> void appendType(T n);
+  void appendType(const String &n)
+    {
+    append(n);
+    }
+  void appendType(const Char *n)
+    {
+    append(n);
+    }
+
   template <typename T> T toType(bool *error=0) const;
 
   template <typename Vec> void mid(const Vec &data, xsize pos, xsize len);
@@ -395,6 +410,10 @@ public:
     }
   String(const Char *n, AllocatorBase *alloc=Core::defaultAllocator())
       : BaseType(n, alloc)
+    {
+    }
+  String(const Char *n, xsize s, AllocatorBase *alloc=Core::defaultAllocator())
+      : BaseType(n, s, alloc)
     {
     }
   template<xsize Prealloc, typename Alloc>
