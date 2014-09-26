@@ -12,24 +12,6 @@ namespace Eks
 
 class String;
 
-class EKSCORE_EXPORT CodeLocation
-  {
-XProperties:
-  XROProperty(const char *, file);
-  XROProperty(xuint32, line);
-  XROProperty(const char *, function);
-
-public:
-  CodeLocation(const char *file="", xuint32 line=0, const char *function="");
-  CodeLocation(const CodeLocation &l);
-
-  String toString() const;
-
-  bool operator==(const CodeLocation &a) const;
-  };
-
-
-
 class EKSCORE_EXPORT StackWalker
   {
 public:
@@ -46,9 +28,40 @@ public:
   static void walk(xsize skip, Visitor *visit);
   };
 
+class EKSCORE_EXPORT CodeLocation
+  {
+XProperties:
+  XROProperty(const char *, file);
+  XROProperty(xuint32, line);
+  XROProperty(const char *, function);
+
+public:
+  CodeLocation(const char *file="", xuint32 line=0, const char *function="");
+  CodeLocation(const CodeLocation &l);
+
+  String toString() const;
+
+  bool operator==(const CodeLocation &a) const;
+  };
+
+class EKSCORE_EXPORT DetailedCodeLocation : public CodeLocation
+  {
+public:
+  DetailedCodeLocation(const char *file="", xuint32 line=0, const char *function="");
+
+  String toCallStack() const;
+
+private:
+  enum
+    {
+    StackSize = 64
+    };
+  void *_stack[64];
+  };
 }
 
 #define X_CURRENT_CODE_LOCATION Eks::CodeLocation(__FILE__, __LINE__, xCurrentFunction)
+#define X_CURRENT_CODE_LOCATION_DETAILED Eks::DetailedCodeLocation(__FILE__, __LINE__, xCurrentFunction)
 
 
 namespace std
