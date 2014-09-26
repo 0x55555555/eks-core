@@ -32,7 +32,7 @@ namespace Eks
 namespace detail
 {
 
-Assert::Assert(const CodeLocation &location, const char *condition, const char* message)
+Assert::Assert(const DetailedCodeLocation &location, const char *condition, const char* message)
     : _location(location), _condition(condition), _message(message), _argCount(0)
   {
   }

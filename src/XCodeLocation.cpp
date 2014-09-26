@@ -50,8 +50,15 @@ bool CodeLocation::operator==(const CodeLocation &a) const
     strcmp(function(), a.function()) == 0;
   }
 
+static bool g_stackInit = false;
 void StackWalker::intialiseSymbolNames()
   {
+  if (g_stackInit)
+    {
+    return;
+    }
+  g_stackInit = true;
+
 #if X_ENABLE_STACK_WALKING
 #ifdef Q_CC_MSVC
   SymInitialize(::GetCurrentProcess(), 0, true);
@@ -66,6 +73,7 @@ void StackWalker::terminateSymbolNames()
   SymCleanup(::GetCurrentProcess());
 #endif
 #endif
+  g_stackInit = false;
   }
 
 void StackWalker::getSymbolName(
@@ -175,6 +183,32 @@ void StackWalker::walk(
 #endif
 #endif
   }
+
+DetailedCodeLocation::DetailedCodeLocation(const char *file, xuint32 line, const char *function)
+    : CodeLocation(file, line, function)
+  {
+  class Walker : public StackWalker::Visitor
+    {
+  public:
+    void visit(xsize level, void *symbol) X_OVERRIDE
+      {
+      stack[level] = symbol;
+      }
+
+    void **stack;
+    } wlk;
+  wlk.stack = _stack;
+
+  StackWalker::walk(1, &wlk);
+  }
+
+Eks::String DetailedCodeLocation::toCallStack() const
+  {
+  StackWalker::intialiseSymbolNames();
+
+  return toString();
+  }
+
 }
 
 
