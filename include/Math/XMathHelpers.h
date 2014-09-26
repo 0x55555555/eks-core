@@ -90,6 +90,11 @@ template <typename T> constexpr T maxFor(const T&)
   return std::numeric_limits<T>::max();
   }
 
+template <typename T> constexpr T maxFor()
+  {
+  return std::numeric_limits<T>::max();
+  }
+
 }
 
 #endif // XMATHHELPERS_H
