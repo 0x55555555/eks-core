@@ -19,7 +19,7 @@ public:
 
   void assign(T &t, const T &val)
     {
-    _oldValue = _value;
+    _oldValue = t;
     _value = &t;
     *_value = val;
     }
