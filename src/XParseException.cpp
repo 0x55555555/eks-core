@@ -4,33 +4,55 @@
 namespace Eks
 {
 
-ParseException::ParseException(const DetailedCodeLocation &codeLocation, const String &lineText, xsize line, xsize chr, const String &msg)
+ParseError::ParseError(
+    const DetailedCodeLocation& codeLocation,
+    ContextType t,
+    const String &lineText,
+    xsize line,
+    xsize chr,
+    const String &msg)
   : _location(codeLocation),
     _msg(msg),
     _hasLocation(true),
-    _lineText(lineText),
+    _type(t),
+    _context(lineText),
     _line(line),
     _chr(chr)
   {
   format();
   }
 
-ParseException::ParseException(const DetailedCodeLocation &codeLocation, const String &msg)
+ParseError::ParseError(
+    const DetailedCodeLocation& codeLocation,
+    ContextType t,
+    const String &context,
+    xsize line,
+    const String &msg)
+  : _location(codeLocation),
+    _msg(msg),
+    _hasLocation(true),
+    _type(t),
+    _context(context),
+    _line(line),
+    _chr(Eks::maxFor<xsize>())
+  {
+  format();
+  }
+
+ParseError::ParseError(
+    const DetailedCodeLocation &codeLocation,
+    const String &msg)
   : _location(codeLocation),
     _msg(msg),
     _hasLocation(false),
+    _type(NoContext),
     _line(Eks::maxFor<xsize>()),
     _chr(Eks::maxFor<xsize>())
   {
   format();
   }
 
-const char *ParseException::what() const noexcept
-  {
-  return _stringError.data();
-  }
-
-Eks::String ParseException::fileLocation() const
+Eks::String ParseError::fileLocation() const
   {
   if (!_hasLocation)
     {
@@ -48,9 +70,30 @@ Eks::String ParseException::fileLocation() const
     chr += f.length();
     }
 
-  if (_lineText.length())
+  if (_context.length())
     {
-    f << _lineText;
+    if (_type == LineContext)
+      {
+      f << _context;
+      }
+    else if (_type == FullContext)
+      {
+      const char *c = _context.data();
+      for (xsize i = _line; i > 1; --i)
+        {
+        c = strchr(c, '\n');
+        if (!c)
+          {
+          c = _context.data();
+          }
+        ++c;
+        }
+
+      while (*c != '\0' && *c != '\n')
+        {
+        f << *c++;
+        }
+      }
     }
 
   if (_chr != Eks::maxFor<xsize>())
@@ -66,7 +109,7 @@ Eks::String ParseException::fileLocation() const
   return f;
   }
 
-void ParseException::format()
+void ParseError::format()
   {
   _stringError = fileLocation();
   if (_stringError.length())
@@ -77,5 +120,14 @@ void ParseException::format()
   _stringError = _msg;
   }
 
+ParseException::ParseException(const ParseError &codeLocation)
+  : ParseError(codeLocation)
+  {
+  }
+
+const char *ParseException::what() const noexcept
+  {
+  return error().data();
+  }
 
 }
