@@ -32,11 +32,11 @@ public:
     Bucket(xsize objectSize, xsize count)
         : _next(0), _count(count), _size(objectSize)
       {
-      xAssertIsAligned(objectSize);
       xAssert((count % 32) == 0);
       _memory = Eks::roundToAlignment(_alloc);
       xAssertIsAligned(_memory);
       _masks = (xuint32*)((xuint8*)_memory + (_count*_size));
+      xAssert(_count%32 == 0);
 
       for(xsize i=0, s=(_count/32); i<s; ++i)
         {
@@ -88,7 +88,6 @@ public:
           data += offset;
 
           void *memory = (void *)data;
-          xAssertIsAligned(data);
           return memory;
           }
         }
