@@ -89,8 +89,16 @@ private:
 
 #define X_CONSTRUCT_ASSERT(condition, message, ...) Eks::detail::Assert ass(X_CURRENT_CODE_LOCATION_DETAILED, #condition, message); (void)ass X_EXPAND_ARGS(X_ASSERT_VARIABLE, 0, __VA_ARGS__)
 
+#if defined(X_WIN) && !defined(X_ARCH_ARM)
+# define X_DEBUG_BREAK DebugBreak
+#elif __clang__
+#define X_DEBUG_BREAK __builtin_debugtrap()
+#else
+# define X_DEBUG_BREAK Eks::detail::Assert::currentBreakFunction()()
+#endif
+
 #if X_ASSERTS_ENABLED
-# define xAssertMessage(condition, message, ...) if(!(condition) && Eks::detail::Assert::currentFireFunction()) { X_CONSTRUCT_ASSERT(condition, message, __VA_ARGS__); if( Eks::detail::Assert::currentFireFunction()(ass) && Eks::detail::Assert::currentBreakFunction() ) { Eks::detail::Assert::currentBreakFunction()(); } }
+# define xAssertMessage(condition, message, ...) if(!(condition) && Eks::detail::Assert::currentFireFunction()) { X_CONSTRUCT_ASSERT(condition, message, __VA_ARGS__); if(Eks::detail::Assert::currentFireFunction()(ass) ) { X_DEBUG_BREAK; } }
 # define xVerify xAssert
 #define X_USED_FOR_ASSERTS(x) x
 

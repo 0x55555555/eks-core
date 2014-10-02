@@ -69,29 +69,31 @@ bool Assert::defaultFire(const Assert &a)
   std::string title;
   std::string text;
 
-  title += "Assertion ";
+  title += "Assertion '";
   title += a.condition();
-  title += " failed";
+  title += "' failed";
 
   std::string location = a.location().toString().data();
 
-  text += title;
-  text += " in " + location + "\n\n";
+  text += location + ":\n";
 
-  if(strcmp(a.message(), "") == 0)
+  if(strcmp(a.message(), "") != 0)
     {
+    text += "> ";
     text += a.message();
-    text += ":\n\n" + text;
+    text += "\n";
     }
+
+  text += "> " + title + "\n";
 
   if(a._argCount)
     {
-    text += "Arguments:\n";
+    text += "> Arguments:\n";
     for(xsize i = 0; i < a._argCount; ++i)
       {
       const Assert::Argument &arg = a._arguments[i];
 
-      text + "  ";
+      text += "> ";
       text += arg.name;
 # if X_ASSERT_VALUE_HANDLING
       text += ": ";
@@ -124,14 +126,6 @@ bool Assert::defaultFire(const Assert &a)
     {
     disabled->insert(a.location(), true);
     }
-#else
-# if defined(X_WIN)
-  _ASSERT(0);
-#elif defined(X_OSX)
-  __builtin_trap();
-# else
-#  error No simple assert defined
-# endif
 #endif
 
   return true;
@@ -148,7 +142,12 @@ void Assert::setCurrentFireFunction(FireFunction *f)
   g_currentFireFunction = f;
   }
 
-#if defined(X_OSX) || defined(X_LINUX)
+#if defined(__clang__)
+void interuptBreak()
+  {
+  __builtin_debugtrap();
+  }
+#elif defined(X_LINUX) || defined (X_OSX)
 void interuptBreak()
   {
   raise(SIGINT);
@@ -170,7 +169,7 @@ Assert::BreakFunction *Assert::currentBreakFunction()
 
   if(!f)
     {
-#if defined(Q_CC_MSVC) && !defined(X_ARCH_ARM)
+#if defined(X_WIN) && !defined(X_ARCH_ARM)
     f = DebugBreak;
 #else
     f = interuptBreak;
