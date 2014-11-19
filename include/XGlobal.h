@@ -109,22 +109,6 @@ typedef uint64_t xuint64;     /* 46 bit unsigned */
 typedef std::size_t xsize;
 typedef std::ptrdiff_t xptrdiff;
 
-#if 0
-#define X_INT64_C(c) static_cast<long long>(c ## LL)     /* signed 64 bit constant */
-#define X_UINT64_C(c) static_cast<unsigned long long>(c ## ULL) /* unsigned 64 bit constant */
-
-#define X_SIZE_SENTINEL ((xsize)-1)
-#define X_UINT64_SENTINEL ((xuint64)-1)
-#define X_UINT32_SENTINEL ((xuint32)-1)
-#define X_UINT16_SENTINEL ((xuint16)-1)
-#define X_UINT8_SENTINEL ((xuint8)-1)
-#define X_INT16_MAX ((xint16)32767)
-#define X_INT16_MIN ((xint16)-32768)
-#define X_INT64_MAX (X_INT64_C(9223372036854775807LL))
-#define X_INT64_MIN (X_INT64_C(-9223372036854775808))
-
-#endif
-
 #define X_OVERRIDE override
 #define X_FINAL final
 #define X_CONST_EXPR //Q_DECL_CONSTEXPR

@@ -198,7 +198,7 @@ void GenericCurveSegment<SIZE,RETURN,TORETURN,FROMRETURN>::setBasis( BasisMode m
     }
   else
     {
-    qWarning() << "Unrecognised Curve Mode";
+    xAssertFailMessage("Unrecognised Curve Mode", mode);
     }
   }
 

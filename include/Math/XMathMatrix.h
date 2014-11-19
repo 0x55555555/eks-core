@@ -3,7 +3,6 @@
 
 #include "XGlobal.h"
 #include "Math/XMathHelpers.h"
-#include "QtCore/QDebug"
 
 namespace Eks
 {
@@ -13,6 +12,9 @@ typedef Eigen::Matrix<Real, 4, 4> Matrix4x4;
 typedef Eigen::Matrix<Real, 3, 3> Matrix3x3;
 
 }
+
+#if X_QT_INTEROP
+#include "QDebug"
 
 template <typename Derived> QDebug operator <<(QDebug str, const Eigen::DenseBase <Derived> &data)
   {
@@ -55,7 +57,6 @@ template <typename Derived> QDebug operator <<(QDebug str, const Eigen::DenseBas
   return str;
   }
 
-#if X_QT_INTEROP
 
 Q_DECLARE_METATYPE(Eks::Matrix4x4);
 Q_DECLARE_METATYPE(Eks::Matrix3x3);

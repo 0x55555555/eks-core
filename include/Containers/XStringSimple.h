@@ -1,4 +1,4 @@
-#ifndef XSTRING_H
+	#ifndef XSTRING_H
 #define XSTRING_H
 
 #include "XGlobal.h"
@@ -32,6 +32,8 @@ public:
   typedef typename String::size_type size_type;
   typedef typename String::iterator iterator;
   typedef typename String::const_iterator const_iterator;
+
+  static const xsize npos = -1;
 
   StringBase(AllocatorBase *alloc=0)
       : String(Alloc(alloc))
@@ -137,6 +139,11 @@ public:
     return std::lexicographical_compare(String::begin(), String::end(), oth.begin(), oth.end());
     }
 
+  typename String::reverse_iterator rbegin()
+    {
+    return String::rbegin()+1;
+    }
+
   void clear()
     {
     String::clear();
@@ -156,7 +163,7 @@ public:
 
   bool isEmpty() const
     {
-    return String::begin() == end();
+    return size() == 0;
     }
 
   Char &back()
@@ -196,7 +203,7 @@ public:
     String::reserve(newCapacity+1);
     }
 
-  template <typename T> void appendType(T n);
+  template <typename T> void appendType(const T &n);
   void appendType(const String &n)
     {
     append(n);
@@ -243,7 +250,7 @@ public:
     }
 
   template <typename T>
-  void append(T data)
+  void append(const T &data)
     {
     if(String::size())
       {
@@ -253,7 +260,7 @@ public:
     String::pushBack('\0');
     xAssert(!String::size() || String::at(size()) == '\0');
     }
-
+    
   void append(const Char *data)
     {
     if(String::size())
@@ -270,7 +277,7 @@ public:
       {
       String::popBack();
       }
-    String::resize(size() + 2, data);
+    String::resize(String::size() + 2, data);
     String::at(String::size()-1) = '\0';
     xAssert(String::at(size()) == '\0');
     }
@@ -327,7 +334,13 @@ public:
     return *this;
     }
 
-  String& operator<<(const String &t)
+  String& operator<<(const Char *t)
+    {
+    append(t);
+    return *this;
+    }
+
+  ThisType& operator<<(const ThisType &t)
     {
     append(t);
     return *this;
@@ -339,6 +352,7 @@ public:
     const Char *dest;
     };
 
+  using String::replace;
   template <typename StringType>
   static void replace(const StringType &old, String *dest, const Replacement *rep, xsize replacementCount = 1)
     {
@@ -383,6 +397,78 @@ public:
 
     destVec->pushBack('\0');
     }
+
+  xsize find(const Char *sequence, xsize from = npos) const
+    {
+    xAssert(*sequence != '\0');
+    if (from == npos)
+      {
+      from = 0;
+      }
+    xAssert(from <= size());
+
+    xsize location = from;
+    xsize sequenceLen = 0;
+    const Char *current = sequence;
+    while(true)
+      {
+      if (String::data()[location] == *current)
+        {
+        ++current;
+
+        if (*current == '\0')
+          {
+          return location - sequenceLen;
+          }
+        ++sequenceLen;
+        }
+      else
+        {
+        current = sequence;
+        }
+
+      if (location == size())
+        {
+        return npos;
+        }
+      ++location;
+      }
+    }
+
+  xsize rfind(const Char *sequence, xsize from = npos) const
+    {
+    xAssert(*sequence != '\0');
+    const Char *last = sequence + strlen(sequence) - 1;
+    if (from == npos)
+      {
+      from = size()-1;
+      }
+    xAssert(from < size());
+
+    xsize location = from;
+    const Char *current = last;
+    while(true)
+      {
+      if (String::data()[location] == *current)
+        {
+        if (current == sequence)
+          {
+          return location;
+          }
+        --current;
+        }
+      else
+        {
+        current = last;
+        }
+
+      if (location == 0)
+        {
+        return npos;
+        }
+      --location;
+      }
+    }
   };
 
 template <typename Char, xsize PreallocatedSize, typename Allocator>
@@ -404,7 +490,7 @@ class String : public StringBase<Char>
 public:
   typedef StringBase<Char> BaseType;
 
-  String(AllocatorBase *alloc=Core::defaultAllocator())
+  explicit String(AllocatorBase *alloc=Core::defaultAllocator())
       : BaseType(alloc)
     {
     }
@@ -510,7 +596,7 @@ template <typename C, xsize P, typename A> std::ostream &operator<<(
     std::ostream &dbg,
     const Eks::StringBase<C, P, A> &str)
   {
-  return dbg << str.data();
+  return dbg << (str.data() ? str.data() : "")	;
   }
 
 namespace std
@@ -522,8 +608,9 @@ public:
     {
     return Eks::hash((const xuint8*)vec.data(), sizeof(T)*vec.size());
     }
-
   };
+
+template <> struct hash<Eks::String> : hash<Eks::StringBase<Eks::String::Char>> { };
 }
 
 

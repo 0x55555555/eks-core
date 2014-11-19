@@ -14,7 +14,6 @@ struct SharedPolicy;
 }
 
 template <typename T> class TypedAllocator;
-template <typename T, typename Policy, typename Alloc> class SharedPointer;
 template <typename T, typename Alloc=Eks::TypedAllocator<T>> class UniquePointer;
 
 class AllocatorBase
@@ -35,9 +34,6 @@ public:
     }
 
   // todo, variadic template args here...
-  template <typename T>
-    Eks::SharedPointer<T, Eks::detail::SharedPolicy, TypedAllocator<T>> createShared();
-
   template <typename T>
     Eks::UniquePointer<T, TypedAllocator<T>> createUnique();
   template <typename T, typename A>

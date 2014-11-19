@@ -234,7 +234,20 @@ void JSONWriter::appendQuotedEscaped(const char *data)
       _vector->pushBack('\\');
       }
 
-    _vector->pushBack(*p);
+    if(*p == '\n')
+      {
+      _vector->pushBack('\\');
+      _vector->pushBack('n');
+      }
+    else if(*p == '\t')
+      {
+      _vector->pushBack('\\');
+      _vector->pushBack('t');
+      }
+    else
+      {
+      _vector->pushBack(*p);
+      }
     }
 
   _vector->pushBack('"');

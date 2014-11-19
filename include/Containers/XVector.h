@@ -41,6 +41,11 @@ private:
 template <typename T, typename Alloc> class VectorStorage<T, 0, Alloc> : public Alloc
   {
 public:
+  typedef std::bidirectional_iterator_tag iterator_category;
+  typedef T value_type;
+  typedef ptrdiff_t difference_type;
+  typedef T *pointer;
+  typedef T &reference;
   VectorStorage(const Alloc& a)
       : Alloc(a),
         _first(0),
@@ -72,6 +77,7 @@ public:
   typedef xsize size_type;
   typedef T* iterator;
   typedef const T* const_iterator;
+  typedef std::reverse_iterator<iterator> reverse_iterator;
 
   Vector(const Alloc &alloc=Alloc())
       : ThisBase(alloc)
@@ -220,6 +226,16 @@ public:
   const_iterator cend() const
     {
     return ThisBase::_end;
+    }
+
+  reverse_iterator rbegin()
+    {
+    return reverse_iterator(ThisBase::_end);
+    }
+
+  reverse_iterator rend()
+    {
+    return reverse_iterator(ThisBase::_first);
     }
 
   void reserve(size_type newCapacity)
@@ -637,6 +653,56 @@ public:
           }
         }
       }
+    }
+
+  template <typename StringType> void replace(size_type i, size_type l, const StringType &newContent)
+    {
+    if (l >= newContent.size())
+      {
+      auto repBeg = begin() + i;
+      const auto repNewEnd = repBeg + newContent.size();
+      const auto repOldEnd = repBeg + l;
+
+      copy(repBeg, repNewEnd, newContent.begin());
+
+      if (repNewEnd != repOldEnd)
+        {
+        erase(repNewEnd, repOldEnd);
+        }
+      }
+    else if (l < newContent.size())
+      {
+      auto repBeg = begin() + i;
+      const auto repOldEnd = repBeg + l;
+      auto newStart = newContent.begin() + l;
+      auto newEnd = newContent.end();
+
+      copy(repBeg, repOldEnd, newContent.begin());
+      insert(repOldEnd, newStart, newEnd);
+      }
+    }
+
+  template <class Input> void insert(iterator position, Input first, Input last)
+    {
+    xsize s = last - first;
+    reserve(size() + s);
+
+    // move old elements
+    auto from = ThisBase::_end - 1;
+    for (auto i = ThisBase::_end+s-1; i >= position; --i, --from)
+      {
+      new(i) T(*from);
+      AllocatorBase::destruct(from);
+      }
+
+    // copy new elements.
+    auto it = first;
+    for (auto i = position; i < (position+s); ++i, ++it)
+      {
+      new(i) T(*it);
+      }
+
+    ThisBase::_end += s;
     }
 
 private:

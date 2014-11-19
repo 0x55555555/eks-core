@@ -1,4 +1,4 @@
-#ifndef XSTRINGBUFFER_H
+	#ifndef XSTRINGBUFFER_H
 #define XSTRINGBUFFER_H
 
 #include "Containers/XStringSimple.h"
@@ -133,7 +133,7 @@ private:
   };
 
 template <typename Char, xsize PreallocatedSize, typename Allocator>
-    template <typename T> void StringBase<Char, PreallocatedSize, Allocator>::appendType(T n)
+    template <typename T> void StringBase<Char, PreallocatedSize, Allocator>::appendType(const T &n)
   {
   Buffer buf(this);
   OStream str(&buf);
@@ -169,6 +169,11 @@ public:
     _buf.reserve(1024);
     }
 
+  void clear()
+    {
+    _buf.clear();
+    }
+
   template <typename T> StringBuilder &operator<<(const T &t)
     {
     _buf.appendType(t);
@@ -181,14 +186,29 @@ public:
     return Eks::String(_buf, Core::defaultAllocator());
     }
 
-  Eks::String value(Eks::AllocatorBase *a=Core::defaultAllocator()) const
+  Eks::String value(Eks::AllocatorBase *a) const
     {
     return Eks::String(_buf, a);
+    }
+
+  const Eks::String &value() const
+    {
+    return _buf;
+    }
+
+  const char *data() const
+    {
+    return _buf.data();
     }
 
   xsize length() const
     {
     return _buf.length();
+    }
+
+  template <typename T> void adjust(const T &t)
+    {
+    t(_buf);
     }
 
 private:
