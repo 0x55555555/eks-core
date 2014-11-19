@@ -2,6 +2,7 @@
 #define XASYNCTASKIMPL_H
 
 #include "Memory/XThreadSafeAllocator.h"
+#include "Async/XAsyncTask.h"
 
 // Implementation details of Eks::Task
 

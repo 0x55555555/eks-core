@@ -150,10 +150,8 @@
 
 #if defined(Q_CC_MSVC)
 # define xForeach(VAR, RANGE) for each(VAR in RANGE)
-#elif defined(X_CPPOX_SUPPORT)
-# define xForeach(VAR, RANGE) for(VAR : RANGE)
 #else
-# error no foreach loop for this platform
+# define xForeach(VAR, RANGE) for(VAR : RANGE)
 #endif
 
 #endif // XMACROHELPERS_H
