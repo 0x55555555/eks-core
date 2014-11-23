@@ -111,7 +111,7 @@ public:
     _str->resize(_writePos, ' ');
     _writePos += n;
     _str->resizeAndCopy(_writePos, s);
-    return _writePos;
+    return n;
     }
 
   int overflow(int c)
@@ -129,6 +129,7 @@ public:
 private:
   StringType *_str;
   xsize _readPos;
+
   xsize _writePos;
   };
 

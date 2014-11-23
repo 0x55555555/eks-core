@@ -596,7 +596,17 @@ template <typename C, xsize P, typename A> std::ostream &operator<<(
     std::ostream &dbg,
     const Eks::StringBase<C, P, A> &str)
   {
-  return dbg << (str.data() ? str.data() : "")	;
+  if (!str.size())
+    {
+    return dbg;
+    }
+
+  auto end = str.end();
+  for (auto i = str.begin(); i != end; ++i)
+    {
+    dbg << *i;
+    }
+  return dbg;
   }
 
 namespace std
