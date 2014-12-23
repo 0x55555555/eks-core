@@ -81,16 +81,30 @@ TemporaryAllocatorCore::Block *TemporaryAllocatorCore::createBlock(xsize expecte
   }
 
 TemporaryAllocator::TemporaryAllocator(TemporaryAllocatorCore *core)
-    : _current(0),
+    : _current(nullptr),
       _used(nullptr),
       _allocationCount(0)
   {
   init(core);
   }
 
+TemporaryAllocator::TemporaryAllocator(TemporaryAllocator &&oth)
+  {
+  swap(oth);
+  }
+
 TemporaryAllocator::~TemporaryAllocator()
   {
   reset();
+  }
+
+TemporaryAllocator &TemporaryAllocator::operator=(TemporaryAllocator &&oth)
+  {
+  reset();
+
+  swap(oth);
+
+  return *this;
   }
 
 void TemporaryAllocator::reset()
@@ -167,5 +181,13 @@ void TemporaryAllocator::free(void *mem)
     xAssert(_allocationCount > 0);
     --_allocationCount;
     }
+  }
+
+void TemporaryAllocator::swap(TemporaryAllocator &&oth)
+  {
+  std::swap(_current, oth._current);
+  std::swap(_used, oth._used);
+  std::swap(_allocationCount, oth._allocationCount);
+  std::swap(_core, oth._core);
   }
 }

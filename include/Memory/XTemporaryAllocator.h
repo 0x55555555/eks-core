@@ -45,7 +45,10 @@ class EKSCORE_EXPORT TemporaryAllocator : public AllocatorBase
   {
 public:
   TemporaryAllocator(TemporaryAllocatorCore *core = nullptr);
+  TemporaryAllocator(TemporaryAllocator &&oth);
   ~TemporaryAllocator();
+
+  TemporaryAllocator &operator=(TemporaryAllocator &&oth);
 
   void reset();
   void init(TemporaryAllocatorCore *core);
@@ -57,6 +60,7 @@ public:
 
 private:
   X_DISABLE_COPY(TemporaryAllocator)
+  void swap(TemporaryAllocator &);
 
   TemporaryAllocatorCore *_core;
 
