@@ -61,8 +61,15 @@ public:
     {
     xAssert(!String::size() || String::at(size()) == '\0');
     }
+
   StringBase(String &&n)
-      : String(n)
+      : String(std::move(n))
+    {
+    xAssert(!String::size() || String::at(size()) == '\0');
+    }
+
+  StringBase(ThisType &&n)
+      : String(std::move(n))
     {
     xAssert(!String::size() || String::at(size()) == '\0');
     }
@@ -111,6 +118,14 @@ public:
     {
     clear();
     append(oth);
+    return *this;
+    }
+    
+  ThisType& operator=(ThisType&& str)
+    {
+    String &ths = *this;
+    String &oth = str;
+    ths = std::move(oth);
     return *this;
     }
 
@@ -517,11 +532,11 @@ public:
     {
     }
   String(String &&n)
-      : BaseType(n, n.allocator().allocator() ? n.allocator().allocator() : Core::defaultAllocator())
+      : BaseType(std::move(n))
     {
     }
   String(String &&n, AllocatorBase *alloc)
-      : BaseType(n, alloc)
+      : BaseType(std::move(n), alloc)
     {
     }
 
@@ -547,6 +562,14 @@ public:
     {
     clear();
     append(str);
+    return *this;
+    }
+    
+  String &operator=(String &&str)
+    {
+    BaseType &ths = *this;
+    BaseType &oth = str;
+    ths = std::move(oth);
     return *this;
     }
   };

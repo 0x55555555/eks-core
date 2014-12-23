@@ -89,6 +89,9 @@ TemporaryAllocator::TemporaryAllocator(TemporaryAllocatorCore *core)
   }
 
 TemporaryAllocator::TemporaryAllocator(TemporaryAllocator &&oth)
+    : _current(nullptr),
+      _used(nullptr),
+      _allocationCount(0)
   {
   swap(std::move(oth));
   }

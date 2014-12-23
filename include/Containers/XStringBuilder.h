@@ -17,15 +17,18 @@ public:
     }
 
   StringBuilder(StringBuilder &&oth)
+      : _alloc(std::move(oth._alloc)),
+        _buf(std::move(oth._buf))
     {
-    _alloc = std::move(oth._alloc);
-    _buf = std::move(oth._buf);
+    _buf.allocator() = &_alloc;
     }
 
   StringBuilder &operator=(StringBuilder &&oth)
     {
+    xAssertFail(); // todo - _buf's allocator may be confused here...
     _alloc = std::move(oth._alloc);
     _buf = std::move(oth._buf);
+    _buf.allocator() = &_alloc;
 
     return *this;
     }
