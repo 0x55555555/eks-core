@@ -1,5 +1,5 @@
 #include "Utilities/XParseException.h"
-#include "Containers/XStringBuffer.h"
+#include "Containers/XStringBuilder.h"
 
 namespace Eks
 {

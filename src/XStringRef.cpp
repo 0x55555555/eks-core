@@ -1,4 +1,5 @@
 #include "Utilities/XStringRef.h"
+#include "Containers/XStringBuffer.h"
 
 namespace Eks
 {
@@ -35,9 +36,24 @@ StringRef::StringRef(const QString &t)
   }
 #endif
 
+Eks::StringBuilder StringRef::toBuilder() const
+  {
+  Eks::StringBuilder bld;
+  toString(bld);
+
+  return std::move(bld);
+  }
+
 bool StringRef::isEmpty() const
   {
   return _length == 0;
+  }
+
+StringRef::DataStub StringRef::data() const
+  {
+  DataStub stb;
+  toString(stb.bld);
+  return std::move(stb);
   }
 
 bool StringRef::operator==(const StringRef &oth) const

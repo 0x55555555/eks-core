@@ -60,12 +60,10 @@ public:
 
 private:
   X_DISABLE_COPY(TemporaryAllocator)
-  void swap(TemporaryAllocator &);
+  void swap(TemporaryAllocator &&);
 
   TemporaryAllocatorCore *_core;
-
   TemporaryAllocatorCore::Block *_current;
-
   TemporaryAllocatorCore::Block *_used;
   xsize _allocationCount;
   };

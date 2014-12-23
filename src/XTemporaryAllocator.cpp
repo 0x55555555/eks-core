@@ -90,7 +90,7 @@ TemporaryAllocator::TemporaryAllocator(TemporaryAllocatorCore *core)
 
 TemporaryAllocator::TemporaryAllocator(TemporaryAllocator &&oth)
   {
-  swap(oth);
+  swap(std::move(oth));
   }
 
 TemporaryAllocator::~TemporaryAllocator()
@@ -102,7 +102,7 @@ TemporaryAllocator &TemporaryAllocator::operator=(TemporaryAllocator &&oth)
   {
   reset();
 
-  swap(oth);
+  swap(std::move(oth));
 
   return *this;
   }

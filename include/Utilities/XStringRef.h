@@ -1,9 +1,12 @@
 #pragma once
 #include "XGlobal.h"
 #include "Containers/XStringSimple.h"
+#include "Containers/XStringBuilder.h"
 
 namespace Eks
 {
+
+class StringBuilder;
 
 class EKSCORE_EXPORT StringRef
   {
@@ -49,6 +52,8 @@ public:
   #endif
     }
 
+  Eks::StringBuilder toBuilder() const;
+
   bool isEmpty() const;
 
   bool operator==(const StringRef &oth) const;
@@ -67,6 +72,14 @@ public:
 
     return false;
     }
+
+  struct DataStub
+    {
+    operator const char *() const { return bld.data(); }
+    Eks::StringBuilder bld;
+    };
+  DataStub data() const;
+
 private:
   X_DISABLE_COPY(StringRef)
 

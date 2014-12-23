@@ -1,10 +1,7 @@
-	#ifndef XSTRINGBUFFER_H
-#define XSTRINGBUFFER_H
-
+#pragma once
 #include "Containers/XStringSimple.h"
 #include "Utilities/XAssert.h"
 #include "Utilities/XTemplateHelpers.h"
-#include "Memory/XTemporaryAllocator.h"
 #include "Math/XMathHelpers.h"
 #include <iostream>
 
@@ -160,63 +157,4 @@ template <typename Char, xsize PreallocatedSize, typename Allocator>
   return out;
   }
 
-class StringBuilder
-  {
-public:
-  StringBuilder()
-      : _alloc(Eks::Core::temporaryAllocator()),
-        _buf(&_alloc)
-    {
-    _buf.reserve(1024);
-    }
-
-  void clear()
-    {
-    _buf.clear();
-    }
-
-  template <typename T> StringBuilder &operator<<(const T &t)
-    {
-    _buf.appendType(t);
-
-    return *this;
-    }
-
-  operator Eks::String() const
-    {
-    return Eks::String(_buf, Core::defaultAllocator());
-    }
-
-  Eks::String value(Eks::AllocatorBase *a) const
-    {
-    return Eks::String(_buf, a);
-    }
-
-  const Eks::String &value() const
-    {
-    return _buf;
-    }
-
-  const char *data() const
-    {
-    return _buf.data();
-    }
-
-  xsize length() const
-    {
-    return _buf.length();
-    }
-
-  template <typename T> void adjust(const T &t)
-    {
-    t(_buf);
-    }
-
-private:
-  Eks::TemporaryAllocator _alloc;
-  Eks::String _buf;
-  };
-
 }
-
-#endif // XSTRINGBUFFER_H
