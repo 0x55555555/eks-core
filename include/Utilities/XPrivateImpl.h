@@ -78,6 +78,44 @@ private:
   xuint8 _valid;
   };
 
+template <typename T, size_t Size>
+class PrivateImplTyped : public PrivateImpl<Size>
+  {
+public:
+  template <typename... Args> PrivateImplTyped(Args &&... a)
+    {
+    xCompileTimeAssert(sizeof(T) <= Size);
+    PrivateImpl<Size>::template create<T>(std::forward<Args>(a)...);
+    }
+
+  PrivateImplTyped(const PrivateImplTyped &t)
+    {
+    PrivateImpl<Size>::template create<T>(t.data());
+    }
+
+  ~PrivateImplTyped()
+    {
+    PrivateImpl<Size>::template destroy<T>();
+    }
+
+  PrivateImplTyped &operator=(const PrivateImplTyped &t)
+    {
+    PrivateImpl<Size>::template destroy<T>();
+    PrivateImpl<Size>::template create<T>(t.data());
+    return *this;
+    }
+
+  T &data() const
+    {
+    return *const_cast<T*>(PrivateImpl<Size>::template data<T>());
+    }
+
+  T *operator->() const
+    {
+    return &data();
+    }
+  };
+
 }
 
 #endif // XPRIVATEIMPL_H

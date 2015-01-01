@@ -50,7 +50,6 @@ Core::Core()
 #endif
 
   g_core->defaultLogger = globalAllocator();
-
   }
 
 Core::~Core()

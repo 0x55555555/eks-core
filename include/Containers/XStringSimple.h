@@ -159,6 +159,11 @@ public:
     return String::rbegin()+1;
     }
 
+  typename String::const_reverse_iterator rbegin() const
+    {
+    return String::rbegin()+1;
+    }
+
   void clear()
     {
     String::clear();
@@ -262,6 +267,19 @@ public:
 
     // append a \0
     String::resize(newSize+1, '\0');
+    }
+
+  template <class Input> void insert(iterator position, Input first, Input last)
+    {
+    if(String::size())
+      {
+      String::popBack();
+      }
+
+    String::insert(position, first, last);
+
+    String::pushBack('\0');
+    xAssert(!String::size() || String::at(size()) == '\0');
     }
 
   template <typename T>

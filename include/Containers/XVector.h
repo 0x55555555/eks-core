@@ -78,6 +78,7 @@ public:
   typedef T* iterator;
   typedef const T* const_iterator;
   typedef std::reverse_iterator<iterator> reverse_iterator;
+  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
   Vector(const Alloc &alloc=Alloc())
       : ThisBase(alloc)
@@ -236,6 +237,16 @@ public:
   reverse_iterator rend()
     {
     return reverse_iterator(ThisBase::_first);
+    }
+
+  const_reverse_iterator rbegin() const
+    {
+    return const_reverse_iterator(ThisBase::_end);
+    }
+
+  const_reverse_iterator rend() const
+    {
+    return const_reverse_iterator(ThisBase::_first);
     }
 
   void reserve(size_type newCapacity)

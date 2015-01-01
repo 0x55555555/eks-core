@@ -14,6 +14,7 @@ public:
         _buf(&_alloc)
     {
     _buf.reserve(1024);
+    _buf.resize(0, '\0');
     }
 
   StringBuilder(StringBuilder &&oth)

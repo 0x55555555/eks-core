@@ -38,6 +38,8 @@ void *TemporaryAllocatorCore::Block::alloc(xsize s, xsize alignment)
 
 TemporaryAllocatorCore::Block *TemporaryAllocatorCore::findBlock(xsize expectedSize)
   {
+  std::lock_guard<std::mutex> lock(mutex);
+
   Block **prevB = &_freeBlock;
   Block *b = _freeBlock;
   while(b && (xsize)(b->end - b->data) < expectedSize)
@@ -60,6 +62,8 @@ TemporaryAllocatorCore::Block *TemporaryAllocatorCore::findBlock(xsize expectedS
 
 void TemporaryAllocatorCore::releaseBlock(Block *b)
   {
+  std::lock_guard<std::mutex> lock(mutex);
+
   xAssert(b);
   xAssert(b->next == 0);
   

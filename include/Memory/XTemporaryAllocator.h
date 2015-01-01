@@ -36,6 +36,7 @@ private:
 
   Block *createBlock(xsize expected);
 
+  std::mutex mutex;
   Block *_freeBlock;
   xsize _blockSize;
   AllocatorBase *_allocator;
