@@ -81,6 +81,9 @@ void StackWalker::getSymbolName(
     Eks::String &symbolName,
     xsize maxSize)
   {
+  (void)symbolLocation;
+  (void)symbolName;
+  (void)maxSize;
 #if X_ENABLE_STACK_WALKING
 #ifdef Q_CC_MSVC
   BYTE *buffer = (BYTE *)alloca(sizeof(SYMBOL_INFO) + maxSize);
@@ -128,6 +131,8 @@ void StackWalker::walk(
     xsize skip,
     Visitor *visit)
   {
+  (void)skip;
+  (void)visit;
 #if X_ENABLE_STACK_WALKING
   struct Utils
     {
