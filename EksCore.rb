@@ -12,3 +12,7 @@ RbMake.library(:EksCore, :Eks) do |l, p|
     l.dependencies << :eigen
   end
 end
+
+RbMake.test(:EksCore, :EksTest) do |l, p|
+  l.root += '/test'
+end
